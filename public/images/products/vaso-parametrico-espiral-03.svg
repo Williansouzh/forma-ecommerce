@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <defs>
+    <linearGradient id="wash-vaso-parametrico-espiral-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8A88C" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#C75B2A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <rect width="800" height="630" fill="url(#wash-vaso-parametrico-espiral-2)"/>
+  
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <rect x="28" y="28" width="744" height="574" fill="none" stroke="#111111" stroke-opacity="0.08"/>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="748" y="66" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" letter-spacing="2" fill="#C75B2A">P-008</text>
+  <ellipse cx="400" cy="520" rx="180" ry="16" fill="#111111" opacity="0.05"/>
+  <g transform="rotate(-8) translate(0 12)" transform="translate(400 300)" fill="none" stroke-linecap="round">
+    <path d="M-60 -160 C-95 -80 -95 60 -52 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.9"/><path d="M-56 -160 C-89 -80 -89 60 -48 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.8200000000000001"/><path d="M-52 -160 C-83 -80 -83 60 -44 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.74"/><path d="M-48 -160 C-77 -80 -77 60 -40 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.66"/><path d="M-44 -160 C-71 -80 -71 60 -36 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.5800000000000001"/><path d="M-40 -160 C-65 -80 -65 60 -32 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.5"/>
+    <path d="M60 -160 C95 -80 95 60 52 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.9"/><path d="M56 -160 C89 -80 89 60 48 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.8200000000000001"/><path d="M52 -160 C83 -80 83 60 44 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.74"/><path d="M48 -160 C77 -80 77 60 40 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.66"/><path d="M44 -160 C71 -80 71 60 36 140" stroke="#C75B2A" stroke-width="7" stroke-opacity="0.5800000000000001"/><path d="M40 -160 C65 -80 65 60 32 140" stroke="#E8A88C" stroke-width="7" stroke-opacity="0.5"/>
+    <ellipse cx="0" cy="-165" rx="62" ry="14" stroke="#C75B2A" stroke-width="7"/>
+  </g>
+</svg>

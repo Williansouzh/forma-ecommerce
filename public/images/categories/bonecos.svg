@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <text x="720" y="600" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="360" font-weight="600" fill="#111111" fill-opacity="0.04">01</text>
+  
+  <g transform="translate(400 320)">
+    <ellipse cx="0" cy="-120" rx="78" ry="96" fill="#E8A88C" opacity="0.65"/>
+    <path d="M-78 -120 C-90 20 -60 60 -40 80 L40 80 C60 60 90 20 78 -120 C60 -200 -60 -200 -78 -120 Z" fill="#E8A88C" opacity="0.65"/>
+    <path d="M-40 80 L-60 170 L60 170 L40 80 Z" fill="#A0461C" opacity="0.8"/>
+    <rect x="-80" y="170" width="160" height="22" rx="6" fill="#111111" opacity="0.85"/>
+    <path d="M-30 -150 C-14 -166 14 -166 30 -150" stroke="#111111" stroke-opacity="0.35" stroke-width="4" fill="none"/>
+  </g>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="52" y="580" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" letter-spacing="1" fill="#111111">Bonecos & Esculturas</text>
+  <text x="52" y="606" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" letter-spacing="3" fill="#C75B2A">24 PEÇAS</text>
+</svg>

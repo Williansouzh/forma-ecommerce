@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <defs>
+    <linearGradient id="wash-miniatura-millennium-falcon-0" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8A88C" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#C75B2A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <rect width="800" height="630" fill="url(#wash-miniatura-millennium-falcon-0)"/>
+  
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <rect x="28" y="28" width="744" height="574" fill="none" stroke="#111111" stroke-opacity="0.08"/>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="748" y="66" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" letter-spacing="2" fill="#C75B2A">P-009</text>
+  <ellipse cx="400" cy="520" rx="180" ry="16" fill="#111111" opacity="0.05"/>
+  <g transform="rotate(0) translate(0 0)" transform="translate(400 310) rotate(-8)">
+    <ellipse cx="0" cy="0" rx="185" ry="58" fill="#111111" opacity="0.82"/>
+    <ellipse cx="0" cy="0" rx="185" ry="58" fill="none" stroke="#C75B2A" stroke-width="4"/>
+    <ellipse cx="-20" cy="-14" rx="70" ry="24" fill="#E8A88C" opacity="0.7"/>
+    <circle cx="120" cy="-8" r="13" fill="#C75B2A"/>
+    <circle cx="-130" cy="6" r="9" fill="#E8A88C"/>
+    <rect x="-30" y="-58" width="60" height="18" rx="8" fill="#C75B2A"/>
+    <line x1="-185" y1="0" x2="-235" y2="0" stroke="#111111" stroke-width="4"/>
+    <line x1="185" y1="0" x2="235" y2="0" stroke="#111111" stroke-width="4"/>
+  </g>
+</svg>

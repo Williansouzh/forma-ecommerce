@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <text x="720" y="600" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="360" font-weight="600" fill="#111111" fill-opacity="0.04">02</text>
+  
+  <g transform="translate(400 320)">
+    <path d="M-55 -170 C-25 -150 -35 -110 -70 -60 C-105 -5 -95 90 -55 130 C-25 162 25 162 55 130 C95 90 105 -5 70 -60 C35 -110 25 -150 55 -170 C25 -182 -25 -182 -55 -170 Z"
+      fill="#E8A88C" opacity="0.5"/>
+    <path d="M-55 -170 C-25 -150 -35 -110 -70 -60 C-105 -5 -95 90 -55 130 C-25 162 25 162 55 130 C95 90 105 -5 70 -60 C35 -110 25 -150 55 -170 C25 -182 -25 -182 -55 -170 Z"
+      fill="none" stroke="#C75B2A" stroke-width="4"/>
+    <path d="M-72 -20 C-30 -44 30 -44 72 -20 M-88 60 C-32 34 32 34 88 60" fill="none" stroke="#D9A441" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="52" y="580" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" letter-spacing="1" fill="#111111">Decoração</text>
+  <text x="52" y="606" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" letter-spacing="3" fill="#C75B2A">18 PEÇAS</text>
+</svg>

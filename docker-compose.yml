@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: forma-mongo
+    volumes:
+      - forma-mongo-data:/data/db
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    image: forma-api
+    container_name: forma-api
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/forma
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@forma.estudio}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-forma-admin-2026}
+      ADMIN_NAME: ${ADMIN_NAME:-Super Admin}
+      SEED_DEMO: ${SEED_DEMO:-true}
+      CORS_ORIGIN: http://localhost:3222,http://localhost:3000
+    depends_on:
+      - mongo
+    ports:
+      - "4001:4000"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+    image: forma-ecommerce
+    container_name: forma-ecommerce
+    environment:
+      API_URL: http://api:4000
+    depends_on:
+      - api
+    ports:
+      - "3222:3000"
+    restart: unless-stopped
+
+volumes:
+  forma-mongo-data:

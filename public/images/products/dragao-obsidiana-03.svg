@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <defs>
+    <linearGradient id="wash-dragao-obsidiana-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8A88C" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#C75B2A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <rect width="800" height="630" fill="url(#wash-dragao-obsidiana-2)"/>
+  
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <rect x="28" y="28" width="744" height="574" fill="none" stroke="#111111" stroke-opacity="0.08"/>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="748" y="66" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" letter-spacing="2" fill="#C75B2A">P-001</text>
+  <ellipse cx="400" cy="520" rx="180" ry="16" fill="#111111" opacity="0.05"/>
+  <g transform="rotate(-8) translate(0 12)" transform="translate(400 290)">
+    <path d="M-160 120 L-60 -80 L20 -140 L90 -100 L60 -30 L140 10 L90 90 L-40 150 Z" fill="#A0461C" opacity="0.92"/>
+    <path d="M-60 -80 L20 -140 L90 -100 L20 -50 Z" fill="#C75B2A"/>
+    <path d="M-160 120 L-40 150 L90 90 L60 30 L-80 70 Z" fill="#111111" opacity="0.85"/>
+    <circle cx="95" cy="-115" r="9" fill="#FAFAF8"/>
+  </g>
+</svg>

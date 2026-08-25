@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#FAFAF8"/>
+  <rect x="40" y="40" width="1120" height="550" fill="none" stroke="#111111" stroke-opacity="0.1"/>
+  
+  <g transform="translate(920 340) scale(0.9)">
+    <path d="M-160 120 L-60 -80 L20 -140 L90 -100 L60 -30 L140 10 L90 90 L-40 150 Z" fill="#A0461C" opacity="0.92"/>
+    <path d="M-60 -80 L20 -140 L90 -100 L20 -50 Z" fill="#C75B2A"/>
+    <path d="M-160 120 L-40 150 L90 90 L60 30 L-80 70 Z" fill="#111111" opacity="0.85"/>
+    <circle cx="95" cy="-115" r="9" fill="#FAFAF8"/>
+  </g>
+  <text x="100" y="300" font-family="ui-sans-serif, system-ui, sans-serif" font-size="96" font-weight="600" letter-spacing="-3" fill="#111111">FORMA<span fill="#C75B2A">.</span></text>
+  <text x="102" y="360" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" fill="#555555">Objetos feitos para existir.</text>
+  <text x="102" y="420" font-family="ui-sans-serif, system-ui, sans-serif" font-size="17" letter-spacing="4" fill="#C75B2A">IMPRESSÃO 3D PREMIUM · SÃO PAULO</text>
+</svg>

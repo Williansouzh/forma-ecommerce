@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 630">
+  <defs>
+    <linearGradient id="wash-luminaria-organica-2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8A88C" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#C75B2A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="630" fill="#FAFAF8"/>
+  <rect width="800" height="630" fill="url(#wash-luminaria-organica-2)"/>
+  
+  <line x1="133.33" y1="0" x2="133.33" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="126" x2="800" y2="126" stroke="#111111" stroke-opacity="0.03"/><line x1="266.66" y1="0" x2="266.66" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="252" x2="800" y2="252" stroke="#111111" stroke-opacity="0.03"/><line x1="399.99" y1="0" x2="399.99" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="378" x2="800" y2="378" stroke="#111111" stroke-opacity="0.03"/><line x1="533.32" y1="0" x2="533.32" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="504" x2="800" y2="504" stroke="#111111" stroke-opacity="0.03"/><line x1="666.6500000000001" y1="0" x2="666.6500000000001" y2="630" stroke="#111111" stroke-opacity="0.03"/><line x1="0" y1="630" x2="800" y2="630" stroke="#111111" stroke-opacity="0.03"/>
+  <rect x="28" y="28" width="744" height="574" fill="none" stroke="#111111" stroke-opacity="0.08"/>
+  <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
+  <text x="748" y="66" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" letter-spacing="2" fill="#C75B2A">P-005</text>
+  <ellipse cx="400" cy="520" rx="180" ry="16" fill="#111111" opacity="0.05"/>
+  <g transform="rotate(-8) translate(0 12)" transform="translate(400 300)">
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#C75B2A" stroke-opacity="0.25" stroke-width="10"/><circle cx="0" cy="0" r="122" fill="none" stroke="#E8A88C" stroke-opacity="0.4" stroke-width="10"/><circle cx="0" cy="0" r="94" fill="none" stroke="#E8A88C" stroke-opacity="0.55" stroke-width="10"/><circle cx="0" cy="0" r="66" fill="none" stroke="#E8A88C" stroke-opacity="0.7" stroke-width="10"/><circle cx="0" cy="0" r="38" fill="none" stroke="#E8A88C" stroke-opacity="0.85" stroke-width="10"/>
+    <circle cx="0" cy="0" r="26" fill="#C75B2A"/>
+    <line x1="-150" y1="150" x2="150" y2="150" stroke="#111111" stroke-width="5"/>
+    <line x1="0" y1="26" x2="0" y2="148" stroke="#111111" stroke-width="5"/>
+  </g>
+</svg>
