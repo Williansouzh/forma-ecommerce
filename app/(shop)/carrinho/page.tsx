@@ -12,6 +12,7 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { ProductCard } from "@/components/product/product-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
+import { ShippingEstimator } from "@/components/shared/shipping-estimator";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/product";
 
@@ -54,8 +55,8 @@ export default function CartPage() {
       </h1>
 
       {!hasHydrated ? null : items.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-xl border border-dashed border-strong py-24 text-center">
-          <span className="flex size-16 items-center justify-center rounded-full bg-surface-muted text-tertiary">
+        <div className="mt-16 flex flex-col items-center gap-4 border border-dashed border-primary bg-surface py-24 text-center">
+          <span className="flex size-16 items-center justify-center border border-primary bg-surface-muted text-tertiary">
             <ShoppingBag size={26} />
           </span>
           <p className="font-display text-heading-3">Seu carrinho está vazio</p>
@@ -64,7 +65,7 @@ export default function CartPage() {
           </p>
           <Link
             href="/colecoes"
-            className="mt-2 inline-flex h-12 items-center rounded-md bg-accent px-8 text-body-small font-medium text-white transition-colors hover:bg-accent-dark"
+            className="mt-2 inline-flex h-12 items-center border border-primary bg-primary px-8 label text-background transition-colors hover:bg-transparent hover:text-primary"
           >
             Explorar coleções
           </Link>
@@ -84,7 +85,7 @@ export default function CartPage() {
                     transition={{ duration: 0.3 }}
                     className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center"
                   >
-                    <div className="relative size-24 shrink-0 overflow-hidden rounded-md border border-border-subtle bg-surface-muted">
+                    <div className="relative size-24 shrink-0 overflow-hidden border border-primary bg-surface-muted">
                       {item.image && (
                         <Image
                           src={item.image}
@@ -107,12 +108,12 @@ export default function CartPage() {
                           {item.variantName}
                         </p>
                       )}
-                      <p className="font-mono text-body-small tabular-nums text-secondary">
+                      <p className="text-body-small tabular-nums text-secondary">
                         {formatPrice(item.price)} / unidade
                       </p>
                     </div>
                     <div className="flex items-center justify-between gap-6 sm:justify-end">
-                      <div className="inline-flex h-11 items-center rounded-md border border-strong">
+                      <div className="inline-flex h-11 items-center border border-primary">
                         <button
                           type="button"
                           onClick={() =>
@@ -127,7 +128,7 @@ export default function CartPage() {
                         >
                           −
                         </button>
-                        <span className="w-8 text-center font-mono text-body-small tabular-nums">
+                        <span className="w-8 text-center text-body-small tabular-nums">
                           {item.quantity}
                         </span>
                         <button
@@ -145,7 +146,7 @@ export default function CartPage() {
                           +
                         </button>
                       </div>
-                      <p className="w-24 text-right font-mono font-medium tabular-nums">
+                      <p className="w-24 text-right font-medium tabular-nums">
                         {formatPrice(item.price * item.quantity)}
                       </p>
                       <button
@@ -164,31 +165,51 @@ export default function CartPage() {
 
             <aside
               aria-label="Resumo do pedido"
-              className="h-fit rounded-lg border bg-surface p-6 lg:sticky lg:top-28"
+              className="h-fit border border-border-strong bg-surface p-8 lg:sticky lg:top-28"
             >
               <h2 className="font-display text-heading-3">Resumo</h2>
+              <ul className="mt-4 grid gap-2 border-b border-border-subtle pb-4 text-caption text-tertiary">
+                <li className="flex items-center gap-2">
+                  <span className="h-px w-4 bg-accent" aria-hidden />
+                  Produção após confirmação do pagamento.
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-px w-4 bg-accent" aria-hidden />
+                  Embalagem protegida e pronta para presente.
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-px w-4 bg-accent" aria-hidden />
+                  Frete grátis acima de R$ 400.
+                </li>
+              </ul>
               <dl className="mt-5 space-y-2.5 text-body-small">
                 <div className="flex justify-between text-secondary">
                   <dt>Subtotal</dt>
-                  <dd className="font-mono tabular-nums">{formatPrice(totals.subtotal)}</dd>
+                  <dd className="tabular-nums">{formatPrice(totals.subtotal)}</dd>
                 </div>
                 <div className="flex justify-between text-secondary">
                   <dt>Frete</dt>
-                  <dd className="font-mono tabular-nums">
+                  <dd className="tabular-nums">
                     {totals.shipping === 0 ? "Grátis" : formatPrice(totals.shipping)}
                   </dd>
                 </div>
-                <div className="flex justify-between border-t border-border-subtle pt-4 font-mono text-heading-3">
+                <div className="flex justify-between border-t border-border-subtle pt-4 text-heading-3">
                   <dt>Total</dt>
-                  <dd className="tabular-nums font-mono">{formatPrice(totals.total)}</dd>
+                  <dd className="tabular-nums">{formatPrice(totals.total)}</dd>
                 </div>
               </dl>
+              <div className="mt-5">
+                <ShippingEstimator subtotal={totals.subtotal} compact />
+              </div>
               <Link
                 href="/checkout"
-                className="mt-6 flex h-13 w-full items-center justify-center rounded-md bg-accent py-3.5 text-body font-medium text-white transition-all hover:-translate-y-px hover:bg-accent-dark active:scale-[0.98]"
+                className="mt-6 flex h-13 w-full items-center justify-center border border-primary bg-primary py-3.5 label text-background transition-all hover:bg-transparent hover:text-primary"
               >
                 Finalizar compra
               </Link>
+              <p className="mt-3 text-center text-micro uppercase tracking-[0.08em] text-tertiary">
+                Compra segura · troca por defeito de fabricação
+              </p>
               <Link
                 href="/colecoes"
                 className="mt-3 flex w-full items-center justify-center py-2 text-body-small text-secondary underline-offset-4 hover:text-primary hover:underline"

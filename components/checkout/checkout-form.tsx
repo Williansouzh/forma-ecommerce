@@ -187,7 +187,7 @@ export function CheckoutForm({
               aria-current={index === step ? "step" : undefined}
               className={cn(
                 "flex size-9 shrink-0 items-center justify-center rounded-full text-body-small font-medium transition-colors",
-                index < step && "bg-success text-white",
+                index < step && "bg-success text-background",
                 index === step && "bg-primary text-background",
                 index > step &&
                   "border border-strong text-tertiary",
@@ -262,7 +262,7 @@ export function CheckoutForm({
                     inputMode="numeric"
                     value={data.cpf}
                     onChange={(event) => set("cpf")(maskCPF(event.target.value))}
-                    className="font-mono"
+                    className="tabular-nums"
                     error={errors.cpf}
                     placeholder="000.000.000-00"
                   />
@@ -274,7 +274,7 @@ export function CheckoutForm({
                     onChange={(event) =>
                       set("phone")(maskPhone(event.target.value))
                     }
-                    className="font-mono"
+                    className="tabular-nums"
                     error={errors.phone}
                     placeholder="(11) 90000-0000"
                   />
@@ -291,7 +291,7 @@ export function CheckoutForm({
                   autoComplete="postal-code"
                   value={data.zipCode}
                   onChange={(event) => set("zipCode")(maskCEP(event.target.value))}
-                  className="font-mono"
+                  className="tabular-nums"
                   error={errors.zipCode}
                   hint="O endereço é preenchido automaticamente pelo CEP em breve"
                   placeholder="00000-000"
@@ -376,7 +376,7 @@ export function CheckoutForm({
                         className={cn(
                           "flex size-11 shrink-0 items-center justify-center rounded-md",
                           payment === option.id
-                            ? "bg-accent text-white"
+                            ? "bg-accent text-background"
                             : "bg-surface-muted text-secondary"
                         )}
                       >
@@ -411,7 +411,7 @@ export function CheckoutForm({
                           onChange={(event) =>
                             set("cardNumber")(maskCard(event.target.value))
                           }
-                            className="font-mono"
+                            className="tabular-nums"
                           error={errors.cardNumber}
                           placeholder="0000 0000 0000 0000"
                         />
@@ -431,7 +431,7 @@ export function CheckoutForm({
                             onChange={(event) =>
                               set("cardExpiry")(maskExpiry(event.target.value))
                             }
-                            className="font-mono"
+                            className="tabular-nums"
                             error={errors.cardExpiry}
                             placeholder="MM/AA"
                           />
@@ -445,7 +445,7 @@ export function CheckoutForm({
                                 event.target.value.replace(/\D/g, "")
                               )
                             }
-                            className="font-mono"
+                            className="tabular-nums"
                             error={errors.cardCvv}
                             placeholder="000"
                           />
@@ -479,7 +479,7 @@ export function CheckoutForm({
           type="button"
           onClick={step === 2 ? submit : next}
           disabled={items.length === 0}
-          className="inline-flex h-13 items-center justify-center rounded-md bg-accent px-10 py-3.5 text-body font-medium text-white transition-all hover:-translate-y-px hover:bg-accent-dark active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
+          className="inline-flex h-13 items-center justify-center rounded-md border border-primary bg-primary px-10 py-3.5 label text-background transition-all hover:bg-transparent hover:text-primary disabled:pointer-events-none disabled:opacity-40"
         >
           {step === 2 ? "Confirmar pedido" : "Continuar"}
         </button>

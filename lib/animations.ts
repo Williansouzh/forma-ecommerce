@@ -9,7 +9,7 @@ export const EASE_EXIT: Ease = [0.4, 0, 1, 1];
 export const SPRING: Transition = { type: "spring", stiffness: 300, damping: 30 };
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 1, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
@@ -18,12 +18,12 @@ export const fadeUp: Variants = {
 };
 
 export const fadeIn: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   visible: { opacity: 1, transition: { duration: 0.4, ease: EASE_OUT } },
 };
 
 export const slideRight: Variants = {
-  hidden: { opacity: 0, x: -20 },
+  hidden: { opacity: 1, x: -20 },
   visible: {
     opacity: 1,
     x: 0,

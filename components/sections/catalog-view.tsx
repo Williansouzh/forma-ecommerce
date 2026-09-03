@@ -10,12 +10,15 @@ type SortOption = "relevance" | "price-asc" | "price-desc" | "newest";
 
 const COLOR_NAMES: Record<string, string> = {
   "#111111": "Preto",
-  "#EDEDE8": "Branco",
-  "#C75B2A": "Laranja",
+  "#EDEDE8": "Areia",
+  "#C75B2A": "Terracota",
   "#444444": "Grafite",
-  "#888888": "Cinza",
+  "#888888": "Pedra",
   "#2D6A4F": "Musgo",
 };
+
+/** Alturas alternadas: grid uniforme lê como catálogo, irregular lê como vitrine. */
+const CARD_RHYTHM = ["tall", "medium", "wide", "medium", "tall", "wide"] as const;
 
 function productSize(product: Product): "P" | "M" | "G" {
   const height = product.dimensions?.height ?? 200;
@@ -37,6 +40,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
   const [customOnly, setCustomOnly] = useState(false);
   const [sizes, setSizes] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const availableColors = useMemo(() => {
@@ -47,6 +51,14 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
       })
     );
     return [...hexes];
+  }, [products]);
+
+  const availableMaterials = useMemo(() => {
+    const names = new Set<string>();
+    products.forEach((product) => {
+      if (product.material) names.add(product.material);
+    });
+    return [...names];
   }, [products]);
 
   const filtered = useMemo(() => {
@@ -62,6 +74,13 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
         !(product.variants ?? []).some(
           (variant) => variant.colorHex && colors.includes(variant.colorHex)
         )
+      )
+        return false;
+      if (materials.length && !product.material) return false;
+      if (
+        materials.length &&
+        product.material &&
+        !materials.includes(product.material)
       )
         return false;
       return true;
@@ -85,7 +104,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
       }
     });
     return result;
-  }, [products, sort, maxPrice, inStockOnly, customOnly, sizes, colors]);
+  }, [products, sort, maxPrice, inStockOnly, customOnly, sizes, colors, materials]);
 
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
@@ -96,6 +115,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
     setCustomOnly(false);
     setSizes([]);
     setColors([]);
+    setMaterials([]);
   };
 
   const activeFilterCount =
@@ -103,12 +123,13 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
     (inStockOnly ? 1 : 0) +
     (customOnly ? 1 : 0) +
     sizes.length +
-    colors.length;
+    colors.length +
+    materials.length;
 
   const filtersPanel = (
     <div className="space-y-8">
       <fieldset>
-        <legend className="text-caption uppercase text-secondary">
+        <legend className="label text-tertiary">
           Faixa de preço
         </legend>
         <input
@@ -147,7 +168,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
       </label>
 
       <fieldset>
-        <legend className="text-caption uppercase text-secondary">Tamanho</legend>
+        <legend className="label text-tertiary">Tamanho</legend>
         <div className="mt-3 flex gap-2">
           {["P", "M", "G"].map((size) => (
             <button
@@ -156,10 +177,10 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
               aria-pressed={sizes.includes(size)}
               onClick={() => setSizes(toggle(sizes, size))}
               className={cn(
-                "flex size-10 items-center justify-center rounded-md border text-body-small transition-colors",
+                "flex size-10 items-center justify-center border text-body-small transition-colors duration-300",
                 sizes.includes(size)
-                  ? "border-accent bg-accent text-white"
-                  : "border-strong hover:border-primary/40"
+                  ? "border-primary bg-primary text-background"
+                  : "border-border-strong hover:border-primary"
               )}
             >
               {size}
@@ -170,7 +191,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
 
       {availableColors.length > 0 && (
         <fieldset>
-          <legend className="text-caption uppercase text-secondary">Cor</legend>
+          <legend className="label text-tertiary">Cor</legend>
           <div className="mt-3 flex flex-wrap gap-2.5">
             {availableColors.map((hex) => (
               <button
@@ -180,12 +201,39 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
                 aria-pressed={colors.includes(hex)}
                 onClick={() => setColors(toggle(colors, hex))}
                 className={cn(
-                  "size-7 rounded-full border border-strong transition-transform hover:scale-110",
-                  colors.includes(hex) &&
-                    "ring-2 ring-accent ring-offset-2 ring-offset-background"
+                  "size-7 rounded-full outline outline-1 transition-all duration-300",
+                  colors.includes(hex)
+                    ? "outline-primary outline-offset-[5px]"
+                    : "outline-border-strong hover:outline-offset-[3px]"
                 )}
                 style={{ backgroundColor: hex }}
               />
+            ))}
+          </div>
+        </fieldset>
+      )}
+
+      {availableMaterials.length > 0 && (
+        <fieldset>
+          <legend className="label text-tertiary">
+            Material
+          </legend>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {availableMaterials.map((material) => (
+              <button
+                key={material}
+                type="button"
+                aria-pressed={materials.includes(material)}
+                onClick={() => setMaterials(toggle(materials, material))}
+                className={cn(
+                  "border px-3 py-2 text-micro uppercase transition-colors duration-300",
+                  materials.includes(material)
+                    ? "border-primary bg-primary text-background"
+                    : "border-border-strong hover:border-primary"
+                )}
+              >
+                {material}
+              </button>
             ))}
           </div>
         </fieldset>
@@ -197,7 +245,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
           onClick={clearAll}
           className="inline-flex items-center gap-1.5 text-body-small text-accent underline-offset-4 hover:underline"
         >
-          <X size={14} />
+          <X size={14} strokeWidth={1} />
           Limpar filtros ({activeFilterCount})
         </button>
       )}
@@ -205,13 +253,13 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
   );
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[240px_1fr]">
+    <div className="grid gap-12 lg:grid-cols-[240px_1fr] lg:gap-16">
       <aside
         className={cn(
           "h-fit lg:sticky lg:top-28",
           filtersOpen
-            ? "rounded-lg border p-6"
-            : "hidden lg:block lg:border-none lg:p-0"
+            ? "bg-surface p-8"
+            : "hidden lg:block lg:border-r lg:border-border-subtle lg:pr-8"
         )}
         aria-label="Filtros do catálogo"
       >
@@ -221,26 +269,27 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
             type="button"
             onClick={() => setFiltersOpen(false)}
             aria-label="Fechar filtros"
-            className="flex size-9 items-center justify-center rounded-md text-secondary"
+            className="flex size-9 items-center justify-center border border-border-subtle text-secondary"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={1} />
           </button>
         </div>
         {filtersPanel}
       </aside>
 
       <section aria-label={`Produtos — ${title}`}>
-        <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <header className="mb-14 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <h1 className="font-display text-heading-1 tracking-tight">{title}</h1>
+            <h1 className="font-display text-heading-1">{title}</h1>
             {description && (
               <p className="mt-2 max-w-xl text-body-large text-secondary">
                 {description}
               </p>
             )}
-            <p className="mt-3 text-caption uppercase text-tertiary" aria-live="polite">
-              {filtered.length}{" "}
-              {filtered.length === 1 ? "produto encontrado" : "produtos encontrados"}
+            <p className="mt-6 text-body-small italic text-tertiary" aria-live="polite">
+              {filtered.length === 1
+                ? "uma peça"
+                : `${filtered.length} peças`}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -248,9 +297,9 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
               type="button"
               onClick={() => setFiltersOpen(true)}
               aria-expanded={filtersOpen}
-              className="inline-flex h-11 items-center gap-2 rounded-md border border-strong px-4 text-body-small lg:hidden"
+              className="inline-flex h-11 items-center gap-2 border border-border-strong px-5 text-body-small lg:hidden"
             >
-              <SlidersHorizontal size={16} />
+              <SlidersHorizontal size={16} strokeWidth={1} />
               Filtros{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
             </button>
             <label className="sr-only" htmlFor="catalog-sort">
@@ -260,7 +309,7 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
               id="catalog-sort"
               value={sort}
               onChange={(event) => setSort(event.target.value as SortOption)}
-              className="h-11 rounded-md border border-strong bg-surface px-3 text-body-small focus:border-accent focus:outline-none"
+              className="h-11 border border-border-strong bg-surface px-3 text-body-small focus:border-primary focus:outline-none"
             >
               <option value="relevance">Relevância</option>
               <option value="newest">Novidade</option>
@@ -271,28 +320,31 @@ export function CatalogView({ products, title, description }: CatalogViewProps) 
         </header>
 
         {filtered.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-strong py-20 text-center">
-            <p className="font-display text-heading-3">Nada por aqui</p>
-            <p className="mx-auto mt-2 max-w-sm text-body-small text-secondary">
-              Nenhum produto corresponde aos filtros selecionados. Ajuste os
-              critérios para ver mais peças.
+          <div className="border-t border-border-strong py-24">
+            <p className="font-display text-heading-2">
+              Nada aqui com esses filtros
+            </p>
+            <p className="mt-3 max-w-sm text-body text-secondary">
+              Tenta afrouxar um critério — ou dá uma olhada em tudo que está
+              pronto.
             </p>
             <button
               type="button"
               onClick={clearAll}
-              className="mt-6 inline-flex h-11 items-center rounded-md bg-accent px-6 text-body-small font-medium text-white transition-colors hover:bg-accent-dark"
+              className="label mt-8 inline-block border border-primary px-8 py-4 text-primary transition-colors duration-300 hover:bg-primary hover:text-background"
             >
               Limpar filtros
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-12 gap-y-20 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                variant="medium"
-                revealDelay={(index % 9) * 70}
+                variant={CARD_RHYTHM[index % CARD_RHYTHM.length]}
+                revealDelay={(index % 9) * 0.07}
+                className={index % 3 === 1 ? "xl:mt-12" : undefined}
               />
             ))}
           </div>

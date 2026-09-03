@@ -2,25 +2,22 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Clock, Package, Ruler, ShoppingBag, Star, Weight } from "lucide-react";
 import type { Product, ProductStatus } from "@/types/product";
 import type { ProductVariant } from "@/types/product";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ColorSelector } from "@/components/ui/color-selector";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { ShippingEstimator } from "@/components/shared/shipping-estimator";
 import { useCartStore } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
 import { formatPrice } from "@/lib/utils";
 
-const statusConfig: Record<
-  ProductStatus,
-  { label: string; variant: "success" | "warning" | "accent" | "error" }
-> = {
-  in_stock: { label: "Em estoque", variant: "success" },
-  low_stock: { label: "Últimas unidades", variant: "warning" },
-  made_to_order: { label: "Sob encomenda", variant: "accent" },
-  sold_out: { label: "Esgotado", variant: "error" },
+/** Disponibilidade em prosa, não em badge colorida. */
+const availability: Record<ProductStatus, string> = {
+  in_stock: "Pronto para enviar",
+  low_stock: "Restam poucas peças",
+  made_to_order: "Feito depois do seu pedido",
+  sold_out: "Esgotado por enquanto",
 };
 
 function resolveStatus(product: Product): ProductStatus {
@@ -46,14 +43,25 @@ export function ProductDetails({ product }: { product: Product }) {
   const pushToast = useUIStore((state) => state.pushToast);
 
   const status = resolveStatus(product);
-  const config = statusConfig[status];
   const unitPrice =
     product.price === 0 ? 0 : product.price + (variant?.priceAdjustment ?? 0);
+  const isKeychain = product.tags.some((tag) =>
+    tag.toLowerCase().includes("chaveiro")
+  );
+
+  const finishNote = product.material?.toLowerCase().includes("resina")
+    ? "A resina deixa a superfície lisa e o detalhe fino — dá para ver o desenho de perto."
+    : "Tem linha de camada, sim. É assim que se sabe que foi feito e não fabricado.";
+
+  const statusLine =
+    status === "made_to_order" && typeof product.productionTime === "number"
+      ? `${availability[status]} — ${product.productionTime} dias`
+      : availability[status];
 
   const addToCart = () => {
     if (unitPrice === 0) {
       pushToast(
-        "Peça sob consulta — solicite um orçamento na página de personalizados",
+        "Peça sob consulta — peça um orçamento na página de encomendas",
         "info"
       );
       return;
@@ -68,73 +76,44 @@ export function ProductDetails({ product }: { product: Product }) {
       image: product.images[0]?.url,
       variantName: variant?.name,
     });
-    pushToast(`${product.name} adicionado ao carrinho`);
+    pushToast(`${product.name} — no carrinho`);
     openCart();
   };
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={config.variant}>{config.label}</Badge>
-        {product.badge && <Badge variant="muted">{product.badge}</Badge>}
-      </div>
+      <h1 className="font-display text-heading-1">{product.name}</h1>
 
-      <h1 className="mt-4 font-display text-heading-1 tracking-tight">
-        {product.name}
-      </h1>
-
-      <div className="mt-3 flex items-center gap-3">
+      {/* Preço em serifa. Preço em monoespaçada parece cotação de API. */}
+      <div className="mt-5 flex flex-wrap items-baseline gap-4">
         <motion.p
           key={unitPrice}
-          initial={{ opacity: 0.4, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="font-mono text-heading-2 font-medium tabular-nums"
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="font-display text-heading-2 tabular-nums"
         >
-          {product.price === 0 ? (
-            <span className="text-body-large text-secondary">Sob consulta</span>
-          ) : (
-            formatPrice(unitPrice)
-          )}
+          {product.price === 0 ? "Sob consulta" : formatPrice(unitPrice)}
         </motion.p>
         {product.originalPrice && (
-          <span className="font-mono text-body tabular-nums text-quaternary line-through">
+          <span className="text-body tabular-nums text-tertiary line-through">
             {formatPrice(product.originalPrice)}
           </span>
         )}
       </div>
 
-      <p className="mt-5 max-w-prose text-body-large text-secondary">
+      <p className="mt-2 text-body-small italic text-accent">{statusLine}</p>
+
+      {/* Por que a peça existe vem antes de qualquer milímetro. */}
+      <p className="mt-8 max-w-prose text-body-large text-secondary">
         {product.shortDescription}
       </p>
 
-      {typeof product.rating === "number" && (
-        <div className="mt-8 flex items-center gap-2">
-          <span className="flex items-center gap-1" aria-hidden>
-            {[...Array(5)].map((_, index) => (
-              <Star
-                key={index}
-                size={15}
-                className={
-                  index < Math.round(product.rating!)
-                    ? "fill-accent text-accent"
-                    : "text-quaternary"
-                }
-              />
-            ))}
-          </span>
-          <span className="text-body-small font-medium">{product.rating.toFixed(1)}</span>
-          {typeof product.reviewCount === "number" && (
-            <span className="text-body-small text-tertiary">
-              ({product.reviewCount} avaliações)
-            </span>
-          )}
-        </div>
-      )}
+      <p className="mt-4 max-w-prose text-body-small italic text-tertiary">
+        {finishNote}
+      </p>
 
-      <hr className="my-8 border-border-subtle" />
-
-      <div className="space-y-8">
+      <div className="mt-12 space-y-9">
         {(product.variants?.length ?? 0) > 0 && (
           <ColorSelector
             variants={product.variants ?? []}
@@ -158,65 +137,70 @@ export function ProductDetails({ product }: { product: Product }) {
           disabled={status === "sold_out"}
           className="w-full sm:w-auto"
         >
-          <ShoppingBag size={18} />
           {status === "sold_out"
-            ? "Produto esgotado"
+            ? "Esgotado"
             : unitPrice === 0
-              ? "Solicitar orçamento"
-              : `Adicionar ao carrinho — ${formatPrice(unitPrice * quantity)}`}
+              ? "Pedir um orçamento"
+              : `Adicionar — ${formatPrice(unitPrice * quantity)}`}
         </Button>
+
+        <ShippingEstimator subtotal={unitPrice * quantity} />
       </div>
 
-      <dl className="mt-10 grid grid-cols-1 gap-x-8 gap-y-4 rounded-lg bg-surface-muted p-6 sm:grid-cols-2">
-        {typeof product.productionTime === "number" && (
-          <div className="flex items-start gap-3">
-            <Clock size={17} className="mt-0.5 shrink-0 text-accent" />
-            <div>
-              <dt className="text-micro uppercase text-tertiary">Produção</dt>
-              <dd className="font-mono text-body-small">
-                Até {product.productionTime} dias úteis
-              </dd>
-            </div>
+      <p className="mt-10 max-w-md text-body-small text-tertiary">
+        {isKeychain
+          ? "Vai com argola presa e embalado para presente."
+          : "Embalado com proteção reforçada."}{" "}
+        Evite deixar a peça em carro fechado, sol forte ou perto de fonte de
+        calor.
+      </p>
+
+      {/* Ficha discreta, no fim, sem réguas de accent e sem monoespaçada. */}
+      <dl className="mt-14 grid grid-cols-2 gap-x-10 gap-y-6 border-t border-border-strong pt-8 text-body-small sm:grid-cols-3">
+        {product.material && (
+          <div>
+            <dt className="label text-tertiary">Material</dt>
+            <dd className="mt-1.5 text-secondary">{product.material}</dd>
           </div>
         )}
         {product.dimensions && (
-          <div className="flex items-start gap-3">
-            <Ruler size={17} className="mt-0.5 shrink-0 text-accent" />
-            <div>
-              <dt className="text-micro uppercase text-tertiary">Dimensões</dt>
-              <dd className="font-mono text-body-small">
-                {product.dimensions.width} × {product.dimensions.depth} ×{" "}
-                {product.dimensions.height} mm
-              </dd>
-            </div>
+          <div>
+            <dt className="label text-tertiary">Tamanho</dt>
+            <dd className="mt-1.5 tabular-nums text-secondary">
+              {product.dimensions.width} × {product.dimensions.depth} ×{" "}
+              {product.dimensions.height} mm
+            </dd>
           </div>
         )}
         {typeof product.weight === "number" && (
-          <div className="flex items-start gap-3">
-            <Weight size={17} className="mt-0.5 shrink-0 text-accent" />
-            <div>
-              <dt className="text-micro uppercase text-tertiary">Peso</dt>
-              <dd className="font-mono text-body-small">{product.weight} g</dd>
-            </div>
+          <div>
+            <dt className="label text-tertiary">Peso</dt>
+            <dd className="mt-1.5 tabular-nums text-secondary">
+              {product.weight} g
+            </dd>
           </div>
         )}
-        {product.material && (
-          <div className="flex items-start gap-3">
-            <Package size={17} className="mt-0.5 shrink-0 text-accent" />
-            <div>
-              <dt className="text-micro uppercase text-tertiary">Material</dt>
-              <dd className="text-body-small">{product.material}</dd>
-            </div>
+        {typeof product.productionTime === "number" && (
+          <div>
+            <dt className="label text-tertiary">Produção</dt>
+            <dd className="mt-1.5 text-secondary">
+              até {product.productionTime} dias úteis
+            </dd>
           </div>
         )}
+        <div>
+          <dt className="label text-tertiary">Acabamento</dt>
+          <dd className="mt-1.5 text-secondary">conferido à mão</dd>
+        </div>
+        <div>
+          <dt className="label text-tertiary">Cuidados</dt>
+          <dd className="mt-1.5 text-secondary">longe do calor</dd>
+        </div>
       </dl>
 
-      <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags do produto">
+      <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2" aria-label="Tags do produto">
         {product.tags.map((tag) => (
-          <li
-            key={tag}
-            className="rounded-full border border-strong px-3 py-1 text-caption uppercase text-tertiary"
-          >
+          <li key={tag} className="text-body-small italic text-tertiary">
             {tag}
           </li>
         ))}

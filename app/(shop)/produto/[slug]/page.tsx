@@ -23,8 +23,8 @@ export async function generateMetadata({
   const product = await fetchProductBySlug(slug);
   if (!product) return {};
   return {
-    title: `${product.name} — Impressão 3D Premium`,
-    description: `${product.shortDescription} — Peças únicas produzidas com impressão 3D de alta precisão.`,
+    title: `${product.name} — feito sob demanda`,
+    description: `${product.shortDescription} — Produção em impressão 3D com material, textura e prazo informados antes do envio.`,
     alternates: { canonical: `/produto/${product.slug}` },
     openGraph: {
       title: `${product.name} | FORMA.`,
@@ -46,21 +46,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const category = getCategory(product.category);
   const related = await fetchRelatedProducts(product);
-  const reviews = [
+  const studioNotes = [
     {
-      author: "Marina C.",
-      rating: 5,
-      text: `A qualidade do ${product.name.toLowerCase()} superou o que eu esperava das fotos. Acabamento impecável, dá pra sentir o cuidado em cada detalhe.`,
+      title: "O que conferir ao receber",
+      text: `Veja a superfície, as bordas e o encaixe da peça. No ${product.name.toLowerCase()}, pequenas linhas de camada podem aparecer conforme a luz.`,
     },
     {
-      author: "Rafael T.",
-      rating: 5,
-      text: "Embalagem linda, chegou antes do prazo e a peça é ainda mais bonita ao vivo. Virei cliente do estúdio.",
+      title: "Variação honesta de produção",
+      text: "Cor, brilho e textura podem variar levemente entre lotes de filamento ou resina. Isso faz parte da fabricação sob demanda.",
     },
     {
-      author: "Júlia M.",
-      rating: 4,
-      text: "Peça excelente e atendimento atencioso. Só achei que demorou um pouco mais do que imaginava — mas valeu cada dia de espera.",
+      title: "Quando pedir personalização",
+      text: "Para nomes, iniciais, cores específicas ou kits, envie referência antes da compra para validarmos tamanho, prazo e limite técnico.",
     },
   ];
 
@@ -155,7 +152,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       "Inspeção final, fotografia de conferência e embalagem editorial.",
                     ].map((step, index) => (
                       <li key={index} className="flex gap-4">
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-caption font-medium text-accent">
+                        <span className="flex size-7 shrink-0 items-center justify-center border border-primary bg-surface text-micro font-medium text-primary">
                           {index + 1}
                         </span>
                         <p className="pt-1 text-body text-secondary">{step}</p>
@@ -165,18 +162,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 ),
               },
               {
-                id: "avaliacoes",
-                label: `Avaliações (${product.reviewCount ?? reviews.length})`,
+                id: "observacoes",
+                label: "Notas do estúdio",
                 content: (
                   <ul className="max-w-2xl space-y-8">
-                    {reviews.map((review) => (
-                      <li key={review.author} className="border-b border-border-subtle pb-8 last:border-none">
-                        <p className="text-body-small font-medium">{review.author}</p>
-                        <p className="text-micro uppercase text-accent" aria-label={`${review.rating} de 5 estrelas`}>
-                          {"★".repeat(review.rating)}
-                          <span className="text-quaternary">{"★".repeat(5 - review.rating)}</span>
-                        </p>
-                        <p className="mt-2 text-body text-secondary">“{review.text}”</p>
+                    {studioNotes.map((note) => (
+                      <li key={note.title} className="border-b border-border-subtle pb-8 last:border-none">
+                        <p className="text-micro uppercase text-tertiary">{note.title}</p>
+                        <p className="mt-2 text-body text-secondary">{note.text}</p>
                       </li>
                     ))}
                   </ul>
@@ -202,7 +195,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <ProductCard
                     product={item}
                     variant="medium"
-                    revealDelay={index * 80}
+                    revealDelay={index * 0.08}
                   />
                 </ProductGridItem>
               ))}

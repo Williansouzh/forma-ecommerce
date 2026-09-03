@@ -24,7 +24,7 @@ export const CATEGORIES: Category[] = [
     description:
       "Objetos paramétricos e orgânicos que trazem presença para qualquer ambiente.",
     image: "/images/categories/decoracao.svg",
-    productCount: 18,
+    productCount: 19,
   },
   {
     id: "cat-geek",
@@ -40,16 +40,16 @@ export const CATEGORIES: Category[] = [
     slug: "miniaturas",
     name: "Miniaturas",
     description:
-      "Réveis detalhadas impressas em resina, camada por camada, com precisão de estúdio.",
+      "Réplicas detalhadas impressas em resina, camada por camada, com precisão de estúdio.",
     image: "/images/categories/miniaturas.svg",
     productCount: 42,
   },
   {
     id: "cat-presentes",
     slug: "presentes",
-    name: "Presentes",
+    name: "Presentes & Chaveiros",
     description:
-      "Peças pensadas para serem entregues: embalagem editorial e cartão assinado pelo estúdio.",
+      "Chaveiros, lembranças e peças pequenas pensadas para serem entregues com embalagem de presente.",
     image: "/images/categories/presentes.svg",
     productCount: 15,
   },
@@ -60,7 +60,7 @@ export const CATEGORIES: Category[] = [
     description:
       "Sua ideia modelada do zero pelo nosso time. Uma peça, só sua.",
     image: "/images/categories/personalizados.svg",
-    productCount: 9999,
+    productCount: 1,
   },
 ];
 

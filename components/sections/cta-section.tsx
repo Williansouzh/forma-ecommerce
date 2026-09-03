@@ -2,47 +2,46 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
+import { staggerContainer, fadeUp } from "@/lib/animations";
 
+/**
+ * Sem a sombra dura 5px/5px do CTA anterior: neobrutalismo num site de linho
+ * e serifa é escolher duas linguagens ao mesmo tempo.
+ */
 export function CTASection() {
   return (
-    <section aria-labelledby="cta-titulo" className="bg-background">
+    <section aria-labelledby="cta-titulo">
       <motion.div
-        variants={staggerContainer(0.15)}
+        variants={staggerContainer(0.14)}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-120px" }}
-        className="shell mx-auto max-w-4xl py-32 text-center md:py-48"
+        className="shell max-w-3xl py-40 md:py-56"
       >
         <motion.h2
           id="cta-titulo"
           variants={fadeUp}
-          className="font-display text-display-1 tracking-tight"
+          className="font-display text-display-1"
         >
-          Imagine.
-          <br />
-          Nós imprimimos<span className="text-accent">.</span>
+          Manda a ideia. A gente transforma em objeto
+          <span className="text-clay">.</span>
         </motion.h2>
 
         <motion.p
           variants={fadeUp}
-          className="mx-auto mt-8 max-w-xl text-body-large leading-relaxed text-secondary"
+          className="mt-10 max-w-lg text-body-large text-secondary"
         >
-          Descreva o objeto que existe na sua cabeça. Nosso estúdio cuida da
-          modelagem, da produção e da entrega.
+          Pode ser chaveiro com inicial, lembrança de casamento ou uma peça de
+          decoração que não existe em catálogo nenhum. A gente responde com
+          material, prazo e o que dá e o que não dá para fazer.
         </motion.p>
 
-        <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp} className="mt-12">
           <Link
             href="/personalizados"
-            className="group mt-12 inline-flex items-center justify-center gap-3 rounded-md bg-accent px-10 py-4 text-body font-medium text-white shadow-glow transition-all hover:-translate-y-px hover:bg-accent-dark active:scale-[0.98]"
+            className="label inline-block border border-primary px-9 py-4 text-primary transition-colors duration-300 hover:bg-primary hover:text-background"
           >
-            Começar um projeto
-            <ArrowRight
-              size={18}
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            />
+            Contar a ideia
           </Link>
         </motion.div>
       </motion.div>

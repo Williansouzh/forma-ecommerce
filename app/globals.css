@@ -3,49 +3,82 @@
 @tailwind utilities;
 
 :root {
-  --color-background: #FAFAF8;
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #F5F5F3;
-  --color-text-primary: #111111;
-  --color-text-secondary: #555555;
-  --color-text-tertiary: #888888;
-  --color-text-quaternary: #BBBBBB;
-  --color-accent: #C75B2A;
-  --color-accent-light: #E8A88C;
-  --color-accent-dark: #A0461C;
-  --color-border: rgba(0, 0, 0, 0.06);
-  --color-border-strong: rgba(0, 0, 0, 0.12);
+  /* Linho, papel, areia — fundo silencioso para o objeto colorido. */
+  --color-background: #EFE9DE;
+  --color-surface: #F9F6EF;
+  --color-surface-muted: #E3DACB;
 
-  --bg-rgb: 250 250 248;
-  --surface-rgb: 255 255 255;
-  --surface-muted-rgb: 245 245 243;
-  --text-primary-rgb: 17 17 17;
-  --text-secondary-rgb: 85 85 85;
-  --text-tertiary-rgb: 136 136 136;
-  --text-quaternary-rgb: 187 187 187;
-  --accent-rgb: 199 91 42;
+  /* Tinta quente com viés oliva. Nunca preto puro. */
+  --color-text-primary: #26241E;
+  --color-text-secondary: #565146;
+  --color-text-tertiary: #706756;
+  --color-text-quaternary: #8D8062;
+
+  /* Oliva é a cor estrutural; barro é o acento raro. */
+  --color-accent: #5C6A49;
+  --color-accent-light: #8B9770;
+  --color-accent-dark: #414D31;
+  --color-clay: #AE5E3D;
+
+  --color-border: rgba(38, 36, 30, 0.08);
+  --color-border-strong: rgba(38, 36, 30, 0.16);
+
+  --bg-rgb: 239 233 222;
+  --surface-rgb: 249 246 239;
+  --surface-muted-rgb: 227 218 203;
+  --text-primary-rgb: 38 36 30;
+  --text-secondary-rgb: 86 81 70;
+  --text-tertiary-rgb: 112 103 86;
+  --text-quaternary-rgb: 141 128 98;
+  --accent-rgb: 92 106 73;
+  --clay-rgb: 174 94 61;
+
+  /* Estados de formulário, reafinados para dentro da paleta. */
+  --success-rgb: 92 106 73;
+  --warning-rgb: 174 122 45;
+  --error-rgb: 154 58 42;
+
+  --grain-opacity: 0.28;
+  --grain-blend: multiply;
 
   --ease-forma: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .dark {
-  --color-background: #0A0A0A;
-  --color-surface: #141414;
-  --color-surface-muted: #1A1A1A;
-  --color-text-primary: #F5F5F5;
-  --color-text-secondary: #AAAAAA;
-  --color-text-tertiary: #666666;
-  --color-text-quaternary: #444444;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
+  /* Noite quente, não console. */
+  --color-background: #1B1A15;
+  --color-surface: #24221B;
+  --color-surface-muted: #2E2B22;
 
-  --bg-rgb: 10 10 10;
-  --surface-rgb: 20 20 20;
-  --surface-muted-rgb: 26 26 26;
-  --text-primary-rgb: 245 245 245;
-  --text-secondary-rgb: 170 170 170;
-  --text-tertiary-rgb: 102 102 102;
-  --text-quaternary-rgb: 68 68 68;
+  --color-text-primary: #EDE6D7;
+  --color-text-secondary: #A79E8C;
+  --color-text-tertiary: #8C8271;
+  --color-text-quaternary: #72695B;
+
+  --color-accent: #9EAC7D;
+  --color-accent-light: #B9C49B;
+  --color-accent-dark: #7E8C60;
+  --color-clay: #D68A63;
+
+  --color-border: rgba(237, 230, 215, 0.09);
+  --color-border-strong: rgba(237, 230, 215, 0.18);
+
+  --bg-rgb: 27 26 21;
+  --surface-rgb: 36 34 27;
+  --surface-muted-rgb: 46 43 34;
+  --text-primary-rgb: 237 230 215;
+  --text-secondary-rgb: 167 158 140;
+  --text-tertiary-rgb: 140 130 113;
+  --text-quaternary-rgb: 114 105 91;
+  --accent-rgb: 158 172 125;
+  --clay-rgb: 214 138 99;
+
+  --success-rgb: 158 172 125;
+  --warning-rgb: 209 160 84;
+  --error-rgb: 201 108 90;
+
+  --grain-opacity: 0.20;
+  --grain-blend: overlay;
 }
 
 html {
@@ -53,21 +86,34 @@ html {
 }
 
 body {
-  background-color: var(--color-background);
+  background: var(--color-background);
   color: var(--color-text-primary);
-  font-size: 16px;
+  font-size: 17px;
+  line-height: 1.62;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Textura de verdade: ruído fractal, não gradiente radial. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 ::selection {
-  background-color: var(--color-accent);
-  color: #FFFFFF;
+  background-color: rgb(var(--accent-rgb));
+  color: rgb(var(--bg-rgb));
 }
 
 *:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: 1px solid rgb(var(--accent-rgb));
+  outline-offset: 3px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar {
@@ -80,13 +126,12 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-text-quaternary);
-  border-radius: 9999px;
   border: 3px solid var(--color-background);
 }
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10;
+    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10 lg:px-16;
   }
 
   .nav-link {
@@ -117,6 +162,26 @@ body {
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Superfície de papel: chapada, sem gradiente. */
+  .paper-surface {
+    background: var(--color-surface);
+  }
+
+  /* Sombra longa de luz lateral de janela — nunca glow. */
+  .light-shadow {
+    box-shadow: 0 30px 60px -20px rgba(60, 45, 30, 0.22);
+  }
+
+  /* Régua fina de seção. */
+  .rule {
+    @apply border-t border-border-strong;
+  }
+
+  /* Etiqueta escrita à mão: a sans do texto, não monoespaçada. */
+  .label {
+    @apply text-[0.72rem] font-semibold uppercase tracking-[0.19em];
   }
 }
 

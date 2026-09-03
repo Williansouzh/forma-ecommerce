@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Coleções",
   description:
-    "Explore todas as coleções FORMA.: bonecos, decoração, geek, miniaturas, presentes e personalizados.",
+    "Explore todas as coleções FORMA.: chaveiros, presentes, bonecos, decoração, geek, miniaturas e personalizados.",
   alternates: { canonical: "/colecoes" },
 };
 
@@ -26,8 +26,9 @@ export default async function CollectionsPage() {
           Todas as coleções
         </h1>
         <p className="mt-4 text-body-large text-secondary">
-          {products.length} peças em produção contínua, cada uma verificada à
-          mão antes do envio.
+          {products.length} peças em produção contínua, de chaveiros
+          personalizados a objetos de decoração, cada uma verificada à mão antes
+          do envio.
         </p>
       </header>
 

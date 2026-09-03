@@ -61,7 +61,7 @@ export function OrderSummary({
                 </p>
               )}
             </div>
-            <p className="font-mono text-body-small tabular-nums text-secondary">
+            <p className="text-body-small tabular-nums text-secondary">
               {formatPrice(item.price * item.quantity)}
             </p>
           </li>
@@ -71,11 +71,11 @@ export function OrderSummary({
       <dl className="mt-6 space-y-2 border-t border-border-subtle pt-4 text-body-small">
         <div className="flex justify-between text-secondary">
           <dt>Subtotal</dt>
-          <dd className="font-mono tabular-nums">{formatPrice(totals.subtotal)}</dd>
+          <dd className="tabular-nums">{formatPrice(totals.subtotal)}</dd>
         </div>
         <div className="flex justify-between text-secondary">
           <dt>Frete</dt>
-          <dd className="font-mono tabular-nums">
+          <dd className="tabular-nums">
             {totals.shipping === 0 ? "Grátis" : formatPrice(totals.shipping)}
           </dd>
         </div>
@@ -87,7 +87,7 @@ export function OrderSummary({
             </dd>
           </div>
         )}
-        <div className="flex justify-between border-t border-border-subtle pt-3 font-mono text-heading-3">
+        <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-3">
           <dt>Total</dt>
           <motion.dd className="tabular-nums" aria-live="polite">
             {display}

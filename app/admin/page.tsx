@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/admin/novo"
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-body-small font-medium text-white transition-colors hover:bg-accent-dark"
+            className="inline-flex items-center gap-2 rounded-md border border-primary bg-primary px-5 py-2.5 label text-background transition-colors hover:bg-transparent hover:text-primary"
           >
             <Plus size={16} />
             Novo produto
@@ -123,12 +123,12 @@ export default function AdminDashboardPage() {
 
                 <div className="hidden gap-1.5 sm:flex">
                   {product.isFeatured && (
-                    <span className="rounded-full bg-accent/10 px-2.5 py-1 text-micro uppercase text-accent">
+                    <span className="bg-accent/10 px-2.5 py-1 text-micro uppercase text-accent">
                       Destaque
                     </span>
                   )}
                   {!product.isAvailable && (
-                    <span className="rounded-full bg-error/10 px-2.5 py-1 text-micro uppercase text-error">
+                    <span className="bg-error/10 px-2.5 py-1 text-micro uppercase text-error">
                       Indisponível
                     </span>
                   )}

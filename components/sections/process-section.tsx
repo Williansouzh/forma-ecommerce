@@ -3,31 +3,38 @@
 import { motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/animations";
 
+/**
+ * O teste: leia a frase em voz alta. Se soa como alguém explicando o próprio
+ * trabalho na feira, está certo. Se soa como release técnico, reescreva.
+ *
+ * A numeração fica porque aqui a ordem carrega informação de verdade — é a
+ * sequência real pela qual a peça passa.
+ */
 const STAGES = [
   {
-    title: "Modelagem 3D",
+    title: "Primeiro ela só existe na tela",
     description:
-      "Toda peça nasce em um modelo digital de alta precisão, revisado em malha e espessura antes de ir para a fila de impressão.",
+      "A gente gira o modelo, olha de todos os lados e ajusta o que ainda não fica de pé. Nada vai para a impressora antes disso.",
   },
   {
-    title: "Escolha do material",
+    title: "Escolher o material é escolher o toque",
     description:
-      "Resina para detalhes finos, PLA+ para acabamento acetinado, PETG para peças que pedem resistência.",
+      "Resina quando o desenho é miúdo e precisa aparecer. PLA quando queremos aquele fosco macio. PETG quando a peça vai apanhar no dia a dia.",
   },
   {
-    title: "Impressão camada por camada",
+    title: "Camadas tão finas que a mão sente antes do olho ver",
     description:
-      "Alturas de camada de até 50 micrômetros. Cada objeto é acompanhado em tempo real durante a produção.",
+      "A impressão leva horas e alguém passa para olhar. Peça pequena não perdoa desatenção no meio do caminho.",
   },
   {
-    title: "Acabamento manual",
+    title: "O acabamento é onde a peça vira objeto",
     description:
-      "Cura, lixamento em sete etapas e pintura quando aplicável — sempre à mão, nunca às pressas.",
+      "Cura, lixa, e pintura quando o desenho pede. Sempre à mão, sempre devagar — é a parte que não dá para apressar.",
   },
   {
-    title: "Controle de qualidade e envio",
+    title: "Antes de embalar, cada peça passa na luz da janela",
     description:
-      "Inspeção final sob luz direta, embalagem protetiva e código de rastreio no mesmo dia.",
+      "Bordas, encaixes, cor. Se passar, vai embrulhada com proteção e sai no mesmo dia.",
   },
 ];
 
@@ -36,61 +43,51 @@ export function ProcessSection() {
     <section
       id="processo"
       aria-labelledby="processo-titulo"
-      className="bg-surface-muted py-24 md:py-32"
+      className="bg-surface py-32 md:py-44"
     >
-      <div className="shell max-w-3xl">
+      <div className="shell grid gap-16 lg:grid-cols-[0.85fr_1fr] lg:gap-24">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: EASE_OUT }}
+          transition={{ duration: 0.6, ease: EASE_OUT }}
+          className="lg:sticky lg:top-32 lg:self-start"
         >
-          <p className="flex items-center gap-3 text-caption uppercase text-secondary">
-            <span aria-hidden className="h-px w-8 bg-accent" />
-            Transparência total
-          </p>
-          <h2
-            id="processo-titulo"
-            className="mt-4 font-display text-display-2 tracking-tight"
-          >
-            Do arquivo digital ao objeto real
+          <p className="label text-accent">Do estúdio</p>
+          <h2 id="processo-titulo" className="mt-5 font-display text-display-2">
+            Como isso vira objeto
           </h2>
-          <p className="mt-5 text-body-large leading-relaxed text-secondary">
-            Não há mágica na impressão 3D — há método. Este é o mesmo ciclo
-            que constrói cada peça do estúdio.
+          <p className="mt-6 max-w-sm text-body-large text-secondary">
+            Não tem mágica na impressão 3D — tem paciência. Este é o caminho que
+            toda peça faz aqui dentro, da tela até a sua mesa.
           </p>
         </motion.div>
 
-        <ol className="relative mt-16 space-y-12 border-l border-border-strong pl-10">
+        <ol className="space-y-14">
           {STAGES.map((stage, index) => (
             <motion.li
               key={stage.title}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{
-                duration: 0.4,
-                delay: index * 0.15,
+                duration: 0.5,
+                delay: index * 0.08,
                 ease: EASE_OUT,
               }}
-              className="group relative"
+              className="grid gap-x-8 gap-y-2 border-t border-border-subtle pt-6 sm:grid-cols-[3rem_1fr]"
             >
-              <span
-                aria-hidden
-                className="absolute -left-[46px] top-1 flex size-3 items-center justify-center rounded-full border border-border-strong bg-background"
-              >
-                <span className="size-[6px] rounded-full bg-quaternary transition-colors duration-300 group-hover:bg-accent" />
+              <span className="font-display text-heading-3 tabular-nums text-tertiary">
+                {String(index + 1).padStart(2, "0")}
               </span>
-
-              <p className="font-mono text-micro uppercase tracking-[0.25em] text-tertiary">
-                Etapa {String(index + 1).padStart(2, "0")}
-              </p>
-              <h3 className="mt-1.5 font-display text-heading-3 tracking-tight">
-                {stage.title}
-              </h3>
-              <p className="mt-1.5 max-w-lg text-body leading-relaxed text-secondary">
-                {stage.description}
-              </p>
+              <div>
+                <h3 className="max-w-md font-display text-heading-3 leading-snug">
+                  {stage.title}
+                </h3>
+                <p className="mt-2 max-w-md text-body text-secondary">
+                  {stage.description}
+                </p>
+              </div>
             </motion.li>
           ))}
         </ol>

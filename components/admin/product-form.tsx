@@ -280,7 +280,7 @@ export function ProductForm({ product }: ProductFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-accent px-8 py-3.5 text-body font-medium text-white transition-all hover:bg-accent-dark active:scale-[0.98] disabled:opacity-60"
+          className="rounded-md border border-primary bg-primary px-8 py-3.5 label text-background transition-all hover:bg-transparent hover:text-primary disabled:opacity-60"
         >
           {saving ? "Salvando…" : product ? "Salvar alterações" : "Criar produto"}
         </button>

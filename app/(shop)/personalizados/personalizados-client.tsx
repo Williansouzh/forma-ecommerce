@@ -14,6 +14,7 @@ import type { CustomType } from "@/types";
 
 const typeOptions: { value: CustomType | ""; label: string }[] = [
   { value: "", label: "Selecione o tipo de peça" },
+  { value: "gift", label: "Chaveiro personalizado" },
   { value: "character", label: "Personagem" },
   { value: "gift", label: "Presente" },
   { value: "miniature", label: "Miniatura" },
@@ -180,7 +181,7 @@ export function PersonalizadosClient() {
                   className="h-11 w-full rounded-md border border-strong bg-surface px-4 text-body-small focus:border-accent focus:outline-none"
                 >
                   {typeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option key={`${option.value}-${option.label}`} value={option.value}>
                       {option.label}
                     </option>
                   ))}

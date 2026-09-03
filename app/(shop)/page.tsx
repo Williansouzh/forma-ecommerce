@@ -10,9 +10,9 @@ import { organizationJsonLd, websiteJsonLd } from "@/lib/schema-org";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "FORMA. — Objetos feitos para existir | Impressão 3D Premium",
+  title: "FORMA. — Objetos pequenos para casa",
   description:
-    "Colecionáveis, decoração e peças personalizadas produzidas por impressão 3D sob demanda. Precisão de estúdio, acabamento artesanal.",
+    "Decoração, chaveiros e presentes feitos em pequena escala, com textura aparente, cor quente e acabamento manual.",
   alternates: { canonical: "/" },
 };
 

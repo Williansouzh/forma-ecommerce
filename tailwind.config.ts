@@ -19,14 +19,18 @@ const config: Config = {
         secondary: "rgb(var(--text-secondary-rgb) / <alpha-value>)",
         tertiary: "rgb(var(--text-tertiary-rgb) / <alpha-value>)",
         quaternary: "rgb(var(--text-quaternary-rgb) / <alpha-value>)",
+        // Oliva: a cor estrutural da marca (links, réguas, hover, labels).
         accent: {
           DEFAULT: "rgb(var(--accent-rgb) / <alpha-value>)",
-          light: "#E8A88C",
-          dark: "#A0461C",
+          light: "#8B9770",
+          dark: "#414D31",
         },
-        success: "#2D6A4F",
-        error: "#B91C1C",
-        warning: "#D97706",
+        // Barro: acento raro. Um detalhe por tela, nunca botão cheio.
+        clay: "rgb(var(--clay-rgb) / <alpha-value>)",
+        // Estados de formulário apenas — não usar em status de produto.
+        success: "rgb(var(--success-rgb) / <alpha-value>)",
+        warning: "rgb(var(--warning-rgb) / <alpha-value>)",
+        error: "rgb(var(--error-rgb) / <alpha-value>)",
         "border-subtle": "var(--color-border)",
         "border-strong": "var(--color-border-strong)",
       },
@@ -35,57 +39,54 @@ const config: Config = {
         strong: "var(--color-border-strong)",
       },
       fontFamily: {
-        display: ["var(--font-display)", "sans-serif"],
-        sans: ["var(--font-body)", "sans-serif"],
-        mono: [
-          "ui-monospace",
-          "SFMono-Regular",
-          "Menlo",
-          "monospace",
-        ],
+        // Fraunces: serifa variável de terminais macios. Peso 300–400, nunca 600.
+        display: ["var(--font-display)", "ui-serif", "Georgia", "serif"],
+        // Karla: grotesca humanista. Substitui Inter, que é fonte de aplicativo.
+        sans: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontSize: {
         "display-1": [
-          "clamp(52px, 8vw, 96px)",
-          { lineHeight: "1.0", letterSpacing: "-0.03em", fontWeight: "500" },
+          "clamp(48px, 7.5vw, 92px)",
+          { lineHeight: "0.96", letterSpacing: "-0.022em", fontWeight: "300" },
         ],
         "display-2": [
-          "clamp(34px, 5vw, 64px)",
-          { lineHeight: "1.05", letterSpacing: "-0.02em", fontWeight: "500" },
+          "clamp(32px, 4.6vw, 58px)",
+          { lineHeight: "1.04", letterSpacing: "-0.018em", fontWeight: "300" },
         ],
         "heading-1": [
-          "clamp(30px, 4vw, 48px)",
-          { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "500" },
+          "clamp(28px, 3.6vw, 44px)",
+          { lineHeight: "1.1", letterSpacing: "-0.016em", fontWeight: "400" },
         ],
         "heading-2": [
-          "32px",
-          { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "500" },
+          "30px",
+          { lineHeight: "1.18", letterSpacing: "-0.012em", fontWeight: "400" },
         ],
-        "heading-3": ["24px", { lineHeight: "1.3", fontWeight: "500" }],
-        "body-large": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
-        body: ["16px", { lineHeight: "1.5", fontWeight: "400" }],
-        "body-small": ["14px", { lineHeight: "1.5", fontWeight: "400" }],
+        "heading-3": ["22px", { lineHeight: "1.28", fontWeight: "400" }],
+        "body-large": ["18px", { lineHeight: "1.62", fontWeight: "400" }],
+        body: ["17px", { lineHeight: "1.62", fontWeight: "400" }],
+        "body-small": ["15px", { lineHeight: "1.55", fontWeight: "400" }],
+        // Etiqueta: a sans do texto, aberta no tracking. Sem monoespaçada.
         caption: [
           "12px",
-          { lineHeight: "1.4", letterSpacing: "0.05em", fontWeight: "500" },
+          { lineHeight: "1.4", letterSpacing: "0.16em", fontWeight: "600" },
         ],
         micro: [
           "11px",
-          { lineHeight: "1.3", letterSpacing: "0.08em", fontWeight: "500" },
+          { lineHeight: "1.35", letterSpacing: "0.19em", fontWeight: "600" },
         ],
       },
+      // Canto reto é o padrão. O círculo fica só para swatch de cor.
       borderRadius: {
-        sm: "4px",
-        md: "8px",
-        lg: "12px",
-        xl: "16px",
+        sm: "0px",
+        md: "2px",
+        lg: "3px",
+        xl: "4px",
       },
       boxShadow: {
-        sm: "0 1px 2px rgba(0,0,0,0.04)",
-        md: "0 4px 12px rgba(0,0,0,0.03)",
-        lg: "0 8px 32px rgba(0,0,0,0.06)",
-        xl: "0 16px 48px rgba(0,0,0,0.08)",
-        glow: "0 0 40px rgba(199,91,42,0.15)",
+        sm: "0 1px 2px rgba(60,45,30,0.05)",
+        md: "0 10px 24px -12px rgba(60,45,30,0.16)",
+        lg: "0 24px 48px -20px rgba(60,45,30,0.20)",
+        xl: "0 30px 60px -20px rgba(60,45,30,0.22)",
       },
       spacing: {
         120: "30rem",
@@ -96,34 +97,29 @@ const config: Config = {
           to: { opacity: "1" },
         },
         "fade-up": {
-          from: { opacity: "0", transform: "translateY(24px)" },
+          from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "slide-up": {
-          from: { opacity: "0", transform: "translateY(16px)" },
+          from: { opacity: "0", transform: "translateY(14px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-18px)" },
+        // Peça pousando: uma vez, no load. Sem loop.
+        settle: {
+          from: { opacity: "0", transform: "scale(1.04)" },
+          to: { opacity: "1", transform: "scale(1)" },
         },
-        "pulse-badge": {
-          "0%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.3)" },
-          "100%": { transform: "scale(1)" },
-        },
-        shimmer: {
-          from: { backgroundPosition: "200% 0" },
-          to: { backgroundPosition: "-200% 0" },
+        breathe: {
+          "0%, 100%": { opacity: "0.55" },
+          "50%": { opacity: "0.9" },
         },
       },
       animation: {
         "fade-in": "fade-in 300ms cubic-bezier(0.25,0.1,0.25,1) both",
         "fade-up": "fade-up 500ms cubic-bezier(0.25,0.1,0.25,1) both",
         "slide-up": "slide-up 300ms cubic-bezier(0.25,0.1,0.25,1) both",
-        float: "float 6s ease-in-out infinite",
-        "pulse-badge": "pulse-badge 400ms ease-out",
-        shimmer: "shimmer 1.6s linear infinite",
+        settle: "settle 1200ms cubic-bezier(0.25,0.1,0.25,1) both",
+        breathe: "breathe 2.4s ease-in-out infinite",
       },
     },
   },

@@ -13,7 +13,7 @@
   <text x="52" y="66" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" letter-spacing="3" fill="#111111" fill-opacity="0.45">FORMA.</text>
   <text x="748" y="66" text-anchor="end" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" letter-spacing="2" fill="#C75B2A">P-001</text>
   <ellipse cx="400" cy="520" rx="180" ry="16" fill="#111111" opacity="0.05"/>
-  <g transform="rotate(6) translate(0 6)" transform="translate(400 290)">
+  <g transform="translate(400 290) rotate(6) translate(0 6)">
     <path d="M-160 120 L-60 -80 L20 -140 L90 -100 L60 -30 L140 10 L90 90 L-40 150 Z" fill="#A0461C" opacity="0.92"/>
     <path d="M-60 -80 L20 -140 L90 -100 L20 -50 Z" fill="#C75B2A"/>
     <path d="M-160 120 L-40 150 L90 90 L60 30 L-80 70 Z" fill="#111111" opacity="0.85"/>

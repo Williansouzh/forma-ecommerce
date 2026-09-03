@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,37 +21,35 @@ export function QuantitySelector({
   return (
     <div
       className={cn(
-        "inline-flex h-11 items-center rounded-md border border-strong",
+        "inline-flex h-11 items-center border border-border-strong",
         className
       )}
     >
-      <motion.button
+      <button
         type="button"
-        whileTap={{ scale: 0.85 }}
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
         aria-label="Diminuir quantidade"
         className="flex h-full w-11 items-center justify-center text-secondary transition-colors hover:text-primary disabled:opacity-30"
       >
-        <Minus size={16} />
-      </motion.button>
+        <Minus size={15} strokeWidth={1} />
+      </button>
       <span
         aria-live="polite"
         aria-label={`Quantidade: ${value}`}
-        className="w-10 text-center font-mono text-body-small tabular-nums"
+        className="w-10 text-center text-body-small tabular-nums"
       >
         {value}
       </span>
-      <motion.button
+      <button
         type="button"
-        whileTap={{ scale: 0.85 }}
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
         aria-label="Aumentar quantidade"
         className="flex h-full w-11 items-center justify-center text-secondary transition-colors hover:text-primary disabled:opacity-30"
       >
-        <Plus size={16} />
-      </motion.button>
+        <Plus size={15} strokeWidth={1} />
+      </button>
     </div>
   );
 }

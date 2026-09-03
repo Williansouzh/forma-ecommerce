@@ -8,34 +8,29 @@ import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
 
 export function CategoryIndex() {
   return (
-    <section aria-labelledby="categorias-titulo" className="shell py-24 md:py-32">
+    <section aria-labelledby="categorias-titulo" className="shell py-32 md:py-44">
       <motion.div
-        variants={staggerContainer(0.12)}
+        variants={staggerContainer(0.1)}
         initial="hidden"
         whileInView="visible"
         viewport={VIEWPORT_ONCE}
       >
-        <div className="mb-10 flex items-end justify-between gap-6">
+        <div className="mb-14 flex items-end justify-between gap-6">
           <div>
-            <motion.p
-              variants={fadeUp}
-              className="flex items-center gap-3 text-caption uppercase text-tertiary"
-            >
-              <span className="text-accent">02</span>
-              <span aria-hidden className="h-px w-8 bg-quaternary" />
-              Índice
+            <motion.p variants={fadeUp} className="label text-accent">
+              Por onde começar
             </motion.p>
             <motion.h2
               id="categorias-titulo"
               variants={fadeUp}
-              className="mt-3 font-display text-display-2 tracking-tight"
+              className="mt-5 font-display text-display-2"
             >
               Coleções
             </motion.h2>
           </div>
           <Link
             href="/colecoes"
-            className="nav-link hidden pb-1 text-body-small font-medium text-accent md:block"
+            className="nav-link hidden pb-1 text-body-small text-primary md:block"
           >
             Ver todas
           </Link>

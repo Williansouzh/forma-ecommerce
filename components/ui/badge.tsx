@@ -1,29 +1,33 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "default" | "accent" | "success" | "warning" | "error" | "muted";
+type Variant = "default" | "accent" | "clay" | "muted" | "outline";
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: Variant;
 }
 
+/**
+ * Etiqueta de loja, não pílula de dashboard: sem monoespaçada, sem cor
+ * semântica, sem canto arredondado. Status de estoque vira texto em prosa —
+ * ver `availabilityNote` no card de produto.
+ */
 const variantClasses: Record<Variant, string> = {
   default: "bg-primary text-background",
-  accent: "bg-accent text-white",
-  success: "bg-success/10 text-success border border-success/20",
-  warning: "bg-warning/10 text-warning border border-warning/20",
-  error: "bg-error/10 text-error border border-error/20",
-  muted: "bg-surface-muted text-secondary border border-border-subtle",
+  accent: "bg-accent text-background",
+  clay: "bg-clay text-background",
+  muted: "bg-surface-muted text-secondary",
+  outline: "border border-border-strong text-secondary",
 };
 
 export function Badge({
   className,
-  variant = "default",
+  variant = "outline",
   ...props
 }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-sm px-2 py-1 font-mono text-caption uppercase",
+        "inline-flex items-center gap-1.5 rounded-none px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]",
         variantClasses[variant],
         className
       )}

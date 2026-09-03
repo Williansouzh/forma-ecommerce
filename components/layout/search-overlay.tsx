@@ -83,7 +83,7 @@ export function SearchOverlay() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[85] overflow-y-auto bg-background/95 backdrop-blur-lg"
+          className="fixed inset-0 z-[85] overflow-y-auto bg-background"
         >
           <div className="shell py-8">
             <div className="flex justify-end">
@@ -91,7 +91,7 @@ export function SearchOverlay() {
                 type="button"
                 onClick={closeSearch}
                 aria-label="Fechar busca"
-                className="flex size-11 items-center justify-center rounded-md text-secondary transition-colors hover:text-primary"
+                className="flex size-11 items-center justify-center border border-primary text-secondary transition-colors hover:bg-primary hover:text-background"
               >
                 <X size={24} />
               </button>
@@ -128,7 +128,7 @@ export function SearchOverlay() {
                         key={term}
                         type="button"
                         onClick={() => setQuery(term)}
-                        className="rounded-full border border-strong px-4 py-2 text-body-small text-secondary transition-colors hover:border-accent hover:text-accent"
+                        className="border border-border-strong px-4 py-2 text-body-small text-secondary transition-colors duration-300 hover:border-primary hover:text-primary"
                       >
                         {term}
                       </button>
@@ -201,7 +201,7 @@ export function SearchOverlay() {
                                   {product.category}
                                 </p>
                               </div>
-                              <p className="font-mono text-body-small tabular-nums text-secondary">
+                              <p className="text-body-small tabular-nums text-secondary">
                                 {formatPrice(product.price)}
                               </p>
                             </Link>

@@ -3,28 +3,43 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
 import type { Product } from "@/types/product";
-import { Badge } from "@/components/ui/badge";
 import { useUIStore } from "@/stores/ui-store";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice, cn } from "@/lib/utils";
 
-type CardVariant = "large" | "medium" | "wide" | "horizontal";
+type CardVariant = "large" | "medium" | "tall" | "wide" | "horizontal";
 
 interface ProductCardProps {
   product: Product;
   variant?: CardVariant;
+  /** Atraso do reveal, em segundos (vai direto para o `delay` do framer). */
   revealDelay?: number;
   className?: string;
 }
 
-const statusConfig = {
-  in_stock: { label: "Em estoque", dot: "bg-success" },
-  low_stock: { label: "Últimas unidades", dot: "bg-warning" },
-  made_to_order: { label: "Sob encomenda", dot: "bg-accent" },
-  sold_out: { label: "Esgotado", dot: "bg-error" },
-} as const;
+/**
+ * Proporções deliberadamente irregulares. Grid perfeito lê como catálogo;
+ * alturas diferentes na mesma linha leem como página de revista.
+ */
+const ratio: Record<CardVariant, string> = {
+  large: "aspect-[4/5]",
+  medium: "aspect-square",
+  tall: "aspect-[3/4]",
+  wide: "aspect-[5/4]",
+  horizontal: "aspect-square",
+};
+
+/** Estoque se diz com palavra, não com semáforo. */
+function availabilityNote(product: Product): string | null {
+  const soldOut = !product.isAvailable || product.stock === 0;
+  if (soldOut) return "Esgotado";
+  if (product.price === 0) return "Sob encomenda";
+  if (typeof product.stock === "number" && product.stock <= 3) {
+    return product.stock === 1 ? "Última peça" : `Restam ${product.stock}`;
+  }
+  return null;
+}
 
 export function ProductCard({
   product,
@@ -40,164 +55,114 @@ export function ProductCard({
   const hoverImage = product.images[1] ?? primaryImage;
   const isHorizontal = variant === "horizontal";
   const soldOut = !product.isAvailable || product.stock === 0;
-  const status = soldOut
-    ? statusConfig.sold_out
-    : product.price === 0
-      ? statusConfig.made_to_order
-      : statusConfig.in_stock;
+  const note = availabilityNote(product);
+  const firstVariant = product.variants?.[0];
+
+  // Material e cor viram uma linha sussurrada, não uma ficha técnica.
+  const whisper = [product.material, firstVariant?.name]
+    .filter(Boolean)
+    .join(", ");
 
   const quickAdd = () => {
     addItem({
       productId: product.id,
-      variantId: product.variants?.[0]?.id,
+      variantId: firstVariant?.id,
       quantity: 1,
-      price: product.price + (product.variants?.[0]?.priceAdjustment ?? 0),
+      price: product.price + (firstVariant?.priceAdjustment ?? 0),
       name: product.name,
       slug: product.slug,
       image: primaryImage?.url,
-      variantName: product.variants?.[0]?.name,
+      variantName: firstVariant?.name,
     });
-    pushToast(`${product.name} adicionado ao carrinho`);
+    pushToast(`${product.name} — no carrinho`);
     openCart();
   };
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{
-        duration: 0.4,
+        duration: 0.6,
         delay: revealDelay,
         ease: [0.25, 0.1, 0.25, 1],
       }}
-      whileHover={soldOut ? undefined : "hover"}
       className={cn(
-        "group relative flex flex-col transition-[transform,box-shadow] duration-300",
-        !soldOut && "hover:-translate-y-1 hover:shadow-glow",
-        isHorizontal && "flex-row",
+        "group relative flex flex-col",
+        isHorizontal && "flex-row items-center gap-6",
+        soldOut && "opacity-55",
         className
       )}
     >
-      <div
+      {/* Sem caixa, sem borda, sem sombra: o objeto recortado sobre o linho. */}
+      <Link
+        href={`/produto/${product.slug}`}
+        aria-label={product.name}
         className={cn(
-          "relative shrink-0 overflow-hidden bg-surface-muted",
-          isHorizontal
-            ? "aspect-square w-40 sm:w-56"
-            : cn(
-                "w-full",
-                variant === "large" ? "aspect-[4/3]" : "aspect-square"
-              )
+          "relative block shrink-0 overflow-hidden bg-surface-muted",
+          isHorizontal ? "aspect-square w-32 sm:w-44" : cn("w-full", ratio[variant])
         )}
       >
-        <Link
-          href={`/produto/${product.slug}`}
-          aria-label={product.name}
-          className="relative block h-full w-full"
-        >
-          <motion.div
-            variants={{
-              hover: { scale: isHorizontal ? undefined : 1.08 },
-            }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={primaryImage?.url ?? ""}
-              alt={primaryImage?.alt ?? product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-              className="object-cover transition-opacity duration-500 group-hover:opacity-0"
-            />
-            <Image
-              src={hoverImage?.url ?? ""}
-              alt=""
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-              className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-          </motion.div>
+        <Image
+          src={primaryImage?.url ?? ""}
+          alt={primaryImage?.alt ?? product.name}
+          fill
+          unoptimized={primaryImage?.url.endsWith(".svg")}
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          className="object-cover transition-opacity duration-700 group-hover:opacity-0"
+        />
+        <Image
+          src={hoverImage?.url ?? ""}
+          alt=""
+          fill
+          unoptimized={hoverImage?.url.endsWith(".svg")}
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          className="object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+        />
+      </Link>
 
-          <div className="absolute left-3 top-3 flex gap-2">
-            {product.badge && (
-              <Badge variant={soldOut ? "error" : "accent"}>{product.badge}</Badge>
-            )}
-            {product.originalPrice && (
-              <Badge variant="muted">
-                -{Math.round((1 - product.price / product.originalPrice) * 100)}%
-              </Badge>
-            )}
-          </div>
-
-          {!soldOut && (
-            <motion.button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                quickAdd();
-              }}
-              variants={{
-                hover: { opacity: 1, scale: 1, y: 0 },
-              }}
-              initial={{ opacity: 0, scale: 0.8, y: 12 }}
-              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-              aria-label={`Adicionar ${product.name} ao carrinho`}
-              className={cn(
-                "absolute bottom-3 right-3 z-10 flex size-11 items-center justify-center rounded-md bg-primary text-background shadow-lg transition-colors hover:bg-accent hover:text-white",
-                isHorizontal && "bottom-auto top-3 right-3"
-              )}
-            >
-              <Plus size={18} />
-            </motion.button>
-          )}
-        </Link>
-      </div>
-
-      <div
-        className={cn(
-          "flex flex-col pb-2 pt-4",
-          isHorizontal && "flex-1 justify-center py-4 pl-5 pr-2"
-        )}
-      >
-        <p className="text-caption uppercase text-tertiary">{product.category}</p>
-        <h3
-          className={cn(
-            "mt-1.5 tracking-tight",
-            isHorizontal ? "font-display text-heading-3" : "text-body-large font-medium"
-          )}
-        >
+      <div className={cn("flex flex-col pt-5", isHorizontal && "flex-1 pt-0")}>
+        <h3 className="font-display text-heading-3 leading-snug">
           <Link
             href={`/produto/${product.slug}`}
-            className="transition-colors group-hover:text-accent"
+            className="transition-colors duration-300 group-hover:text-accent"
           >
             {product.name}
           </Link>
         </h3>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <div className="flex items-baseline gap-2">
-            <span
-              className={cn(
-                "tabular-nums",
-                product.price === 0
-                  ? "text-body-small text-secondary"
-                  : "text-body-small font-medium"
+
+        <p className="mt-1.5 text-body-small tabular-nums text-secondary">
+          {product.price === 0 ? (
+            "Sob consulta"
+          ) : (
+            <>
+              {formatPrice(product.price)}
+              {product.originalPrice && (
+                <span className="ml-2 text-tertiary line-through">
+                  {formatPrice(product.originalPrice)}
+                </span>
               )}
+            </>
+          )}
+        </p>
+
+        {whisper && (
+          <p className="mt-1 text-body-small italic text-tertiary">{whisper}</p>
+        )}
+
+        {/* "Adicionar" aparece no hover, embaixo do preço — nunca em cima da foto. */}
+        <div className="mt-2 flex min-h-[1.4rem] items-center gap-3 text-body-small">
+          {note && <span className="italic text-accent">{note}</span>}
+          {!soldOut && product.price > 0 && (
+            <button
+              type="button"
+              onClick={quickAdd}
+              className="text-primary underline decoration-border-strong decoration-1 underline-offset-4 opacity-0 transition-opacity duration-300 hover:decoration-accent focus-visible:opacity-100 group-hover:opacity-100"
             >
-              {product.price === 0 ? "Sob consulta" : formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-micro tabular-nums text-quaternary line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
-          <span className="inline-flex items-center gap-1.5 text-micro uppercase text-tertiary">
-            <span
-              className={cn("size-1.5 rounded-full", status.dot)}
-              aria-hidden
-            />
-            {status.label}
-          </span>
+              Adicionar
+            </button>
+          )}
         </div>
       </div>
     </motion.article>

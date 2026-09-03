@@ -77,3 +77,81 @@ objeto, nunca chama atenção para si mesma.
 
 - View transitions API nativa quando o Next.js estabilizar o suporte
 - Micro-som em interações (add-to-cart, checkout) com toggle explícito
+
+---
+
+# Revisão v3 — consolidação (02 Set 2026)
+
+Consolida três fontes que se contradiziam: este documento, uma *Documentação
+Técnica & Diretrizes de Design v2.0* externa (conceito "Monolito Laranja",
+Space Grotesk + Inter + JetBrains Mono, terracota sobre `#FAFAF8`) e o estado
+real do código. As seções visuais da v2.0 externa (2, 3, 8 e 16) ficam
+substituídas pelo que segue; as não-visuais (modelo de dados, contrato de API,
+testes, CI/CD, WCAG, Core Web Vitals) seguem valendo como roadmap.
+
+O conceito "Monolito Laranja" foi descartado: laranja sobre off-white neutro é
+a paleta default de qualquer gerador. Substituído por **ateliê no fim da
+tarde** — luz lateral de janela, bancada de madeira clara, tecido cru.
+
+## Tokens implementados
+
+Valores exatos em `app/globals.css`. Claro / escuro:
+
+| Papel | Token | Claro | Escuro |
+|---|---|---|---|
+| Fundo (linho) | `--color-background` | `#EFE9DE` | `#1B1A15` |
+| Superfície (papel) | `--color-surface` | `#F9F6EF` | `#24221B` |
+| Superfície recuada (areia) | `--color-surface-muted` | `#E3DACB` | `#2E2B22` |
+| Texto (tinta) | `--color-text-primary` | `#26241E` | `#EDE6D7` |
+| Texto secundário (pedra) | `--color-text-secondary` | `#565146` | `#A79E8C` |
+| Texto terciário | `--color-text-tertiary` | `#706756` | `#8C8271` |
+| Texto quaternário | `--color-text-quaternary` | `#8D8062` | `#72695B` |
+| **Acento estrutural (oliva)** | `--color-accent` | `#5C6A49` | `#9EAC7D` |
+| **Acento raro (barro)** | `--color-clay` | `#AE5E3D` | `#D68A63` |
+
+Contraste verificado sobre o linho: tinta 12.84:1 · pedra 6.53:1 · terciário
+4.62:1 · oliva 4.81:1 — todos acima de 4.5:1. Quaternário (3.22:1) e barro
+(3.89:1) só aparecem em texto ≥24px ou placeholder, onde o limiar AA é 3:1.
+Os neutros da primeira passada (`#7C7565` / `#A79E8C`) falhavam com 3.79:1 e
+2.20:1 — se ajustar a paleta, remeça os quatro degraus.
+
+Par tipográfico: **Fraunces** (display, eixos `SOFT`/`WONK`/`opsz`, peso
+300–400) + **Karla** (corpo e etiquetas). Raio: `sm:0 · md:2px · lg:3px ·
+xl:4px`. Grão global no `body` a 28% `multiply` (20% `overlay` no escuro).
+
+## Registro de decisões (continuação)
+
+| ID | Classe | Decisão |
+|---|---|---|
+| A-020 | **SUSPENSA** | Sistema de dados em IBM Plex Mono. A implementação atual removeu os 66 usos de mono e passou preços, dimensões e prazos para Karla com `tabular-nums` — mono lia como spec sheet de equipamento, não como etiqueta de loja. Decisão pendente de avaliação visual; restaurar é mudança pequena e localizada |
+| A-023 | **REVISADA** | Paleta material quente mantida em princípio, valores trocados: linho `#EFE9DE` no lugar de papel `#F2EEE7`, e o acento passa de brasa para oliva |
+| A-024 | **CONFIRMADA** | Space Grotesk/Inter aposentados — confirmado. Par final é Fraunces + Karla, no lugar de Archivo + Instrument Sans |
+| A-032 | **INVENT** | Oliva `#5C6A49` vira a cor estrutural (links, réguas, labels, hover); barro `#AE5E3D` é rebaixado a acento raro, máximo 2 por viewport. Terracota sobre creme é o par default de todo site gerado — a paleta "certa" era justamente o que fazia o site parecer template |
+| A-033 | **INVENT** | Disponibilidade em prosa, nunca em semáforo: "Restam 3", "Última peça", "Pronto para enviar", "Feito depois do seu pedido — 5 dias". Dots verde/âmbar/vermelho são convenção de status page. `success`/`warning`/`error` sobrevivem só em validação de formulário e admin, reafinados para dentro da paleta |
+| A-034 | **AVOID** | Grid bento proibido na vitrine. O layout modular 7/5·4/4/4·12 é assinatura de landing page de software; editorial é irregular por definição — alturas alternadas (`3/4`, `1/1`, `4/5`, `5/4`) e offsets verticais |
+| A-035 | **AVOID** | Nenhum botão flutuante sobre a foto do produto. FAB circular com sombra é UI de aplicativo e tapa o objeto; "Adicionar" aparece no hover, embaixo do preço |
+| A-036 | **ADAPT** | Ícones em `strokeWidth={1}` e elenco reduzido (sacola, busca, seta). Toggle sol/lua sai do header — affordance de ferramenta de desenvolvedor — e vira controle em texto no rodapé ("Luz baixa" / "Luz do dia") |
+
+## Armadilhas registradas
+
+- **`revealDelay` é em segundos.** Vai direto para o `delay` do Framer Motion.
+  Passar milissegundos (`index * 80`) esconde o card por minutos. Custou um bug
+  real; a prop está documentada em `ProductCardProps`.
+- **`fetchProducts` precisa de `try/catch`.** Sem ele, a API fora do ar derruba
+  a seção inteira em vez de cair no catálogo local — o fallback
+  `if (products.length === 0)` nunca chega a rodar.
+- **`npm run build` com `next dev` ativo corrompe `.next`.** Sintoma:
+  `Cannot find module './vendor-chunks/…'` e 500 em rotas dinâmicas.
+
+## Correções pendentes na Documentação Técnica v2.0
+
+- `src/` não existe — o projeto usa `app/` e `components/` na raiz; `product-card`
+  está em `components/product/`, não `components/sections/`
+- `@tanstack/react-query`, `react-hook-form`, `zod`, `class-variance-authority` e
+  `@hookform/resolvers` não estão instalados; Zustand é 5.0.3, não 4.x
+- O backend não é "integração futura": há NestJS + MongoDB em `api/`, com JWT
+- Categorias reais: `bonecos`, `decoracao`, `geek`, `miniaturas`, `presentes`,
+  `personalizados` — não existem `colecionaveis` nem `arte`
+- `--font-body: 'Inter', 'Suisse Int'l'` tem apóstrofo não escapado, o que quebra
+  o parse da declaração inteira
+- Testes e CI/CD são aspiracionais: não há `.github/workflows`, Jest ou Playwright

@@ -61,7 +61,7 @@ export function SearchPageClient() {
                 key={term}
                 type="button"
                 onClick={() => setQuery(term)}
-                className="rounded-full border border-strong px-4 py-2 text-body-small text-secondary transition-colors hover:border-accent hover:text-accent"
+                className="border border-border-strong px-4 py-2 text-body-small text-secondary transition-colors duration-300 hover:border-primary hover:text-primary"
               >
                 {term}
               </button>

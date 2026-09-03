@@ -1,35 +1,34 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Box, Lightbulb, PackageCheck, Printer, Layers } from "lucide-react";
 import Link from "next/link";
 import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
 
 const steps = [
   {
-    icon: Lightbulb,
+    code: "BRF",
     title: "Ideia",
-    description: "Você traz a referência, nós traduzimos em briefing.",
+    description: "Referência, medidas, uso e quantidade entram no briefing.",
   },
   {
-    icon: Box,
+    code: "MOD",
     title: "Modelo 3D",
     description: "Modelagem digital com prévia para sua aprovação.",
   },
   {
-    icon: Layers,
+    code: "MAT",
     title: "Material",
-    description: "Resina, PLA+ ou PETG conforme o uso da peça.",
+    description: "PLA, PETG ou resina definidos pelo toque e pela função.",
   },
   {
-    icon: Printer,
+    code: "PRT",
     title: "Produção",
-    description: "Impressão camada por camada com controle de qualidade.",
+    description: "Impressão camada por camada, sem esconder textura real.",
   },
   {
-    icon: PackageCheck,
+    code: "CHK",
     title: "Entrega",
-    description: "Acabamento manual e embalagem editorial.",
+    description: "Bordas conferidas, argola/encaixe testado e embalagem.",
   },
 ];
 
@@ -44,22 +43,22 @@ export function CustomOrderSection() {
       >
         <motion.div
           variants={fadeUp}
-          className="rounded-xl bg-surface-muted px-6 py-16 text-center md:px-16"
+          className="paper-surface px-6 py-20 md:px-16 md:py-24"
         >
           <p className="flex items-center justify-center gap-3 text-caption uppercase text-tertiary">
             <span className="text-accent">03</span>
             <span aria-hidden className="h-px w-8 bg-quaternary" />
-            Sob medida
+            Encomendas
           </p>
           <h2
             id="custom-titulo"
             className="mx-auto mt-3 max-w-2xl font-display text-display-2 tracking-tight"
           >
-            Tem uma ideia? Nós materializamos.
+            Quando a casa pede uma forma própria.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-body-large text-secondary">
-            Do rascunho no papel à peça nas suas mãos — um processo transparente
-            em cinco etapas.
+            Do rascunho à peça pronta, o processo continua simples: referência,
+            material, prévia e acabamento antes do envio.
           </p>
 
           <ol className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
@@ -72,8 +71,8 @@ export function CustomOrderSection() {
                 transition={{ delay: index * 0.12, duration: 0.45 }}
                 className="group flex flex-col items-center gap-3 text-center"
               >
-                <span className="flex size-14 items-center justify-center rounded-lg border border-border-subtle bg-surface text-accent transition-transform duration-200 group-hover:scale-110 group-hover:border-accent/30">
-                  <step.icon size={22} strokeWidth={1.75} />
+                <span className="flex size-12 items-center justify-center border border-border-strong text-micro uppercase text-accent">
+                  {step.code}
                 </span>
                 <div>
                   <p className="text-caption uppercase text-secondary">
@@ -89,7 +88,7 @@ export function CustomOrderSection() {
 
           <Link
             href="/personalizados"
-            className="mt-14 inline-flex items-center justify-center rounded-md bg-primary px-8 py-3.5 text-body font-medium text-background transition-all hover:-translate-y-px hover:bg-accent hover:text-white active:scale-[0.98]"
+            className="label mt-14 inline-block border border-primary bg-primary px-9 py-4 text-background transition-colors duration-300 hover:bg-transparent hover:text-primary"
           >
             Solicitar orçamento
           </Link>
