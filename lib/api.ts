@@ -15,11 +15,6 @@ const BASE = `${API_URL}/api/v1`;
 
 type RawProduct = Record<string, unknown>;
 
-function normalizeImageUrl(url: string): string {
-  if (url.endsWith("-03.jpg")) return url.replace("-03.jpg", "-03.svg");
-  return url;
-}
-
 function mapProduct(raw: RawProduct): Product {
   const localProduct = getProduct(String(raw.slug ?? ""));
   const images = Array.isArray(raw.images) ? raw.images : [];
@@ -28,7 +23,7 @@ function mapProduct(raw: RawProduct): Product {
     const img = image as { url: string; alt?: string };
     return {
       id: `${String(raw.id ?? raw.slug)}-img-${index}`,
-      url: normalizeImageUrl(img.url),
+      url: img.url,
       alt: img.alt ?? "",
       isPrimary: index === 0,
       order: index,

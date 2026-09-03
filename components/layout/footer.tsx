@@ -15,13 +15,13 @@ export function Footer() {
       <div className="shell grid gap-16 py-24 lg:grid-cols-[1.3fr_1fr] lg:gap-24">
         <div>
           <p className="max-w-lg font-display text-heading-2 leading-snug">
-            A gente imprime em São Paulo e embala na mesma bancada onde a peça
-            nasceu.
+            A gente imprime em Campina Grande e embala na mesma bancada onde a
+            peça nasceu.
           </p>
 
           <p className="mt-10 max-w-md text-body-small text-secondary">
-            Frete grátis acima de R$ 400. Trocas por defeito de fabricação em até
-            7 dias — os detalhes estão nas{" "}
+            Frete grátis acima de R$ 400. Trocas por defeito de fabricação em
+            até 7 dias — os detalhes estão nas{" "}
             <Link href="/politicas" className="nav-link text-primary">
               políticas
             </Link>
@@ -29,16 +29,16 @@ export function Footer() {
           </p>
 
           <p className="mt-6 max-w-md text-body-small text-secondary">
-            Vila Madalena, São Paulo. Passe para ver as peças de perto — combine
+            Campina Grande — PB. Passe para ver as peças de perto — combine
             antes pelo WhatsApp.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-body-small">
             <a
-              href="mailto:ola@forma.estudio"
+              href="mailto:ola@c3dcriativ.com.br"
               className="nav-link text-primary"
             >
-              ola@forma.estudio
+              ola@c3dcriativ.com.br
             </a>
             <a
               href="https://www.instagram.com/c3dcriativ/"
@@ -49,7 +49,7 @@ export function Footer() {
               Instagram
             </a>
             <a
-              href="https://wa.me/5500000000000"
+              href="https://wa.me/5583988717642"
               target="_blank"
               rel="noreferrer"
               className="nav-link text-primary"

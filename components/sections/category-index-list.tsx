@@ -50,7 +50,9 @@ export function CategoryIndexList({ categories }: { categories: Category[] }) {
               <p className="mt-5 text-body-small italic text-tertiary">
                 {category.slug === "personalizados"
                   ? "sob consulta"
-                  : `${category.productCount} peças`}
+                  : `${category.productCount} ${
+                      category.productCount === 1 ? "peça" : "peças"
+                    }`}
               </p>
             </div>
           </Link>

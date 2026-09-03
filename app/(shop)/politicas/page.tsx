@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/breadcrumb";
 export const metadata: Metadata = {
   title: "Políticas",
   description:
-    "Prazos, trocas, personalização e cuidados para peças FORMA. produzidas por impressão 3D.",
+    "Prazos, trocas, personalização e cuidados para peças da c3dcriativ produzidas por impressão 3D.",
   alternates: { canonical: "/politicas" },
 };
 

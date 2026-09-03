@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { EASE_OUT } from "@/lib/animations";
+import { AtelierVideo } from "@/components/shared/atelier-video";
+import { ATELIER_MEDIA } from "@/lib/atelier-media";
 
 /**
  * Uma foto de ambiente sangrando até a borda direita da tela, texto encostado
@@ -40,9 +42,9 @@ export function HeroSection() {
           </h1>
 
           <p className="mt-8 max-w-md text-body-large text-secondary">
-            Decoração, chaveiros e encomendas em PLA e resina. Textura aparente,
-            cor quente, acabamento conferido à mão — para virar presente ou ficar
-            na sua própria mesa.
+            Decoração, presentes e encomendas em PLA. Textura aparente, cor
+            quente, acabamento conferido à mão — para virar presente ou ficar na
+            sua própria mesa.
           </p>
 
           <div className="mt-10">
@@ -55,7 +57,7 @@ export function HeroSection() {
           </div>
 
           <p className="mt-8 text-body-small italic text-tertiary">
-            PLA, PETG e resina. Impresso em São Paulo, sob demanda.
+            PLA, PETG e resina. Impresso em Campina Grande, sob demanda.
           </p>
         </motion.div>
 
@@ -73,6 +75,23 @@ export function HeroSection() {
             sizes="(max-width: 1024px) 100vw, 55vw"
             className="object-cover"
           />
+
+          {/* A impressora rodando agora, encostada no canto da foto. */}
+          <div className="absolute bottom-5 left-5 w-[188px] bg-[rgba(27,26,21,0.92)] p-3.5 backdrop-blur-sm sm:bottom-8 sm:left-8">
+            <div className="flex items-center gap-[7px] text-[10px] font-bold uppercase tracking-[0.18em] text-[rgba(237,230,215,0.62)]">
+              <span
+                aria-hidden
+                className="size-1.5 animate-breathe rounded-full bg-[#D68A63]"
+              />
+              Ao vivo
+            </div>
+            <div className="relative mt-3 h-[118px] overflow-hidden bg-[rgba(237,230,215,0.06)]">
+              <AtelierVideo {...ATELIER_MEDIA.hero} />
+            </div>
+            <div className="mt-2.5 text-[10.5px] uppercase tracking-[0.12em] text-[rgba(237,230,215,0.55)]">
+              Camada 47 · 0,12 mm
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

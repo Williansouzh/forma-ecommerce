@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
         </Link>
 
         <h1 className="mt-6 font-display text-heading-2 tracking-tight">
-          Painel <span className="text-accent">FORMA.</span>
+          Painel <span className="text-accent">c3dcriativ</span>
         </h1>
         <p className="mt-2 text-body-small text-secondary">
           Acesso restrito à equipe do estúdio.

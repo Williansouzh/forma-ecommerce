@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/animations";
+import { AtelierVideo } from "@/components/shared/atelier-video";
+import { ATELIER_MEDIA } from "@/lib/atelier-media";
 
 /**
  * O teste: leia a frase em voz alta. Se soa como alguém explicando o próprio
@@ -61,6 +63,16 @@ export function ProcessSection() {
             Não tem mágica na impressão 3D — tem paciência. Este é o caminho que
             toda peça faz aqui dentro, da tela até a sua mesa.
           </p>
+
+          <div className="mt-10 border border-border-strong p-[22px]">
+            <div className="relative h-[clamp(240px,40vh,380px)] overflow-hidden bg-surface-muted">
+              <AtelierVideo {...ATELIER_MEDIA.process} />
+            </div>
+            <div className="mt-3.5 flex justify-between text-[10.5px] font-semibold uppercase tracking-[0.16em] text-tertiary">
+              <span>Nº 001 · em produção</span>
+              <span className="text-clay">0,12 mm</span>
+            </div>
+          </div>
         </motion.div>
 
         <ol className="space-y-14">

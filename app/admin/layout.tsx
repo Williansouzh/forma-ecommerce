@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { AdminShell } from "@/components/admin/admin-shell";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Admin | FORMA.",
+  title: "Painel de gestão | c3dcriativ",
   robots: { index: false, follow: false },
 };
 
@@ -11,7 +12,7 @@ export default function AdminLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="min-h-screen bg-background text-primary">
-      {children}
+      <AdminShell>{children}</AdminShell>
     </div>
   );
 }

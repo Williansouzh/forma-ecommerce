@@ -23,7 +23,7 @@ export async function generateMetadata({
     description: category.description,
     alternates: { canonical: `/colecoes/${category.slug}` },
     openGraph: {
-      title: `${category.name} | FORMA.`,
+      title: `${category.name} | c3dcriativ`,
       description: category.description,
     },
   };

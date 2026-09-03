@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CATEGORIES } from "@/data/categories";
+import { withProductCounts } from "@/data/categories";
 import { fetchProducts } from "@/lib/api";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { CategoryIndexList } from "@/components/sections/category-index-list";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Coleções",
   description:
-    "Explore todas as coleções FORMA.: chaveiros, presentes, bonecos, decoração, geek, miniaturas e personalizados.",
+    "Explore todas as coleções da c3dcriativ: decoração, geek, presentes, utilidades e peças sob medida.",
   alternates: { canonical: "/colecoes" },
 };
 
@@ -26,14 +26,13 @@ export default async function CollectionsPage() {
           Todas as coleções
         </h1>
         <p className="mt-4 text-body-large text-secondary">
-          {products.length} peças em produção contínua, de chaveiros
-          personalizados a objetos de decoração, cada uma verificada à mão antes
-          do envio.
+          {products.length} peças em produção contínua, de tags de pet a vasos
+          e peças sob medida, cada uma verificada à mão antes do envio.
         </p>
       </header>
 
       <div className="mt-14">
-        <CategoryIndexList categories={CATEGORIES} />
+        <CategoryIndexList categories={withProductCounts(products)} />
       </div>
     </div>
   );

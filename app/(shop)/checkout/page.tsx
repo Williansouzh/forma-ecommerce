@@ -30,10 +30,13 @@ export default function CheckoutPage() {
   const clear = useCartStore((state) => state.clear);
   const totals = getCartTotals(items);
   const [payment, setPayment] = useState<PaymentMethod>("pix");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [order, setOrder] = useState<{
     id: string;
     method: PaymentMethod;
     data: CheckoutData;
+    paymentUrl: string | null;
   } | null>(null);
 
   if (order) {
@@ -58,6 +61,15 @@ export default function CheckoutPage() {
           <p className="mt-6 inline-block border border-primary bg-surface-muted px-5 py-2.5 text-heading-3 tabular-nums tracking-wide">
             {order.id}
           </p>
+
+          {order.paymentUrl && (
+            <a
+              href={order.paymentUrl}
+              className="mt-8 inline-flex h-13 items-center border border-primary bg-primary px-10 py-3.5 label text-background transition-colors hover:bg-transparent hover:text-primary"
+            >
+              Pagar agora
+            </a>
+          )}
 
           <ol className="mt-12 flex items-start justify-between gap-2 text-left" aria-label="Acompanhamento do pedido">
             {pipeline.map((stage, index) => (
@@ -117,13 +129,59 @@ export default function CheckoutPage() {
     );
   }
 
-  const completeOrder = (data: CheckoutData, method: PaymentMethod) => {
-    const id = `FRMA-${String(Date.now()).slice(-6)}`;
-    setOrder({ id, method, data });
-    clear();
+  const completeOrder = async (data: CheckoutData, method: PaymentMethod) => {
+    setSubmitting(true);
+    setSubmitError(null);
     try {
-      localStorage.removeItem("forma-checkout");
-    } catch {}
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          paymentMethod: method,
+          customer: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            cpf: data.cpf,
+          },
+          shippingAddress: {
+            street: data.street,
+            number: data.number,
+            complement: data.complement,
+            neighborhood: data.neighborhood,
+            city: data.city,
+            state: data.state,
+            zipCode: data.zipCode,
+            country: "BR",
+          },
+        }),
+      });
+      const body = (await response.json()) as {
+        code?: string;
+        paymentUrl?: string | null;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(body.error ?? "Falha ao enviar o pedido");
+
+      setOrder({
+        id: body.code ?? "",
+        method,
+        data,
+        paymentUrl: body.paymentUrl ?? null,
+      });
+      clear();
+      try {
+        localStorage.removeItem("forma-checkout");
+      } catch {}
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Falha ao enviar o pedido"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -154,6 +212,8 @@ export default function CheckoutPage() {
           paymentMethod={payment}
           onPaymentMethodChange={setPayment}
           onComplete={completeOrder}
+          submitting={submitting}
+          submitError={submitError}
         />
         <OrderSummary items={items} totals={totals} pixDiscount={payment === "pix" ? PIX_DISCOUNT : 0} />
       </div>

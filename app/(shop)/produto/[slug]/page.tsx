@@ -27,13 +27,13 @@ export async function generateMetadata({
     description: `${product.shortDescription} — Produção em impressão 3D com material, textura e prazo informados antes do envio.`,
     alternates: { canonical: `/produto/${product.slug}` },
     openGraph: {
-      title: `${product.name} | FORMA.`,
+      title: `${product.name} | c3dcriativ`,
       description: product.shortDescription,
       images: product.images.map((image) => ({ url: image.url })),
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | FORMA.`,
+      title: `${product.name} | c3dcriativ`,
       description: product.shortDescription,
     },
   };
@@ -53,7 +53,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
     {
       title: "Variação honesta de produção",
-      text: "Cor, brilho e textura podem variar levemente entre lotes de filamento ou resina. Isso faz parte da fabricação sob demanda.",
+      text: "Cor, brilho e textura podem variar levemente entre lotes de filamento. Isso faz parte da fabricação sob demanda.",
     },
     {
       title: "Quando pedir personalização",
@@ -112,10 +112,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <div className="max-w-prose space-y-5 text-body text-secondary">
                     <p>{product.description}</p>
                     <p>
-                      Todas as peças FORMA. passam por inspeção individual sob
-                      luz direta antes da embalagem. Peças em resina recebem cura
-                      UV complementar e acabamento manual; peças em filamento são
-                      impressas em alturas de camada de até 0,12 mm.
+                      Todas as peças da c3dcriativ passam por inspeção individual
+                      sob luz direta antes da embalagem. São impressas em
+                      filamento, em alturas de camada de até 0,12 mm, e o
+                      acabamento é sempre manual.
                     </p>
                   </div>
                 ),
@@ -186,12 +186,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </h2>
             <ProductGrid>
               {related.map((item, index) => (
-                <ProductGridItem
-                  key={item.id}
-                  className={
-                    index === 3 ? "sm:col-span-2 xl:col-span-1" : undefined
-                  }
-                >
+                <ProductGridItem key={item.id}>
                   <ProductCard
                     product={item}
                     variant="medium"

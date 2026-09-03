@@ -39,9 +39,11 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  /** Código curto que o cliente lê e cita no WhatsApp: C3D-4820. */
+  code: string;
   items: OrderItem[];
   customer: Customer;
-  shippingAddress: Address;
+  shippingAddress?: Address;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
   subtotal: number;

@@ -89,11 +89,15 @@ export function CheckoutForm({
   paymentMethod,
   onPaymentMethodChange,
   onComplete,
+  submitting = false,
+  submitError = null,
 }: {
   items: CartItem[];
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   onComplete: (data: CheckoutData, method: PaymentMethod) => void;
+  submitting?: boolean;
+  submitError?: string | null;
 }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<CheckoutData>(() => ({
@@ -465,6 +469,15 @@ export function CheckoutForm({
         </AnimatePresence>
       </div>
 
+      {submitError && (
+        <p
+          role="alert"
+          className="mt-8 rounded-md bg-error/10 px-4 py-3 text-body-small text-error"
+        >
+          {submitError}
+        </p>
+      )}
+
       <div className="mt-10 flex flex-wrap items-center gap-4">
         {step > 0 && (
           <button
@@ -478,10 +491,14 @@ export function CheckoutForm({
         <button
           type="button"
           onClick={step === 2 ? submit : next}
-          disabled={items.length === 0}
+          disabled={items.length === 0 || submitting}
           className="inline-flex h-13 items-center justify-center rounded-md border border-primary bg-primary px-10 py-3.5 label text-background transition-all hover:bg-transparent hover:text-primary disabled:pointer-events-none disabled:opacity-40"
         >
-          {step === 2 ? "Confirmar pedido" : "Continuar"}
+          {step === 2
+            ? submitting
+              ? "Enviando…"
+              : "Confirmar pedido"
+            : "Continuar"}
         </button>
       </div>
     </div>

@@ -30,13 +30,23 @@ const ratio: Record<CardVariant, string> = {
   horizontal: "aspect-square",
 };
 
-/** Estoque se diz com palavra, não com semáforo. */
+/**
+ * Estoque e prazo se dizem com palavra, não com semáforo. O prazo aparece
+ * sempre que a peça está disponível — é a informação que decide a compra.
+ */
 function availabilityNote(product: Product): string | null {
   const soldOut = !product.isAvailable || product.stock === 0;
   if (soldOut) return "Esgotado";
   if (product.price === 0) return "Sob encomenda";
   if (typeof product.stock === "number" && product.stock <= 3) {
-    return product.stock === 1 ? "Última peça" : `Restam ${product.stock}`;
+    return product.stock === 1
+      ? "Última peça"
+      : `Últimas ${product.stock} unidades`;
+  }
+  if (typeof product.productionTime === "number") {
+    return product.isCustom
+      ? `Feito depois do seu pedido — ${product.productionTime} dias`
+      : `Pronto em ${product.productionTime} dias`;
   }
   return null;
 }
@@ -58,8 +68,12 @@ export function ProductCard({
   const note = availabilityNote(product);
   const firstVariant = product.variants?.[0];
 
-  // Material e cor viram uma linha sussurrada, não uma ficha técnica.
-  const whisper = [product.material, firstVariant?.name]
+  // Material e cores viram uma linha sussurrada, não uma ficha técnica.
+  const colorCount = product.variants?.length ?? 0;
+  const whisper = [
+    product.material,
+    colorCount > 1 ? `${colorCount} cores` : firstVariant?.name,
+  ]
     .filter(Boolean)
     .join(", ");
 

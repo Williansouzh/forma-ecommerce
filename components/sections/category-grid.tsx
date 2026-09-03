@@ -2,11 +2,16 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { CATEGORIES } from "@/data/categories";
+import { CATEGORIES, type Category } from "@/data/categories";
 import { CategoryIndexList } from "@/components/sections/category-index-list";
 import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
 
-export function CategoryIndex() {
+/** As contagens vêm do servidor; sem elas, mostra as categorias sem número. */
+export function CategoryIndex({
+  categories = CATEGORIES,
+}: {
+  categories?: Category[];
+}) {
   return (
     <section aria-labelledby="categorias-titulo" className="shell py-32 md:py-44">
       <motion.div
@@ -37,7 +42,7 @@ export function CategoryIndex() {
         </div>
 
         <motion.div variants={fadeUp}>
-          <CategoryIndexList categories={CATEGORIES} />
+          <CategoryIndexList categories={categories} />
         </motion.div>
       </motion.div>
     </section>

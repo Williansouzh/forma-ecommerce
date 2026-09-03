@@ -6,11 +6,20 @@ import { configuration } from "./config/configuration";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { RolesGuard } from "./common/guards/roles.guard";
 import { AuthModule } from "./modules/auth/auth.module";
+import { CustomRequestsModule } from "./modules/custom-requests/custom-requests.module";
+import { IntegrationsModule } from "./modules/integrations/integrations.module";
+import { OrdersModule } from "./modules/orders/orders.module";
+import { PaymentsModule } from "./modules/payments/payments.module";
 import { ProductsModule } from "./modules/products/products.module";
+import { SettingsModule } from "./modules/settings/settings.module";
 import {
   Product,
   ProductSchema,
 } from "./modules/products/schemas/product.schema";
+import {
+  Order,
+  OrderSchema,
+} from "./modules/orders/schemas/order.schema";
 import { HealthController } from "./modules/health/health.controller";
 import { SeedService } from "./database/seed.service";
 
@@ -26,9 +35,15 @@ import { SeedService } from "./database/seed.service";
     }),
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
+      { name: Order.name, schema: OrderSchema },
     ]),
     AuthModule,
     ProductsModule,
+    OrdersModule,
+    SettingsModule,
+    IntegrationsModule,
+    CustomRequestsModule,
+    PaymentsModule,
   ],
   controllers: [HealthController],
   providers: [

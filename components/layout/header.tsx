@@ -53,7 +53,7 @@ export function Header() {
           className="font-display text-[26px] leading-none text-primary"
           aria-label={`${SITE_NAME} — página inicial`}
         >
-          FORMA<span className="text-clay">.</span>
+          c3dcriativ<span className="text-clay">.</span>
         </Link>
 
         <nav aria-label="Navegação principal" className="hidden lg:block">

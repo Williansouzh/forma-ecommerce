@@ -2,11 +2,10 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
 export const CATEGORY_SLUGS = [
-  "bonecos",
   "decoracao",
   "geek",
-  "miniaturas",
   "presentes",
+  "utilidades",
   "personalizados",
 ] as const;
 export type CategorySlug = (typeof CATEGORY_SLUGS)[number];
@@ -18,6 +17,15 @@ export class ProductImageEmbed {
   alt!: string;
 }
 
+/** Cor de filamento oferecida na peça. `id` vem do painel, não do Mongo. */
+export class ProductVariantEmbed {
+  id!: string;
+  name!: string;
+  colorHex?: string;
+  priceAdjustment!: number;
+  stock!: number;
+}
+
 export class DimensionsEmbed {
   width!: number;
   height!: number;
@@ -25,8 +33,8 @@ export class DimensionsEmbed {
 }
 
 /**
- * Produto da loja FORMA. Preços em CENTAVOS (inteiros).
- * Sem controle de estoque — produção sob demanda.
+ * Produto da loja. Preços em CENTAVOS (inteiros).
+ * `stock` é opcional: sem valor, a peça é produzida sob demanda.
  */
 @Schema({ collection: "products", timestamps: true })
 export class Product {
@@ -62,11 +70,30 @@ export class Product {
   })
   images: ProductImageEmbed[];
 
+  @Prop({
+    type: [
+      {
+        _id: false,
+        id: String,
+        name: String,
+        colorHex: String,
+        priceAdjustment: { type: Number, default: 0 },
+        stock: { type: Number, default: 0 },
+      },
+    ],
+    default: [],
+  })
+  variants: ProductVariantEmbed[];
+
   @Prop({ trim: true })
   material?: string;
 
   @Prop({ min: 0 })
   productionTime?: number;
+
+  /** Peças prontas em estoque. Ausente = produção sob demanda. */
+  @Prop({ min: 0 })
+  stock?: number;
 
   @Prop()
   dimensions?: DimensionsEmbed;
@@ -79,6 +106,10 @@ export class Product {
 
   @Prop({ required: true, default: false })
   isFeatured: boolean;
+
+  /** Peça que aceita personalização (nome, cor, medida) sob encomenda. */
+  @Prop({ required: true, default: false })
+  isCustom: boolean;
 
   @Prop({ trim: true })
   badge?: string;

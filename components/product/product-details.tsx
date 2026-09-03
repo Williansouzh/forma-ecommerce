@@ -53,10 +53,22 @@ export function ProductDetails({ product }: { product: Product }) {
     ? "A resina deixa a superfície lisa e o detalhe fino — dá para ver o desenho de perto."
     : "Tem linha de camada, sim. É assim que se sabe que foi feito e não fabricado.";
 
+  /**
+   * O prazo é a informação que decide a compra aqui — aparece na linha
+   * principal, não só na ficha lá embaixo.
+   */
+  const days = product.productionTime;
+  const remaining = variant?.stock ?? product.stock;
   const statusLine =
-    status === "made_to_order" && typeof product.productionTime === "number"
-      ? `${availability[status]} — ${product.productionTime} dias`
-      : availability[status];
+    status === "sold_out"
+      ? availability.sold_out
+      : typeof remaining === "number" && remaining > 0 && remaining <= 3
+        ? `Restam ${remaining} ${remaining === 1 ? "unidade" : "unidades"} desta cor — depois volta para a fila de produção.`
+        : typeof days === "number"
+          ? status === "made_to_order" || product.isCustom
+            ? `Feito depois do seu pedido — enviada em ${days} dias úteis.`
+            : `Impressa depois do seu pedido e enviada em ${days} dias úteis.`
+          : availability[status];
 
   const addToCart = () => {
     if (unitPrice === 0) {

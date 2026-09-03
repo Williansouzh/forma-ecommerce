@@ -5,21 +5,12 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
 import { createProduct, updateProduct, type ProductInput } from "@/lib/admin-api";
+import {
+  centsToInput,
+  parsePriceToCents,
+  validateProductInput,
+} from "@/lib/product-input";
 import type { Product } from "@/types/product";
-
-function parsePriceToCents(value: string): number {
-  const cleaned = value.trim().replace(/[^\d,.-]/g, "");
-  if (!cleaned) return 0;
-  const normalized = cleaned.includes(",")
-    ? cleaned.replace(/\./g, "").replace(",", ".")
-    : cleaned;
-  return Math.round(parseFloat(normalized) * 100) || 0;
-}
-
-function centsToInput(cents?: number): string {
-  if (typeof cents !== "number") return "";
-  return (cents / 100).toFixed(2).replace(".", ",");
-}
 
 interface ImageRow {
   url: string;
@@ -81,10 +72,6 @@ export function ProductForm({ product }: ProductFormProps) {
     setError(null);
 
     const validImages = images.filter((image) => image.url.trim());
-    if (validImages.length === 0) {
-      setError("Informe ao menos uma imagem (URL).");
-      return;
-    }
 
     const payload: ProductInput = {
       name: name.trim(),
@@ -115,6 +102,12 @@ export function ProductForm({ product }: ProductFormProps) {
         : {}),
     };
 
+    const invalid = validateProductInput(payload);
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
+
     setSaving(true);
     try {
       if (product) {
@@ -122,7 +115,7 @@ export function ProductForm({ product }: ProductFormProps) {
       } else {
         await createProduct(payload);
       }
-      router.push("/admin");
+      router.push("/admin/produtos");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao salvar");
     } finally {
@@ -286,7 +279,7 @@ export function ProductForm({ product }: ProductFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin")}
+          onClick={() => router.push("/admin/produtos")}
           className="rounded-md px-6 py-3.5 text-body font-medium text-secondary transition-colors hover:text-primary"
         >
           Cancelar

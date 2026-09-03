@@ -4,19 +4,24 @@ import { FeaturedProducts } from "@/components/sections/featured-products";
 import { CategoryIndex } from "@/components/sections/category-grid";
 import { CustomOrderSection } from "@/components/sections/custom-order-section";
 import { ProcessSection } from "@/components/sections/process-section";
+import { AtelierSection } from "@/components/sections/atelier-section";
 import { CTASection } from "@/components/sections/cta-section";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/schema-org";
+import { withProductCounts } from "@/data/categories";
+import { fetchProducts } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "FORMA. — Objetos pequenos para casa",
+  title: "c3dcriativ — Objetos pequenos para casa",
   description:
     "Decoração, chaveiros e presentes feitos em pequena escala, com textura aparente, cor quente e acabamento manual.",
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await fetchProducts();
+
   return (
     <>
       <script
@@ -27,9 +32,10 @@ export default function HomePage() {
       />
       <HeroSection />
       <FeaturedProducts />
-      <CategoryIndex />
+      <CategoryIndex categories={withProductCounts(products)} />
       <CustomOrderSection />
       <ProcessSection />
+      <AtelierSection />
       <CTASection />
     </>
   );

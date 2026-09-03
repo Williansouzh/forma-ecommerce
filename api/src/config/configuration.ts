@@ -18,6 +18,10 @@ export interface ApiConfig {
   adminPassword: string;
   adminName: string;
   seedDemo: boolean;
+  /** Base pública da API, para o Mercado Pago alcançar o webhook. */
+  publicApiUrl: string;
+  /** Base pública da loja, para as back_urls do checkout. */
+  publicSiteUrl: string;
 }
 
 export function configuration(): ApiConfig {
@@ -31,5 +35,9 @@ export function configuration(): ApiConfig {
     adminPassword: process.env.ADMIN_PASSWORD ?? "forma-admin-2026",
     adminName: process.env.ADMIN_NAME ?? "Super Admin",
     seedDemo: process.env.SEED_DEMO !== "false",
+    publicApiUrl:
+      process.env.PUBLIC_API_URL ?? "http://localhost:4000",
+    publicSiteUrl:
+      process.env.PUBLIC_SITE_URL ?? "http://localhost:3000",
   };
 }
