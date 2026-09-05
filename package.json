@@ -13,7 +13,9 @@
     "ci:compose": "python3 scripts/check-compose-images.py",
     "ci:audit": "python3 scripts/check-audit.py",
     "api:types:generate": "node scripts/generate-api-types.mjs",
-    "api:types:check": "node scripts/generate-api-types.mjs --check"
+    "api:types:check": "node scripts/generate-api-types.mjs --check",
+    "db:backup": "./scripts/backup-mongo.sh",
+    "db:restore": "./scripts/restore-mongo.sh"
   },
   "dependencies": {
     "clsx": "^2.1.1",
