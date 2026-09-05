@@ -402,6 +402,64 @@ export default function AdminIntegrationsPage() {
                   className={fieldClass}
                 />
               </label>
+              <label className={cn(labelClass, "flex-1 basis-[200px]")}>
+                Phone number ID
+                <input
+                  defaultValue={String(wa?.config.phoneNumberId ?? "")}
+                  placeholder="da Cloud API da Meta"
+                  onBlur={(event) =>
+                    void save("whatsapp", {
+                      config: { phoneNumberId: event.target.value.trim() },
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </label>
+
+              <label className={cn(labelClass, "flex-1 basis-[200px]")}>
+                <SecretLabel
+                  title="Access token"
+                  stored={wa?.secretHints.accessToken}
+                  onRemove={() =>
+                    void save(
+                      "whatsapp",
+                      { removeSecrets: ["accessToken"] },
+                      "Access token do WhatsApp removido"
+                    )
+                  }
+                />
+                <input
+                  type="password"
+                  autoComplete="off"
+                  placeholder={wa?.secretHints.accessToken ?? "não gravado"}
+                  onBlur={(event) => {
+                    const value = event.target.value.trim();
+                    if (!value) return;
+                    event.target.value = "";
+                    void save(
+                      "whatsapp",
+                      { secrets: { accessToken: value } },
+                      "Access token do WhatsApp gravado no servidor"
+                    );
+                  }}
+                  className={fieldClass}
+                />
+              </label>
+
+              <label className={cn(labelClass, "flex-1 basis-[200px]")}>
+                Template de etapa
+                <input
+                  defaultValue={String(wa?.config.stageTemplate ?? "")}
+                  placeholder="nome aprovado na Meta"
+                  onBlur={(event) =>
+                    void save("whatsapp", {
+                      config: { stageTemplate: event.target.value.trim() },
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </label>
+
               <label className={cn(labelClass, "flex-[2_1_320px]")}>
                 Mensagem padrão do orçamento
                 <textarea
@@ -485,9 +543,12 @@ export default function AdminIntegrationsPage() {
           </div>
 
           <p className="mt-6 max-w-[620px] text-[13px] text-tertiary">
-            Ligar uma integração guarda a configuração e a credencial. O
-            webhook de pagamento já funciona; o disparo automático no WhatsApp e
-            a etiqueta de envio ainda não estão implementados.
+            Ligar uma integração guarda a configuração e a credencial. O webhook
+            de pagamento e o aviso de etapa no WhatsApp já funcionam — o aviso
+            sai por <strong>template aprovado na Meta</strong>, que é a única
+            forma de mensagem iniciada pelo negócio fora da janela de 24 h. O
+            template recebe dois parâmetros: código do pedido e etapa. A etiqueta
+            de envio ainda não está implementada.
           </p>
         </>
       )}

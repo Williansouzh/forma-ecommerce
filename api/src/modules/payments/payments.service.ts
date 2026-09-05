@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { createHmac, timingSafeEqual } from "crypto";
 import { IntegrationsService } from "../integrations/integrations.service";
 import { OrdersService } from "../orders/orders.service";
+import { WhatsappService } from "../notifications/whatsapp.service";
 import type { ApiConfig } from "../../config/configuration";
 
 export interface WebhookHeaders {
@@ -27,6 +28,7 @@ export class PaymentsService {
   constructor(
     private readonly integrations: IntegrationsService,
     private readonly orders: OrdersService,
+    private readonly whatsapp: WhatsappService,
     private readonly config: ConfigService<ApiConfig>,
   ) {}
 
@@ -212,6 +214,19 @@ export class PaymentsService {
     }
 
     this.logger.log(`${code} marcado como pago pelo webhook do Mercado Pago.`);
-    return { handled: true, reason: `${code} marcado como pago` };
+
+    // O aviso é secundário: se falhar, o pedido continua pago.
+    const notification = await this.whatsapp.notifyOrderStage(
+      order.customer.phone,
+      order.code,
+      "paid",
+    );
+
+    return {
+      handled: true,
+      reason: notification.sent
+        ? `${code} marcado como pago · cliente avisado`
+        : `${code} marcado como pago (aviso não saiu: ${notification.reason})`,
+    };
   }
 }

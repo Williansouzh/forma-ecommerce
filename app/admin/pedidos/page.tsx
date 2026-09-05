@@ -43,9 +43,15 @@ export default function AdminOrdersPage() {
   const changeStatus = async (order: Order, status: OrderStatus) => {
     setBusy(order.id);
     try {
-      await updateOrderStatus(order.id, status);
+      const updated = await updateOrderStatus(order.id, status);
       await refresh();
-      pushToast(`${order.code} → ${ORDER_STATUS_LABELS[status].toLowerCase()}`);
+      // Só dizemos "cliente avisado" quando a mensagem realmente saiu.
+      const stage = ORDER_STATUS_LABELS[status].toLowerCase();
+      pushToast(
+        updated.notification?.sent
+          ? `${order.code} → ${stage} · cliente avisado no WhatsApp`
+          : `${order.code} → ${stage}`
+      );
     } catch (err) {
       pushToast(
         err instanceof Error ? err.message : "Falha ao mudar o status",
@@ -183,8 +189,8 @@ export default function AdminOrdersPage() {
       </div>
 
       <p className="mt-3.5 text-[13px] text-tertiary">
-        Mudar o status salva na hora. O aviso ao cliente ainda é manual — o
-        disparo automático no WhatsApp entra com as Integrações.
+        Mudar o status salva na hora. Com o WhatsApp conectado e o aviso de
+        etapa ligado, o cliente recebe a mensagem no mesmo gesto.
       </p>
     </div>
   );

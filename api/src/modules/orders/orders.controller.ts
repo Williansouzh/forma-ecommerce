@@ -1,11 +1,15 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto, UpdateOrderStatusDto } from "./dto/order.dto";
+import { WhatsappService } from "../notifications/whatsapp.service";
 import { Public, Roles } from "../../common/decorators/auth.decorators";
 
 @Controller("orders")
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly whatsapp: WhatsappService,
+  ) {}
 
   @Roles("superadmin")
   @Get()
@@ -26,9 +30,22 @@ export class OrdersController {
     return this.ordersService.create(dto);
   }
 
+  /**
+   * Trocar a etapa avisa o cliente. O aviso é secundário: se falhar, o status
+   * muda do mesmo jeito e a resposta diz por que a mensagem não saiu.
+   */
   @Roles("superadmin")
   @Patch(":id")
-  updateStatus(@Param("id") id: string, @Body() dto: UpdateOrderStatusDto) {
-    return this.ordersService.updateStatus(id, dto.status);
+  async updateStatus(
+    @Param("id") id: string,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    const order = await this.ordersService.updateStatus(id, dto.status);
+    const notification = await this.whatsapp.notifyOrderStage(
+      order.customer.phone,
+      order.code,
+      order.status,
+    );
+    return { ...order, notification };
   }
 }

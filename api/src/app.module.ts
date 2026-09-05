@@ -9,6 +9,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { CustomRequestsModule } from "./modules/custom-requests/custom-requests.module";
 import { IntegrationsModule } from "./modules/integrations/integrations.module";
 import { OrdersModule } from "./modules/orders/orders.module";
+import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { SettingsModule } from "./modules/settings/settings.module";
@@ -44,6 +45,7 @@ import { SeedService } from "./database/seed.service";
     IntegrationsModule,
     CustomRequestsModule,
     PaymentsModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
   providers: [

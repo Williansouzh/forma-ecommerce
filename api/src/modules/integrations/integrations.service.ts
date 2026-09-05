@@ -120,6 +120,13 @@ export class IntegrationsService {
     return row?.secrets ?? {};
   }
 
+  async configFor(key: IntegrationKey): Promise<Record<string, unknown>> {
+    const row = await this.integrationModel
+      .findOne({ key })
+      .lean<Integration | null>();
+    return row?.config ?? {};
+  }
+
   async isEnabled(key: IntegrationKey): Promise<boolean> {
     const row = await this.integrationModel
       .findOne({ key })

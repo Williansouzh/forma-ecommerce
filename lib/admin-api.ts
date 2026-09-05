@@ -132,11 +132,16 @@ export async function listOrders(): Promise<Order[] | null> {
   return response.json() as Promise<Order[]>;
 }
 
+/** O PATCH devolve o pedido e o desfecho do aviso ao cliente. */
+export interface OrderStatusUpdate extends Order {
+  notification?: { sent: boolean; reason: string };
+}
+
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus
-): Promise<Order> {
-  return authFetch<Order>(`/orders/${id}`, {
+): Promise<OrderStatusUpdate> {
+  return authFetch<OrderStatusUpdate>(`/orders/${id}`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
