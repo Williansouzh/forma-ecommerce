@@ -18,3 +18,4 @@ next-env.d.ts
 # Dumps do Mongo — contêm dados de cliente (nome, telefone, endereço) e os
 # segredos das integrações. Nunca versionar.
 /backups/
+coverage/

@@ -54,6 +54,11 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
+      # As invariantes do webhook: sem segredo recusa, assinatura de outro
+      # pagamento recusa, corpo adulterado recusa.
+      - name: Testes
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -110,6 +115,11 @@ jobs:
 
       - name: Type-check
         run: npm run typecheck
+
+      # O caminho do dinheiro: desconto do Pix, fronteira do frete grátis,
+      # arredondamento em centavos. Erro aqui é silencioso.
+      - name: Testes e gate de cobertura
+        run: npm run test:coverage
 
       # A outra metade: os tipos gerados têm de bater com o contrato. Sem isto
       # a loja compila contra um contrato que a API não serve mais.
