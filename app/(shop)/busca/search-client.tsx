@@ -32,7 +32,7 @@ export function SearchPageClient() {
   }, [query]);
 
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb
         items={[{ label: "Início", href: "/" }, { label: "Busca" }]}
       />
@@ -80,6 +80,7 @@ export function SearchPageClient() {
             <CatalogView
               products={results}
               title={`Resultados para “${query}”`}
+              showFilters={false}
             />
           ) : (
             <div className="rounded-lg border border-dashed border-strong py-20 text-center">
@@ -92,7 +93,7 @@ export function SearchPageClient() {
             </div>
           )
         ) : (
-          <CatalogView products={results} title="Catálogo completo" />
+          <CatalogView products={results} title="Catálogo completo" showFilters={false} />
         )}
       </div>
     </div>

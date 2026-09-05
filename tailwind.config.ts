@@ -113,6 +113,18 @@ const config: Config = {
           "0%, 100%": { opacity: "0.55" },
           "50%": { opacity: "0.9" },
         },
+        // Rola metade da faixa: o conteúdo é duplicado, então volta ao início
+        // exatamente onde parou e o laço não tem emenda visível.
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
+        // Aproximação lenta na foto do hero: 20s de ida e volta, quase
+        // imperceptível. Zoom rápido em foto de produto lê como banner.
+        slowzoom: {
+          from: { transform: "scale(1.02)" },
+          to: { transform: "scale(1.14)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 300ms cubic-bezier(0.25,0.1,0.25,1) both",
@@ -120,6 +132,10 @@ const config: Config = {
         "slide-up": "slide-up 300ms cubic-bezier(0.25,0.1,0.25,1) both",
         settle: "settle 1200ms cubic-bezier(0.25,0.1,0.25,1) both",
         breathe: "breathe 2.4s ease-in-out infinite",
+        marquee: "marquee 34s linear infinite",
+        "marquee-slow": "marquee 48s linear infinite",
+        slowzoom:
+          "slowzoom 20s cubic-bezier(0.25,0.1,0.25,1) infinite alternate both",
       },
     },
   },

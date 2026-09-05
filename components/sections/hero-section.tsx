@@ -2,97 +2,120 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
-import { EASE_OUT } from "@/lib/animations";
+import { ArrowRight } from "lucide-react";
 import { AtelierVideo } from "@/components/shared/atelier-video";
 import { ATELIER_MEDIA } from "@/lib/atelier-media";
 
 /**
- * Uma foto de ambiente sangrando até a borda direita da tela, texto encostado
- * à esquerda. Sem colagem em arco, sem parallax, sem float infinito: objeto de
- * decoração é pesado — ele pousa uma vez e fica parado.
+ * A foto ocupa a tela inteira e o texto se apoia nela pela base — é a peça que
+ * apresenta o ateliê, não um bloco de texto ao lado de uma imagem. O degradê
+ * existe só para o texto ter contraste; a foto continua sendo o assunto.
+ *
+ * O `slowzoom` roda em 20s: quem olha por três segundos não percebe, quem
+ * fica parado percebe. Zoom mais rápido viraria banner de campanha.
  */
 const HERO_IMAGE = {
-  src: "/images/products/cacto-trancado-mesa-02.jpg",
-  alt: "Conjunto de cactos decorativos impressos em 3D sobre mesa de madeira, com luz de janela",
+  src: "/images/products/vaso-canelado-01.jpg",
+  alt: "Vaso canelado verde impresso em 3D com flores, ao lado de porta-vela",
 };
 
-export function HeroSection() {
-  const reduced = useReducedMotion();
+/** Os quatro selos da régua inferior — onde fica, desde quando, para onde envia. */
+const CREDENTIALS = [
+  { label: "Nº 001 · Vaso Canelado" },
+  { label: "Campina Grande — PB" },
+  { label: "Ateliê desde 2024" },
+  { label: "Envio para todo o Brasil", accent: true },
+];
 
+export function HeroSection() {
   return (
     <section
       aria-label="Apresentação"
-      className="relative overflow-hidden pt-24 lg:pt-20"
+      className="ink relative flex min-h-[clamp(560px,88vh,900px)] items-end overflow-hidden"
     >
-      <div className="grid w-full items-center gap-y-14 lg:min-h-svh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.1 }}
-          className="order-2 w-full max-w-xl px-6 py-10 md:px-10 lg:order-1 lg:justify-self-end lg:py-0 lg:pl-16 lg:pr-14 xl:pl-24"
-        >
-          <p className="label text-accent">
-            Objetos para casa, feitos em pequena escala
+      <Image
+        src={HERO_IMAGE.src}
+        alt={HERO_IMAGE.alt}
+        fill
+        priority
+        sizes="100vw"
+        className="animate-slowzoom object-cover saturate-[0.92] brightness-[0.82] [transform-origin:60%_40%]"
+      />
+
+      {/* Só para o texto respirar sobre a foto — não é efeito de cor. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(to_top,rgba(27,26,21,0.88)_0%,rgba(27,26,21,0.42)_45%,rgba(27,26,21,0.18)_100%)]"
+      />
+
+      <div className="shell relative w-full py-[clamp(40px,8vh,96px)] pb-[clamp(28px,5vh,56px)]">
+        <div className="mb-[clamp(18px,4vh,34px)] flex animate-fade-in items-center gap-3">
+          <span aria-hidden className="h-px w-[34px] bg-border-strong" />
+          <span className="label text-secondary">
+            Ateliê de impressão 3D · Campina Grande
+          </span>
+        </div>
+
+        <h1 className="font-display text-[clamp(46px,10.5vw,152px)] font-light leading-[0.9] tracking-[-0.03em] text-balance">
+          <span className="block animate-fade-up">Feito camada</span>
+          <span className="block animate-fade-up [animation-delay:130ms]">
+            por camada,
+          </span>
+          <span className="type-outline block animate-fade-up italic [animation-delay:260ms]">
+            à mão.
+          </span>
+        </h1>
+
+        <div className="mt-[clamp(26px,5vh,48px)] flex flex-wrap items-end gap-x-[clamp(20px,4vw,56px)] gap-y-8">
+          <p className="max-w-md flex-[1_1_300px] text-body text-secondary">
+            Não temos estoque parado. Cada objeto é impresso depois do seu
+            pedido, em 0,12 mm por camada, lixado e conferido peça por peça no
+            nosso ateliê em Campina Grande.
           </p>
 
-          <h1 className="mt-8 font-display text-display-1">
-            Peças pequenas para morar na casa
-            <span className="text-clay">.</span>
-          </h1>
-
-          <p className="mt-8 max-w-md text-body-large text-secondary">
-            Decoração, presentes e encomendas em PLA. Textura aparente, cor
-            quente, acabamento conferido à mão — para virar presente ou ficar na
-            sua própria mesa.
-          </p>
-
-          <div className="mt-10">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/colecoes"
-              className="label inline-block border border-primary bg-primary px-9 py-4 text-background transition-colors duration-300 hover:bg-transparent hover:text-primary"
+              className="group inline-flex min-h-[52px] items-center gap-3 rounded-md bg-primary px-[26px] text-[14px] font-semibold tracking-[0.02em] text-background transition-colors duration-300 hover:bg-accent hover:text-primary"
             >
-              Ver a coleção
+              Explorar coleção
+              <ArrowRight
+                size={17}
+                strokeWidth={1}
+                aria-hidden
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </Link>
+            <Link
+              href="/personalizados"
+              className="inline-flex min-h-[52px] items-center rounded-md border border-border-strong px-6 text-[14px] font-medium text-primary transition-colors duration-300 hover:border-primary hover:bg-surface-muted"
+            >
+              Quero uma peça minha
             </Link>
           </div>
+        </div>
 
-          <p className="mt-8 text-body-small italic text-tertiary">
-            PLA, PETG e resina. Impresso em Campina Grande, sob demanda.
-          </p>
-        </motion.div>
+        <div className="mt-[clamp(28px,6vh,58px)] flex flex-wrap gap-x-[clamp(14px,3vw,44px)] gap-y-2 border-t border-border-subtle pt-4 text-micro uppercase text-tertiary">
+          {CREDENTIALS.map((item) => (
+            <span key={item.label} className={item.accent ? "text-clay" : undefined}>
+              {item.label}
+            </span>
+          ))}
+        </div>
+      </div>
 
-        <motion.div
-          initial={reduced ? false : { opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: EASE_OUT }}
-          className="relative order-1 h-[56vh] w-full bg-surface-muted lg:order-2 lg:h-[88vh]"
-        >
-          <Image
-            src={HERO_IMAGE.src}
-            alt={HERO_IMAGE.alt}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 55vw"
-            className="object-cover"
-          />
-
-          {/* A impressora rodando agora, encostada no canto da foto. */}
-          <div className="absolute bottom-5 left-5 w-[188px] bg-[rgba(27,26,21,0.92)] p-3.5 backdrop-blur-sm sm:bottom-8 sm:left-8">
-            <div className="flex items-center gap-[7px] text-[10px] font-bold uppercase tracking-[0.18em] text-[rgba(237,230,215,0.62)]">
-              <span
-                aria-hidden
-                className="size-1.5 animate-breathe rounded-full bg-[#D68A63]"
-              />
-              Ao vivo
-            </div>
-            <div className="relative mt-3 h-[118px] overflow-hidden bg-[rgba(237,230,215,0.06)]">
-              <AtelierVideo {...ATELIER_MEDIA.hero} />
-            </div>
-            <div className="mt-2.5 text-[10.5px] uppercase tracking-[0.12em] text-[rgba(237,230,215,0.55)]">
-              Camada 47 · 0,12 mm
-            </div>
-          </div>
-        </motion.div>
+      {/* A impressora rodando agora. Fica no alto à direita, longe do título. */}
+      <div className="absolute right-[clamp(16px,4vw,64px)] top-[clamp(80px,14vh,150px)] hidden w-[168px] animate-fade-in rounded-lg border border-border-strong bg-[rgba(27,26,21,0.62)] p-3.5 backdrop-blur-[10px] [animation-delay:900ms] sm:block">
+        <div className="flex items-center gap-[7px] text-[10px] font-bold uppercase tracking-[0.18em] text-tertiary">
+          <span aria-hidden className="size-1.5 animate-breathe rounded-full bg-clay" />
+          Ao vivo
+        </div>
+        <div className="relative mt-3 h-[118px] overflow-hidden bg-surface">
+          <AtelierVideo {...ATELIER_MEDIA.hero} />
+        </div>
+        <div className="mt-2.5 text-[10.5px] uppercase tracking-[0.12em] text-tertiary">
+          Camada 47 · 0,12 mm
+        </div>
       </div>
     </section>
   );

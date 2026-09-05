@@ -130,8 +130,20 @@ body::after {
 }
 
 @layer components {
+  /*
+   * A régua do handoff: 1360px de largura máxima e recuo de 4vw (16px no
+   * celular, 64px no teto). Não é 1280/64 — a diferença de 93px na coluna de
+   * conteúdo aparece em cada seção da loja e é o que deixava a página inteira
+   * mais estreita que o desenho.
+   */
   .shell {
-    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10 lg:px-16;
+    @apply mx-auto w-full max-w-[1360px];
+    padding-inline: clamp(16px, 4vw, 64px);
+  }
+
+  /* Só o recuo, para as seções que têm largura máxima própria. */
+  .gutter {
+    padding-inline: clamp(16px, 4vw, 64px);
   }
 
   .nav-link {
@@ -182,6 +194,57 @@ body::after {
   /* Etiqueta escrita à mão: a sans do texto, não monoespaçada. */
   .label {
     @apply text-[0.72rem] font-semibold uppercase tracking-[0.19em];
+  }
+
+  /*
+   * Seção sempre escura, independente do tema — hero, processo, CTA e rodapé.
+   * Em vez de espalhar #1B1A15 pelo JSX, redefinimos as variáveis dentro do
+   * bloco: `bg-surface`, `text-secondary` e `border-border-subtle` continuam
+   * valendo lá dentro, só que já lendo a paleta noturna.
+   */
+  .ink {
+    --color-background: #1B1A15;
+    --color-surface: #24221B;
+    --color-surface-muted: #2E2B22;
+
+    /*
+     * Os degraus de texto no escuro são areia rebaixada — 72%, 55% e 42% de
+     * `#EDE6D7` sobre a tinta — e não os neutros do tema escuro, que puxam
+     * para o amarelo e deixam o texto sujo em cima de foto. Guardamos o
+     * resultado já mesclado porque os utilitários usam `rgb(... / <alpha>)`.
+     */
+    --color-text-primary: #EDE6D7;
+    --color-text-secondary: #B2ADA1;
+    --color-text-tertiary: #8F8A80;
+    --color-text-quaternary: #737066;
+
+    --color-accent: #9EAC7D;
+    --color-clay: #D68A63;
+
+    --color-border: rgba(237, 230, 215, 0.14);
+    --color-border-strong: rgba(237, 230, 215, 0.18);
+
+    --bg-rgb: 27 26 21;
+    --surface-rgb: 36 34 27;
+    --surface-muted-rgb: 46 43 34;
+    --text-primary-rgb: 237 230 215;
+    --text-secondary-rgb: 178 173 161;
+    --text-tertiary-rgb: 143 138 128;
+    --text-quaternary-rgb: 115 112 102;
+    --accent-rgb: 158 172 125;
+    --clay-rgb: 214 138 99;
+
+    background: var(--color-background);
+    color: var(--color-text-primary);
+  }
+
+  /*
+   * Contorno em vez de preenchimento: a segunda linha dos títulos grandes.
+   * Só funciona em corpo bem grande — abaixo de ~32px o traço come a letra.
+   */
+  .type-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(var(--text-primary-rgb) / 0.62);
   }
 }
 

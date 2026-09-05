@@ -30,7 +30,7 @@ const policies = [
 
 export default function PoliciesPage() {
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb
         items={[{ label: "Início", href: "/" }, { label: "Políticas" }]}
       />

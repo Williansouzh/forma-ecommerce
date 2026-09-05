@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, PackageSearch } from "lucide-react";
-import type { CartItem, PaymentMethod } from "@/types";
+import type { PaymentMethod } from "@/types";
 import {
   useCartStore,
   getCartTotals,
@@ -16,6 +16,7 @@ import {
 } from "@/components/checkout/checkout-form";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { PIX_DISCOUNT } from "@/lib/constants";
+import { payableTotal } from "@/lib/cart";
 
 const pipeline = [
   "Pedido recebido",
@@ -41,7 +42,7 @@ export default function CheckoutPage() {
 
   if (order) {
     return (
-      <div className="shell pb-24 pt-28 md:pt-36">
+      <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,7 +110,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="shell pb-24 pt-28 md:pt-36">
+      <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
         <div className="mx-auto max-w-md py-20 text-center">
           <span className="mx-auto flex size-16 items-center justify-center border border-primary bg-surface-muted text-tertiary">
             <PackageSearch size={26} />
@@ -185,37 +186,30 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb
-        items={[{ label: "Início", href: "/" }, { label: "Checkout" }]}
+        items={[{ label: "Coleção", href: "/colecoes" }, { label: "Checkout" }]}
       />
-      <div className="mb-8 grid gap-3 border-y border-primary py-4 text-body-small text-secondary md:grid-cols-3">
-        <p>
-          <span className="text-micro uppercase text-tertiary">Pagamento</span>
-          <br />
-          Protegido
-        </p>
-        <p>
-          <span className="text-micro uppercase text-tertiary">Inspeção</span>
-          <br />
-          Peça conferida antes do envio
-        </p>
-        <p>
-          <span className="text-micro uppercase text-tertiary">Produção</span>
-          <br />
-          Prazo informado no pedido
-        </p>
-      </div>
-      <div className="grid gap-12 lg:grid-cols-[1fr_380px]">
+
+      <h1 className="mb-[clamp(28px,5vh,54px)] mt-[18px] font-display text-[clamp(30px,5vw,60px)] font-light tracking-[-0.03em]">
+        Fechar pedido
+      </h1>
+
+      <div className="flex flex-wrap items-start gap-[clamp(28px,5vw,70px)]">
         <CheckoutForm
           items={items}
           paymentMethod={payment}
           onPaymentMethodChange={setPayment}
           onComplete={completeOrder}
+          total={payableTotal(totals, payment === "pix" ? PIX_DISCOUNT : 0)}
           submitting={submitting}
           submitError={submitError}
         />
-        <OrderSummary items={items} totals={totals} pixDiscount={payment === "pix" ? PIX_DISCOUNT : 0} />
+        <OrderSummary
+          items={items}
+          totals={totals}
+          pixDiscount={payment === "pix" ? PIX_DISCOUNT : 0}
+        />
       </div>
     </div>
   );

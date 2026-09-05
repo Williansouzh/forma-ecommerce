@@ -19,7 +19,7 @@ export async function generateMetadata({
   const category = getCategory(slug);
   if (!category) return {};
   return {
-    title: `${category.name} — Coleções`,
+    title: `${category.name} — Coleção`,
     description: category.description,
     alternates: { canonical: `/colecoes/${category.slug}` },
     openGraph: {
@@ -37,14 +37,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const products = await fetchProducts({ category: category.slug });
 
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
             breadcrumbJsonLd([
               { name: "Início", item: "/" },
-              { name: "Coleções", item: "/colecoes" },
+              { name: "Coleção", item: "/colecoes" },
               { name: category.name, item: `/colecoes/${category.slug}` },
             ])
           ),
@@ -53,14 +53,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <Breadcrumb
         items={[
           { label: "Início", href: "/" },
-          { label: "Coleções", href: "/colecoes" },
+          { label: "Coleção", href: "/colecoes" },
           { label: category.name },
         ]}
       />
       <CatalogView
         products={products}
         title={category.name}
-        description={category.description}
+        activeSlug={category.slug}
       />
     </div>
   );

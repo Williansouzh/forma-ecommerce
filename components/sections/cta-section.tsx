@@ -1,50 +1,38 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { staggerContainer, fadeUp } from "@/lib/animations";
 
 /**
- * Sem a sombra dura 5px/5px do CTA anterior: neobrutalismo num site de linho
- * e serifa é escolher duas linguagens ao mesmo tempo.
+ * O fecho da página: uma pergunta grande e dois caminhos. Sem parágrafo — a
+ * essa altura quem rolou até aqui já leu tudo o que precisava.
  */
 export function CTASection() {
   return (
-    <section aria-labelledby="cta-titulo">
-      <motion.div
-        variants={staggerContainer(0.14)}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-120px" }}
-        className="shell max-w-3xl py-40 md:py-56"
+    <section
+      aria-labelledby="cta-titulo"
+      className="ink gutter mt-[clamp(72px,14vh,170px)] py-[clamp(72px,15vh,180px)] text-center"
+    >
+      <h2
+        id="cta-titulo"
+        className="mx-auto max-w-[900px] font-display text-[clamp(34px,7vw,104px)] font-light leading-[0.98] tracking-[-0.03em]"
       >
-        <motion.h2
-          id="cta-titulo"
-          variants={fadeUp}
-          className="font-display text-display-1"
-        >
-          Manda a ideia. A gente transforma em objeto
-          <span className="text-clay">.</span>
-        </motion.h2>
+        Tem uma ideia
+        <br />
+        <span className="type-outline italic">na cabeça?</span>
+      </h2>
 
-        <motion.p
-          variants={fadeUp}
-          className="mt-10 max-w-lg text-body-large text-secondary"
+      <div className="mt-[clamp(30px,6vh,56px)] flex flex-wrap justify-center gap-3">
+        <Link
+          href="/personalizados"
+          className="inline-flex min-h-[54px] items-center rounded-md bg-primary px-[30px] text-[14px] font-semibold text-background transition-colors duration-300 hover:bg-clay hover:text-primary"
         >
-          Pode ser chaveiro com inicial, lembrança de casamento ou uma peça de
-          decoração que não existe em catálogo nenhum. A gente responde com
-          material, prazo e o que dá e o que não dá para fazer.
-        </motion.p>
-
-        <motion.div variants={fadeUp} className="mt-12">
-          <Link
-            href="/personalizados"
-            className="label inline-block border border-primary px-9 py-4 text-primary transition-colors duration-300 hover:bg-primary hover:text-background"
-          >
-            Contar a ideia
-          </Link>
-        </motion.div>
-      </motion.div>
+          Solicitar orçamento
+        </Link>
+        <Link
+          href="/colecoes"
+          className="inline-flex min-h-[54px] items-center rounded-md border border-border-strong px-[26px] text-[14px] font-medium text-primary transition-colors duration-300 hover:border-primary hover:bg-surface-muted"
+        >
+          Ver a coleção
+        </Link>
+      </div>
     </section>
   );
 }

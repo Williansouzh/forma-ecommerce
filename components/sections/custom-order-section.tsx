@@ -1,99 +1,100 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
+import { WHATSAPP_URL } from "@/lib/constants";
 
-const steps = [
+/**
+ * Os cinco passos da encomenda, do lado do convite.
+ *
+ * Ficam numa lista vertical em vez de cinco círculos numa fila: cada passo tem
+ * uma frase inteira, e frase não cabe embaixo de ícone. A ordem é a real —
+ * ninguém escolhe cor antes de aprovar a prévia.
+ */
+const STEPS = [
   {
-    code: "BRF",
-    title: "Ideia",
-    description: "Referência, medidas, uso e quantidade entram no briefing.",
+    title: "Você manda a ideia",
+    text: "Foto, print, desenho no papel ou só a descrição no WhatsApp.",
   },
   {
-    code: "MOD",
-    title: "Modelo 3D",
-    description: "Modelagem digital com prévia para sua aprovação.",
+    title: "Modelamos e mostramos",
+    text: "Você recebe a prévia em 3D e aprova antes de qualquer impressão.",
   },
   {
-    code: "MAT",
-    title: "Material",
-    description: "PLA, PETG ou resina definidos pelo toque e pela função.",
+    title: "Escolhe cor e material",
+    text: "PLA fosco, silk, resina — com amostra de cor na mão.",
   },
   {
-    code: "PRT",
-    title: "Produção",
-    description: "Impressão camada por camada, sem esconder textura real.",
+    title: "Imprimimos e acabamos",
+    text: "Suporte removido, lixa em três grãos, encaixe conferido.",
   },
   {
-    code: "CHK",
-    title: "Entrega",
-    description: "Bordas conferidas, argola/encaixe testado e embalagem.",
+    title: "Chega até você",
+    text: "Embalada com proteção e cartão do ateliê, com rastreio.",
   },
 ];
 
 export function CustomOrderSection() {
   return (
-    <section aria-labelledby="custom-titulo" className="shell py-24 md:py-32">
-      <motion.div
-        variants={staggerContainer(0.12)}
-        initial="hidden"
-        whileInView="visible"
-        viewport={VIEWPORT_ONCE}
-      >
-        <motion.div
-          variants={fadeUp}
-          className="paper-surface px-6 py-20 md:px-16 md:py-24"
-        >
-          <p className="flex items-center justify-center gap-3 text-caption uppercase text-tertiary">
-            <span className="text-accent">03</span>
-            <span aria-hidden className="h-px w-8 bg-quaternary" />
-            Encomendas
-          </p>
+    <section
+      aria-labelledby="custom-titulo"
+      className="shell pt-[clamp(72px,14vh,170px)]"
+    >
+      <div className="flex flex-wrap gap-[clamp(28px,5vw,80px)] bg-surface-muted p-[clamp(28px,5vw,76px)]">
+        <div className="min-w-[260px] flex-[1_1_min(100%,380px)]">
+          <span className="label text-tertiary">03 · Sob medida</span>
+
           <h2
             id="custom-titulo"
-            className="mx-auto mt-3 max-w-2xl font-display text-display-2 tracking-tight"
+            className="mt-[18px] font-display text-[clamp(30px,4.6vw,60px)] font-light leading-[1.02] tracking-[-0.025em]"
           >
-            Quando a casa pede uma forma própria.
+            Você imagina.
+            <br />
+            <em className="italic text-accent">A gente imprime.</em>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-body-large text-secondary">
-            Do rascunho à peça pronta, o processo continua simples: referência,
-            material, prévia e acabamento antes do envio.
+
+          <p className="mt-[22px] max-w-[380px] text-body text-secondary">
+            Um personagem, um presente com nome, a peça que quebrou e não se
+            acha mais. Manda uma foto ou um desenho no WhatsApp — a gente
+            responde com prazo e preço no mesmo dia.
           </p>
 
-          <ol className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
-            {steps.map((step, index) => (
-              <motion.li
-                key={step.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.12, duration: 0.45 }}
-                className="group flex flex-col items-center gap-3 text-center"
-              >
-                <span className="flex size-12 items-center justify-center border border-border-strong text-micro uppercase text-accent">
-                  {step.code}
-                </span>
-                <div>
-                  <p className="text-caption uppercase text-secondary">
-                    {String(index + 1).padStart(2, "0")} · {step.title}
-                  </p>
-                  <p className="mt-1 text-body-small text-tertiary">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.li>
-            ))}
-          </ol>
+          <div className="mt-[30px] flex flex-wrap gap-3">
+            <Link
+              href="/personalizados"
+              className="inline-flex min-h-[52px] items-center rounded-md bg-primary px-[26px] text-[14px] font-semibold text-background transition-colors duration-300 hover:bg-accent"
+            >
+              Solicitar orçamento
+            </Link>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-[52px] items-center rounded-md border border-border-strong px-[22px] text-[14px] font-medium text-primary transition-colors duration-300 hover:border-accent hover:text-accent"
+            >
+              Falar no WhatsApp
+            </a>
+          </div>
+        </div>
 
-          <Link
-            href="/personalizados"
-            className="label mt-14 inline-block border border-primary bg-primary px-9 py-4 text-background transition-colors duration-300 hover:bg-transparent hover:text-primary"
-          >
-            Solicitar orçamento
-          </Link>
-        </motion.div>
-      </motion.div>
+        <ol className="min-w-[260px] flex-[1_1_min(100%,400px)]">
+          {STEPS.map((step, index) => (
+            <li
+              key={step.title}
+              className="flex gap-[18px] border-t border-border-strong py-[18px]"
+            >
+              <span className="shrink-0 pt-[5px] text-micro font-bold tabular-nums text-clay">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span>
+                <strong className="block font-display text-heading-3 font-normal">
+                  {step.title}
+                </strong>
+                <span className="mt-1 block text-body-small text-secondary">
+                  {step.text}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

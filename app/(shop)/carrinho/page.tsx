@@ -9,10 +9,9 @@ import {
   useCartStore,
   getCartTotals,
 } from "@/stores/cart-store";
-import { useUIStore } from "@/stores/ui-store";
 import { ProductCard } from "@/components/product/product-card";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
-import { ShippingEstimator } from "@/components/shared/shipping-estimator";
+import { ShippingNote } from "@/components/shared/shipping-note";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/product";
 
@@ -42,7 +41,7 @@ export default function CartPage() {
     .slice(0, 3);
 
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb
         items={[{ label: "Início", href: "/" }, { label: "Carrinho" }]}
       />
@@ -199,7 +198,7 @@ export default function CartPage() {
                 </div>
               </dl>
               <div className="mt-5">
-                <ShippingEstimator subtotal={totals.subtotal} compact />
+                <ShippingNote subtotal={totals.subtotal} />
               </div>
               <Link
                 href="/checkout"

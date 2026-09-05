@@ -7,9 +7,12 @@ import type { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
 
 /**
- * A imagem 01 é sempre a peça em uso — na mesa, na estante, ao lado de um livro.
- * Sem lupa que persegue o mouse: zoom perseguidor é padrão de loja de
- * eletrônico. As miniaturas viram uma coluna fina à esquerda.
+ * A imagem 01 é sempre a peça em uso — na mesa, na estante, ao lado de um
+ * livro. Sem lupa que persegue o mouse: zoom perseguidor é padrão de loja de
+ * eletrônico; aqui a foto só cresce um pouco no hover.
+ *
+ * As miniaturas ficam numa linha embaixo, não numa coluna: em 82px elas leem
+ * como contato de filme, e a foto grande fica com a largura inteira.
  */
 export function ProductGallery({ product }: { product: Product }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -17,44 +20,8 @@ export function ProductGallery({ product }: { product: Product }) {
   const activeImage = images[activeIndex];
 
   return (
-    <div className="flex flex-col-reverse gap-4 sm:flex-row sm:gap-6">
-      {images.length > 1 && (
-        <div
-          role="tablist"
-          aria-label="Galeria de imagens do produto"
-          className="no-scrollbar flex shrink-0 gap-3 overflow-x-auto sm:w-20 sm:flex-col sm:overflow-visible"
-        >
-          {images.map((image, index) => (
-            <button
-              key={image.id}
-              role="tab"
-              aria-selected={index === activeIndex}
-              aria-label={`Ver imagem ${index + 1}: ${image.alt}`}
-              onClick={() => setActiveIndex(index)}
-              className={cn(
-                "relative aspect-square w-16 shrink-0 overflow-hidden bg-surface-muted transition-opacity duration-300 sm:w-full",
-                index === activeIndex
-                  ? "opacity-100"
-                  : "opacity-45 hover:opacity-80"
-              )}
-            >
-              <Image
-                src={image.url}
-                alt=""
-                fill
-                unoptimized={image.url.endsWith(".svg")}
-                sizes="80px"
-                className="object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div
-        className="relative aspect-[4/5] flex-1 overflow-hidden bg-surface-muted"
-        aria-live="polite"
-      >
+    <div className="min-w-[280px] flex-[1_1_min(100%,560px)]">
+      <div className="group relative aspect-[4/5] overflow-hidden bg-surface-muted">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeIndex}
@@ -70,12 +37,49 @@ export function ProductGallery({ product }: { product: Product }) {
               fill
               priority
               unoptimized={activeImage?.url.endsWith(".svg")}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 560px"
+              className="object-cover saturate-[0.94] transition-transform duration-[1200ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-[1.16]"
             />
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {images.length > 1 && (
+        <div
+          role="tablist"
+          aria-label="Galeria de imagens do produto"
+          className="no-scrollbar mt-2.5 flex gap-2.5 overflow-x-auto"
+        >
+          {images.map((image, index) => (
+            <button
+              key={image.id}
+              role="tab"
+              aria-selected={index === activeIndex}
+              aria-label={`Ver imagem ${index + 1}: ${image.alt}`}
+              onClick={() => setActiveIndex(index)}
+              className={cn(
+                "relative aspect-square w-[82px] shrink-0 overflow-hidden rounded-md border bg-surface-muted transition-colors",
+                index === activeIndex
+                  ? "border-primary"
+                  : "border-border-strong hover:border-accent"
+              )}
+            >
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                unoptimized={image.url.endsWith(".svg")}
+                sizes="82px"
+                className="object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      <p className="mt-4 text-[12px] uppercase tracking-[0.12em] text-quaternary">
+        Fotos reais das peças que saem do ateliê
+      </p>
     </div>
   );
 }

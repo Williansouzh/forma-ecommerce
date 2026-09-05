@@ -1,110 +1,108 @@
 import Link from "next/link";
-import { CATEGORIES } from "@/data/categories";
-import { SITE_NAME } from "@/lib/constants";
+import {
+  ATELIER_CITY,
+  ATELIER_HOURS,
+  FREE_SHIPPING_THRESHOLD,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_URL,
+  SITE_NAME,
+  WHATSAPP_NUMBER,
+  WHATSAPP_URL,
+} from "@/lib/constants";
+import { formatPrice } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
+const LOJA_LINKS = [
+  { href: "/colecoes", label: "Coleção completa" },
+  { href: "/personalizados", label: "Sob medida" },
+  { href: "/atelier", label: "Ateliê" },
+  { href: "/sobre", label: "Sobre nós" },
+  { href: "/politicas", label: "Prazos e cuidados" },
+];
+
 /**
- * Uma faixa só, aberta por uma frase em vez de um logotipo.
- * As três barras empilhadas anteriores liam como barra de ferramentas.
+ * O rodapé fecha a página no mesmo escuro do CTA logo acima — juntos formam
+ * um bloco só, e a transição some. Três colunas: quem somos, para onde ir,
+ * onde ficamos.
  */
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border-strong">
-      <div className="shell grid gap-16 py-24 lg:grid-cols-[1.3fr_1fr] lg:gap-24">
-        <div>
-          <p className="max-w-lg font-display text-heading-2 leading-snug">
-            A gente imprime em Campina Grande e embala na mesma bancada onde a
-            peça nasceu.
+    <footer className="ink gutter pb-[30px] pt-[clamp(46px,9vh,100px)]">
+      <div className="mx-auto flex w-full max-w-[1360px] flex-wrap gap-[clamp(26px,5vw,80px)]">
+        <div className="flex-[1_1_min(100%,320px)]">
+          <p className="font-display text-[clamp(28px,4vw,44px)] font-light tracking-[-0.02em]">
+            {SITE_NAME}
+            <span className="text-clay">.</span>
           </p>
 
-          <p className="mt-10 max-w-md text-body-small text-secondary">
-            Frete grátis acima de R$ 400. Trocas por defeito de fabricação em
-            até 7 dias — os detalhes estão nas{" "}
-            <Link href="/politicas" className="nav-link text-primary">
-              políticas
-            </Link>
-            .
+          <p className="mt-3.5 max-w-[320px] text-body-small text-secondary">
+            Objetos impressos em 3D, um por vez, em Campina Grande — PB.
+            Transformando ideias em coisas que dá pra segurar.
           </p>
 
-          <p className="mt-6 max-w-md text-body-small text-secondary">
-            Campina Grande — PB. Passe para ver as peças de perto — combine
-            antes pelo WhatsApp.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-body-small">
-            <a
-              href="mailto:ola@c3dcriativ.com.br"
-              className="nav-link text-primary"
-            >
-              ola@c3dcriativ.com.br
-            </a>
-            <a
-              href="https://www.instagram.com/c3dcriativ/"
-              target="_blank"
-              rel="noreferrer"
-              className="nav-link text-primary"
-            >
-              Instagram
-            </a>
-            <a
-              href="https://wa.me/5583988717642"
-              target="_blank"
-              rel="noreferrer"
-              className="nav-link text-primary"
-            >
-              WhatsApp
-            </a>
-          </div>
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="nav-link mt-4 inline-block text-body-small font-semibold text-clay"
+          >
+            wa.me/{WHATSAPP_NUMBER}
+          </a>
         </div>
 
-        <div className="grid gap-12 sm:grid-cols-2">
-          <nav aria-label="Loja">
-            <p className="label text-tertiary">Coleções</p>
-            <ul className="mt-5 space-y-3">
-              {CATEGORIES.slice(0, 5).map((category) => (
-                <li key={category.slug}>
-                  <Link
-                    href={`/colecoes/${category.slug}`}
-                    className="text-body-small text-secondary transition-colors duration-300 hover:text-primary"
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        <nav aria-label="Loja" className="flex-[1_1_160px]">
+          <p className="label text-quaternary">Loja</p>
+          <ul className="mt-3.5 space-y-[9px]">
+            {LOJA_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-body-small text-secondary transition-colors duration-300 hover:text-primary"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link
+                href="/admin"
+                className="text-body-small text-quaternary transition-colors duration-300 hover:text-secondary"
+              >
+                Painel de gestão
+              </Link>
+            </li>
+          </ul>
+        </nav>
 
-          <nav aria-label="Estúdio">
-            <p className="label text-tertiary">Estúdio</p>
-            <ul className="mt-5 space-y-3">
-              {[
-                { href: "/#processo", label: "Como isso vira objeto" },
-                { href: "/personalizados", label: "Encomendas" },
-                { href: "/colecoes", label: "Tudo que está pronto" },
-                { href: "/politicas", label: "Prazos e cuidados" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-body-small text-secondary transition-colors duration-300 hover:text-primary"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        <div className="flex-[1_1_200px]">
+          <p className="label text-quaternary">Ateliê</p>
+          <ul className="mt-3.5 space-y-[9px] text-body-small text-secondary">
+            <li>{ATELIER_HOURS}</li>
+            <li>{ATELIER_CITY}</li>
+            <li>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors duration-300 hover:text-primary"
+              >
+                {INSTAGRAM_HANDLE}
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div className="shell flex flex-col justify-between gap-2 border-t border-border-subtle py-8 text-body-small text-tertiary sm:flex-row">
-        <p>
-          © {year} {SITE_NAME} Estúdio de impressão 3D
-        </p>
-        <div className="flex gap-8">
-          <p className="italic">Feito à mão, camada por camada</p>
+      <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-3.5 border-t border-border-subtle pt-[18px] text-[11.5px] uppercase tracking-[0.13em] text-quaternary">
+        <span>
+          © {year} {SITE_NAME}
+        </span>
+        <div className="flex items-center gap-6">
+          {/* Formatado a partir da mesma constante que o carrinho usa, para o
+              rodapé não anunciar um limite que o checkout não pratica. */}
+          <span>Frete grátis acima de {formatPrice(FREE_SHIPPING_THRESHOLD)}</span>
           <ThemeToggle />
         </div>
       </div>

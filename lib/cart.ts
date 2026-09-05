@@ -23,3 +23,13 @@ export function getCartTotals(
     count: items.reduce((acc, item) => acc + item.quantity, 0),
   };
 }
+
+/**
+ * O total que a pessoa paga, já com o desconto do Pix.
+ *
+ * Vive aqui porque o resumo do pedido e o botão de confirmar precisam dizer o
+ * mesmo número — calculado em dois lugares, um dia divergem.
+ */
+export function payableTotal(totals: CartTotals, pixDiscount = 0): number {
+  return totals.total - Math.round(totals.subtotal * pixDiscount);
+}

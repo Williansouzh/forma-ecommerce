@@ -66,6 +66,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 120, height: 220, depth: 120 },
     weight: 310,
     isCustom: false,
+    badge: "Conjunto",
     isFeatured: true,
   },
   {
@@ -92,7 +93,7 @@ const DEMO_PRODUCTS = [
     weight: 260,
     isCustom: false,
     isFeatured: true,
-    badge: "Novo",
+    badge: "38 juntas móveis",
   },
   {
     name: "Gato de Contorno",
@@ -116,7 +117,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 150, height: 180, depth: 40 },
     weight: 90,
     isCustom: false,
-    isFeatured: false,
+    isFeatured: true,
   },
   {
     name: "Suporte Onda",
@@ -169,7 +170,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 300, height: 240, depth: 25 },
     weight: 520,
     isCustom: true,
-    isFeatured: true,
+    isFeatured: false,
     badge: "Sob medida",
   },
   {
@@ -195,6 +196,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 38, height: 28, depth: 4 },
     weight: 6,
     isCustom: true,
+    badge: "Com nome",
     isFeatured: false,
   },
   {
@@ -221,7 +223,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 130, height: 210, depth: 130 },
     weight: 340,
     isCustom: false,
-    isFeatured: true,
+    isFeatured: false,
   },
   {
     name: "Mini Dinos",
@@ -246,6 +248,7 @@ const DEMO_PRODUCTS = [
     dimensions: { width: 60, height: 70, depth: 40 },
     weight: 25,
     isCustom: false,
+    badge: "Kit com 6",
     isFeatured: false,
   },
 ];

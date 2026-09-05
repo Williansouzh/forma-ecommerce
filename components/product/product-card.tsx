@@ -7,6 +7,7 @@ import type { Product } from "@/types/product";
 import { useUIStore } from "@/stores/ui-store";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice, cn } from "@/lib/utils";
+import { availabilityNote } from "@/lib/product-availability";
 
 type CardVariant = "large" | "medium" | "tall" | "wide" | "horizontal";
 
@@ -29,27 +30,6 @@ const ratio: Record<CardVariant, string> = {
   wide: "aspect-[5/4]",
   horizontal: "aspect-square",
 };
-
-/**
- * Estoque e prazo se dizem com palavra, não com semáforo. O prazo aparece
- * sempre que a peça está disponível — é a informação que decide a compra.
- */
-function availabilityNote(product: Product): string | null {
-  const soldOut = !product.isAvailable || product.stock === 0;
-  if (soldOut) return "Esgotado";
-  if (product.price === 0) return "Sob encomenda";
-  if (typeof product.stock === "number" && product.stock <= 3) {
-    return product.stock === 1
-      ? "Última peça"
-      : `Últimas ${product.stock} unidades`;
-  }
-  if (typeof product.productionTime === "number") {
-    return product.isCustom
-      ? `Feito depois do seu pedido — ${product.productionTime} dias`
-      : `Pronto em ${product.productionTime} dias`;
-  }
-  return null;
-}
 
 export function ProductCard({
   product,
@@ -87,6 +67,7 @@ export function ProductCard({
       slug: product.slug,
       image: primaryImage?.url,
       variantName: firstVariant?.name,
+      productionTime: product.productionTime,
     });
     pushToast(`${product.name} — no carrinho`);
     openCart();
