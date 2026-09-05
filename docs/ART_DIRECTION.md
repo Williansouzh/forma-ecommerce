@@ -62,16 +62,19 @@ objeto, nunca chama atenção para si mesma.
 
 | Superfície | Tratamento |
 |---|---|
-| Header | transparente → blur no scroll; progress bar fixa |
-| Hero | display 124px com palavra vazada; vitrine com slow-zoom + grain + etiqueta; meta row |
+| Header | barra clara translúcida + blur, sempre; régua reage ao scroll; progress bar fixa |
+| Hero | foto full-bleed com slow-zoom; display sobre a foto, terceira linha vazada; cartão "Ao vivo"; meta row |
 | Marquee | faixa ink infinita, pausa em hover/focus |
-| Destaques | grid assimétrico 12 cols + ghost numerals |
+| Destaques | quatro peças em `flex-wrap`, larguras e proporções desiguais, duas colunas deslocadas na vertical |
 | Manifesto | hairline + frase display + assinatura tracking 0.3em |
 | Coleções | células editoriais com numeral fantasma + preview de imagem no hover |
 | Sob medida | cartão muted com steps sequenciais (mantido) |
-| Processo | seção ink com grain + glow radial accent + timeline numerada |
+| Catálogo | chips de categoria no topo + ordenação à direita; grade `auto-fill` de 260px, cards alinhados |
+| Produto | galeria 4/5 com miniaturas em linha; coluna direita fixa: categoria, preço com parcela, prazo em caixa areia, cores com nome, ficha em `dl` |
+| Checkout | página única com três grupos numerados; resumo em `aside` fixo; botão repete o total |
+| Processo | seção ink com timeline numerada e o tempo real de cada etapa |
 | CTA final | ink full-bleed, display 124px vazado, botão invertido |
-| Footer | ink com wordmark marca-d'água gigante |
+| Footer | ink em três colunas, colado ao CTA acima |
 
 ## Próximos passos (não implementados ainda)
 
@@ -119,6 +122,16 @@ Par tipográfico: **Fraunces** (display, eixos `SOFT`/`WONK`/`opsz`, peso
 300–400) + **Karla** (corpo e etiquetas). Raio: `sm:0 · md:2px · lg:3px ·
 xl:4px`. Grão global no `body` a 28% `multiply` (20% `overlay` no escuro).
 
+Dois utilitários carregam o ritmo claro/escuro (`app/globals.css`):
+
+- **`.ink`** — a seção sempre escura, independente do tema. Redefine as
+  variáveis de cor dentro do próprio bloco, então `bg-surface`,
+  `text-secondary` e `border-border-subtle` seguem valendo lá dentro, já
+  lendo a paleta noturna. É o que evita `#1B1A15` solto no JSX.
+- **`.type-outline`** — a linha vazada dos títulos grandes (`-webkit-text-stroke`
+  sobre `color: transparent`). Só funciona acima de ~32px: abaixo disso o
+  traço come a letra.
+
 ## Registro de decisões (continuação)
 
 | ID | Classe | Decisão |
@@ -131,6 +144,16 @@ xl:4px`. Grão global no `body` a 28% `multiply` (20% `overlay` no escuro).
 | A-034 | **AVOID** | Grid bento proibido na vitrine. O layout modular 7/5·4/4/4·12 é assinatura de landing page de software; editorial é irregular por definição — alturas alternadas (`3/4`, `1/1`, `4/5`, `5/4`) e offsets verticais |
 | A-035 | **AVOID** | Nenhum botão flutuante sobre a foto do produto. FAB circular com sombra é UI de aplicativo e tapa o objeto; "Adicionar" aparece no hover, embaixo do preço |
 | A-036 | **ADAPT** | Ícones em `strokeWidth={1}` e elenco reduzido (sacola, busca, seta). Toggle sol/lua sai do header — affordance de ferramenta de desenvolvedor — e vira controle em texto no rodapé ("Luz baixa" / "Luz do dia") |
+| A-037 | **REVISADA** | Header deixa de ser transparente no topo. Com o hero virando foto escura full-bleed, tinta escura sobre transparente sumia na imagem; a barra passa a ser clara e translúcida sempre, e só a régua inferior reage ao scroll |
+| A-038 | **INVENT** | Seção ink como bloco de variáveis com escopo (`.ink`), não como hex no componente. O handoff pede "sempre pelas classes/tokens do projeto"; redefinir os tokens dentro do bloco deixa as mesmas utilitárias servirem as duas paletas |
+| A-039 | **INVENT** | A ordem da vitrine é decisão editorial, não ordem de documento. `FeaturedProducts` ancora na sequência do catálogo local — o primeiro slot é o maior, e deixar o Mongo escolher quem ocupa ele entrega destaque a peça aleatória |
+| A-040 | **REVISADA** | A régua é 1360px com recuo `clamp(16px, 4vw, 64px)`, não 1280/64. A diferença de 93px na coluna aparecia em toda seção e deixava a loja inteira mais estreita que o desenho |
+| A-041 | **REVISADA** | Header `sticky`, não `fixed`. Com o hero virando foto full-bleed, a barra fixa deixava a foto passar por trás e subia o conteúdo 73px; no fluxo, cada tela usa o recuo do próprio desenho em vez de compensar a barra |
+| A-042 | **REVISADA** | Filtros de faixa de preço, tamanho, cor e material saem do catálogo. O desenho filtra por chip de categoria e ordena por select — a lateral era invenção nossa, e um catálogo de 9 peças não a sustenta |
+| A-043 | **INVENT** | Degraus de texto sobre ink são areia rebaixada (72% / 55% / 42% de `#EDE6D7`), guardados já mesclados. Os neutros do tema escuro puxam para o amarelo e sujam o texto em cima de foto |
+| A-044 | **AVOID** | Nada de simular frete. O `ShippingEstimator` pedia CEP e devolvia "2 a 4 dias úteis" derivado do primeiro dígito, sem consultar transportadora — chute vestido de cálculo. Virou `ShippingNote`: valor fixo e quanto falta para o frete grátis |
+| A-045 | **AVOID** | Checkout não coleta dados de cartão. Os quatro campos que existiam eram teatro: o payload nunca os enviava e a cobrança acontece no Mercado Pago. Pedir número de cartão para descartá-lo é risco sem contrapartida |
+| A-046 | **ADAPT** | O grupo "Entrega" do desenho tem quatro campos; mantivemos sete. `AddressDto` exige bairro e UF, e etiqueta de envio não sai sem eles — a lista do protótipo é ilustrativa, como os campos de token do painel |
 
 ## Armadilhas registradas
 
@@ -142,6 +165,45 @@ xl:4px`. Grão global no `body` a 28% `multiply` (20% `overlay` no escuro).
   `if (products.length === 0)` nunca chega a rodar.
 - **`npm run build` com `next dev` ativo corrompe `.next`.** Sintoma:
   `Cannot find module './vendor-chunks/…'` e 500 em rotas dinâmicas.
+- **O seed da API não roda em volume que já tem produtos.** `SEED_DEMO=true`
+  não basta: `seedProducts` sai cedo com `countDocuments() > 0`. Mudança em
+  `data/products.ts` + `seed.service.ts` não chega ao container até o volume
+  ser recriado — ou ser aplicada no banco à mão.
+- **Comparar telas em miniatura não prova nada.** Uma diferença de 93px na
+  largura do container some num thumbnail de 620px. Vale medir
+  `getBoundingClientRect()` dos containers e amostrar pixel nos mesmos pontos.
+- **`captureBeyondViewport` não compõe `backdrop-filter`.** O elemento
+  desaparece da captura mesmo com `opacity: 1` no DOM. Para conferir cartão
+  com blur, capture só a viewport.
+
+## Verificação automática
+
+`npm run lint`, `npm run typecheck` e os guardas `ci:*` rodam no CI
+(`.github/workflows/ci.yml`) para os dois pacotes. Os guardas vieram do
+`flora-lis-site`, onde já pegaram incidentes reais:
+
+| Comando | O que pega |
+| --- | --- |
+| `ci:workflows` | erro de sintaxe no shell embutido nos workflows |
+| `ci:actions` | Action remota sem SHA imutável |
+| `ci:compose` | tag de imagem inexistente — `compose pull` aborta inteiro |
+| `ci:audit` | vulnerabilidade high/critical fora da allowlist documentada |
+| `openapi:check` (api) | contrato versionado divergente das rotas registradas |
+| `api:types:check` | `types/generated/api-v1.d.ts` divergente do contrato |
+
+Os dois últimos fecham uma corrente: mudou o controller ou o schema da API →
+muda `api/openapi/v1.json` → mudam os tipos gerados → o `tsc` da loja quebra
+no mesmo commit. Antes, renomear um campo no `product.schema.ts` passava por
+lint, type-check e build, e só aparecia como campo vazio na tela. O
+`lib/api.ts` traduz `ApiProduct` para o tipo de domínio campo a campo, de
+propósito: `_id` vira `id`, a imagem ganha `isPrimary`/`order` que só existem
+no front, e `rating` não existe na API — um spread cru esconderia as três.
+
+O `ci:audit` existe no lugar de `npm audit --audit-level=high` porque as três
+descobertas atuais vêm de cópias que o próprio Next carrega e só somem no
+upgrade para o Next 16. Passo permanentemente vermelho deixa de ser lido; a
+allowlist registra motivo e condição de saída de cada uma, e qualquer
+descoberta nova continua quebrando o build.
 
 ## Correções pendentes na Documentação Técnica v2.0
 
