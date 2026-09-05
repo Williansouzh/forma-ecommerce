@@ -1,13 +1,13 @@
 import * as path from "path";
+import * as fs from "fs";
 import * as dotenv from "dotenv";
 
+// O `.env` só existe fora do container: em produção as variáveis vêm do
+// ambiente. Ausência do arquivo é o caso normal, não erro.
 const envPath = path.resolve(process.cwd(), ".env");
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require("fs").accessSync(envPath);
+if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
-  // eslint-disable-next-line no-empty
-} catch {}
+}
 
 export interface ApiConfig {
   port: number;

@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela execuções antigas do mesmo ref ao receber um novo push.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── API: lint, type-check e build ────────────────────────────────────────
+  api:
+    name: API — lint + type-check + contrato
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    # `app.init()` aguarda a conexão do Mongoose, e sem app inicializado o
+    # scanner não enxerga rota nenhuma — o contrato sairia vazio.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27018:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Instala dependências
+        run: npm ci
+
+      - name: Instala PyYAML para os guardas
+        run: pip install --quiet pyyaml
+
+      - name: Audita dependências de produção
+        run: python3 ../scripts/check-audit.py
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      # Fecha metade da corrente: mudou controller ou schema, o contrato
+      # versionado tem de acompanhar no mesmo commit.
+      - name: Verifica contrato OpenAPI
+        run: npm run openapi:check
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27018/openapi
+
+  # ── Web: guardas, lint, type-check e build ───────────────────────────────
+  web:
+    name: Web — lint + type-check + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instala dependências
+        run: npm ci
+
+      - name: Instala PyYAML para os guardas
+        run: pip install --quiet pyyaml
+
+      # `npm audit` puro ficaria vermelho por meses por causa de cópias
+      # aninhadas do Next, e um passo permanentemente vermelho deixa de ser
+      # lido. O guarda tem allowlist com motivo e condição de saída, então
+      # descoberta NOVA continua quebrando o build.
+      - name: Audita dependências de produção
+        run: npm run ci:audit
+
+      # Sintaxe do shell embutido nos workflows. Um erro de aspas no script de
+      # deploy só apareceria com o job já rodando no servidor.
+      - name: Valida shell dos workflows
+        run: npm run ci:workflows
+
+      # Tag de Action é mutável; SHA não. Sem isso o CI pode passar a executar
+      # código que ninguém revisou.
+      - name: Exige Actions fixadas por SHA
+        run: npm run ci:actions
+
+      # `docker compose pull` aborta por inteiro quando UMA imagem não resolve,
+      # e o deploy roda com `set -e`.
+      - name: Valida imagens dos composes
+        run: npm run ci:compose
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      # A outra metade: os tipos gerados têm de bater com o contrato. Sem isto
+      # a loja compila contra um contrato que a API não serve mais.
+      - name: Verifica tipos gerados da API
+        run: npm run api:types:check
+
+      - name: Build
+        run: npm run build
+        env:
+          # O build não fala com a API — as páginas são `force-dynamic` e caem
+          # no catálogo local quando ela não responde.
+          NEXT_PUBLIC_API_URL: http://localhost:4001
