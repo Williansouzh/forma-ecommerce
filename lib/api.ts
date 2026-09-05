@@ -1,5 +1,13 @@
 import type { Product } from "@/types/product";
+import type { components } from "@/types/generated/api-v1";
 import { PRODUCTS, getProduct } from "@/data/products";
+
+/**
+ * A forma exata que a API devolve, gerada do contrato OpenAPI — não escrita à
+ * mão. Renomear um campo no `product.schema.ts` da API agora quebra o build
+ * daqui, em vez de aparecer como campo vazio na tela.
+ */
+type ApiProduct = components["schemas"]["Product"];
 
 export interface ApiProductFilters {
   category?: string;
@@ -13,38 +21,52 @@ const API_URL =
   process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const BASE = `${API_URL}/api/v1`;
 
-type RawProduct = Record<string, unknown>;
+/**
+ * Traduz o produto da API para o tipo de domínio da loja.
+ *
+ * A tradução é explícita campo a campo de propósito: o `_id` do Mongo vira
+ * `id`, a imagem ganha `id`/`isPrimary`/`order` que só existem no front, e
+ * `rating`/`reviewCount` não existem na API — vêm do catálogo local. Um
+ * spread cru mascararia as três diferenças.
+ */
+function mapProduct(raw: ApiProduct): Product {
+  const localProduct = getProduct(raw.slug);
+  const mappedImages = raw.images.map((image, index) => ({
+    id: `${raw._id}-img-${index}`,
+    url: image.url,
+    alt: image.alt,
+    isPrimary: index === 0,
+    order: index,
+  }));
 
-function mapProduct(raw: RawProduct): Product {
-  const localProduct = getProduct(String(raw.slug ?? ""));
-  const images = Array.isArray(raw.images) ? raw.images : [];
-  const variants = Array.isArray(raw.variants) ? raw.variants : [];
-  const mappedImages = images.map((image, index) => {
-    const img = image as { url: string; alt?: string };
-    return {
-      id: `${String(raw.id ?? raw.slug)}-img-${index}`,
-      url: img.url,
-      alt: img.alt ?? "",
-      isPrimary: index === 0,
-      order: index,
-    };
-  });
   return {
-    ...localProduct,
-    ...(raw as unknown as Product),
+    id: raw._id,
+    slug: raw.slug,
+    name: raw.name,
+    description: raw.description,
+    shortDescription: raw.shortDescription,
+    price: raw.price,
+    originalPrice: raw.originalPrice,
+    category: raw.category,
+    tags: raw.tags,
     images: mappedImages.length > 0 ? mappedImages : (localProduct?.images ?? []),
     variants:
-      variants.length > 0
-        ? (variants as Product["variants"])
-        : (localProduct?.variants ?? []),
-    rating:
-      typeof raw.rating === "number" ? raw.rating : localProduct?.rating,
-    reviewCount:
-      typeof raw.reviewCount === "number"
-        ? raw.reviewCount
-        : localProduct?.reviewCount,
-    stock:
-      typeof raw.stock === "number" ? raw.stock : localProduct?.stock,
+      raw.variants.length > 0 ? raw.variants : (localProduct?.variants ?? []),
+    dimensions: raw.dimensions,
+    weight: raw.weight,
+    material: raw.material,
+    productionTime: raw.productionTime,
+    stock: raw.stock ?? localProduct?.stock,
+    isAvailable: raw.isAvailable,
+    isCustom: raw.isCustom,
+    isFeatured: raw.isFeatured,
+    badge: raw.badge,
+    // A API não guarda avaliação; enquanto não guardar, é o catálogo local
+    // que responde — e some sozinho quando o campo existir lá.
+    rating: localProduct?.rating,
+    reviewCount: localProduct?.reviewCount,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
   };
 }
 
@@ -69,9 +91,9 @@ export async function fetchProducts(
   const query = params.toString();
   // Com a API fora, seguimos só com o catálogo local: a mesclagem e os filtros
   // abaixo já sabem lidar com uma lista remota vazia.
-  let rows: RawProduct[] = [];
+  let rows: ApiProduct[] = [];
   try {
-    rows = await request<RawProduct[]>(`/products${query ? `?${query}` : ""}`);
+    rows = await request<ApiProduct[]>(`/products${query ? `?${query}` : ""}`);
   } catch {
     rows = [];
   }
@@ -112,7 +134,7 @@ export async function fetchProducts(
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   try {
-    const raw = await request<RawProduct | null>(`/products/${slug}`);
+    const raw = await request<ApiProduct | null>(`/products/${slug}`);
     return raw ? mapProduct(raw) : null;
   } catch {
     return getProduct(slug) ?? null;
@@ -123,14 +145,17 @@ export async function fetchRelatedProducts(
   product: Pick<Product, "slug" | "category">,
   limit = 4
 ): Promise<Product[]> {
+  // Começa pela categoria, mas completa com o resto do catálogo: uma
+  // categoria de quatro peças devolveria três e deixaria a fileira de quatro
+  // colunas com um buraco.
   try {
-    const rows = await request<RawProduct[]>(
-      `/products?category=${encodeURIComponent(product.category)}&limit=${limit + 1}`
+    const all = await fetchProducts();
+    const others = all.filter((item) => item.slug !== product.slug);
+    const sameCategory = others.filter(
+      (item) => item.category === product.category
     );
-    return rows
-      .map(mapProduct)
-      .filter((item) => item.slug !== product.slug)
-      .slice(0, limit);
+    const rest = others.filter((item) => item.category !== product.category);
+    return [...sameCategory, ...rest].slice(0, limit);
   } catch {
     return [];
   }
