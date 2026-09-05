@@ -4,6 +4,10 @@ services:
     container_name: forma-mongo
     volumes:
       - forma-mongo-data:/data/db
+    # Preso em 127.0.0.1: serve para inspecionar o banco e para gerar o
+    # contrato OpenAPI a partir da máquina, sem expor o Mongo na rede.
+    ports:
+      - "127.0.0.1:27018:27017"
     restart: unless-stopped
 
   api:
@@ -17,6 +21,10 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-forma-admin-2026}
       ADMIN_NAME: ${ADMIN_NAME:-Super Admin}
       SEED_DEMO: ${SEED_DEMO:-true}
+      # O Mercado Pago precisa alcançar estas URLs de fora: em produção,
+      # aponte para o domínio público, senão o webhook nunca chega.
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:4001}
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3222}
       CORS_ORIGIN: http://localhost:3222,http://localhost:3000,http://localhost:3001
     depends_on:
       - mongo

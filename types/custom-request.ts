@@ -17,6 +17,8 @@ export type RequestStatus =
 
 export interface CustomRequest {
   id: string;
+  /** Código curto do orçamento: ORC-101. */
+  code: string;
   customerName: string;
   customerEmail: string;
   description: string;
@@ -25,5 +27,6 @@ export interface CustomRequest {
   budget?: number;
   deadline?: string;
   status: RequestStatus;
-  createdAt: Date;
+  customerPhone?: string;
+  createdAt: string | Date;
 }

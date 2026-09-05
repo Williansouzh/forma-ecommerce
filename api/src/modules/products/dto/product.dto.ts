@@ -24,6 +24,23 @@ export class ProductImageDto {
   alt!: string;
 }
 
+export class ProductVariantDto {
+  @IsString() @MinLength(1)
+  id!: string;
+
+  @IsString() @MinLength(1)
+  name!: string;
+
+  @IsOptional() @IsString() @MaxLength(9)
+  colorHex?: string;
+
+  @IsInt()
+  priceAdjustment: number = 0;
+
+  @IsInt() @Min(0)
+  stock: number = 0;
+}
+
 export class DimensionsDto {
   @IsInt() @Min(0) width!: number;
   @IsInt() @Min(0) height!: number;
@@ -60,11 +77,19 @@ export class CreateProductDto {
   @Type(() => ProductImageDto)
   images!: ProductImageDto[];
 
+  @IsOptional() @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
+
   @IsOptional() @IsString()
   material?: string;
 
   @IsOptional() @IsInt() @Min(0)
   productionTime?: number;
+
+  @IsOptional() @IsInt() @Min(0)
+  stock?: number;
 
   @IsOptional() @ValidateNested()
   @Type(() => DimensionsDto)
@@ -78,6 +103,9 @@ export class CreateProductDto {
 
   @IsBoolean() @IsOptional()
   isFeatured?: boolean;
+
+  @IsBoolean() @IsOptional()
+  isCustom?: boolean;
 
   @IsOptional() @IsString() @MaxLength(40)
   badge?: string;
@@ -110,11 +138,19 @@ export class UpdateProductDto {
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];
 
+  @IsOptional() @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
+
   @IsOptional() @IsString()
   material?: string;
 
   @IsOptional() @IsInt() @Min(0)
   productionTime?: number;
+
+  @IsOptional() @IsInt() @Min(0)
+  stock?: number;
 
   @IsOptional() @ValidateNested()
   @Type(() => DimensionsDto)
@@ -128,6 +164,9 @@ export class UpdateProductDto {
 
   @IsOptional() @IsBoolean()
   isFeatured?: boolean;
+
+  @IsOptional() @IsBoolean()
+  isCustom?: boolean;
 
   @IsOptional() @IsString() @MaxLength(40)
   badge?: string;

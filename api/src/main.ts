@@ -26,7 +26,7 @@ async function bootstrap() {
 
   const port = config.get<number>("port") ?? 4000;
   await app.listen(port);
-  Logger.log(`API FORMA no ar em http://localhost:${port}/api/v1`, "Bootstrap");
+  Logger.log(`API c3dcriativ no ar em http://localhost:${port}/api/v1`, "Bootstrap");
 }
 
 void bootstrap();

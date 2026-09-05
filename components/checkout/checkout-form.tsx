@@ -1,18 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, CreditCard, QrCode, Barcode, Lock } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import type { CartItem, PaymentMethod } from "@/types";
-import {
-  maskCEP,
-  maskCPF,
-  maskCard,
-  maskExpiry,
-  maskPhone,
-  cn,
-} from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { maskCEP, maskPhone, formatPrice } from "@/lib/utils";
 
 export interface CheckoutData {
   email: string;
@@ -27,10 +18,6 @@ export interface CheckoutData {
   neighborhood: string;
   city: string;
   state: string;
-  cardNumber: string;
-  cardName: string;
-  cardExpiry: string;
-  cardCvv: string;
 }
 
 export const emptyCheckout: CheckoutData = {
@@ -46,17 +33,7 @@ export const emptyCheckout: CheckoutData = {
   neighborhood: "",
   city: "",
   state: "",
-  cardNumber: "",
-  cardName: "",
-  cardExpiry: "",
-  cardCvv: "",
 };
-
-const STEPS = [
-  { id: "info", label: "Informações" },
-  { id: "delivery", label: "Entrega" },
-  { id: "payment", label: "Pagamento" },
-] as const;
 
 const STORAGE_KEY = "forma-checkout";
 
@@ -69,39 +46,50 @@ function loadSaved(): Partial<CheckoutData> {
   }
 }
 
+/**
+ * As três formas que o Mercado Pago realmente processa. O protótipo desenha
+ * "Combinar no WhatsApp" como terceira opção, mas não há nada ligado atrás
+ * dela — botão que não faz nada é pior que botão que falta.
+ */
+const PAYMENTS: { id: PaymentMethod; name: string; note: string }[] = [
+  { id: "pix", name: "Pix", note: "5% de desconto" },
+  { id: "credit_card", name: "Cartão", note: "até 3× sem juros" },
+  { id: "boleto", name: "Boleto", note: "até 3 dias para compensar" },
+];
+
 interface FieldErrors {
   [key: string]: string | undefined;
 }
 
-const paymentOptions: {
-  id: PaymentMethod;
-  label: string;
-  description: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-}[] = [
-  { id: "pix", label: "Pix", description: "Aprovação imediata · 5% de desconto", icon: QrCode },
-  { id: "credit_card", label: "Cartão de crédito", description: "Em até 12x", icon: CreditCard },
-  { id: "boleto", label: "Boleto bancário", description: "Até 3 dias úteis para compensar", icon: Barcode },
-];
-
+/**
+ * Uma página, três grupos numerados — a estrutura do handoff.
+ *
+ * O assistente de três passos que existia aqui escondia o custo do formulário
+ * atrás de "Continuar"; numa compra de peça única, ver tudo de uma vez é mais
+ * curto. Os dados de cartão saíram: quem cobra é o Mercado Pago, e o campo
+ * daqui coletava o número para descartá-lo.
+ */
 export function CheckoutForm({
-  items,
   paymentMethod,
   onPaymentMethodChange,
   onComplete,
+  total,
+  submitting = false,
+  submitError = null,
 }: {
   items: CartItem[];
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   onComplete: (data: CheckoutData, method: PaymentMethod) => void;
+  total: number;
+  submitting?: boolean;
+  submitError?: string | null;
 }) {
-  const [step, setStep] = useState(0);
   const [data, setData] = useState<CheckoutData>(() => ({
     ...emptyCheckout,
     ...loadSaved(),
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
-  const payment = paymentMethod;
 
   useEffect(() => {
     try {
@@ -112,378 +100,209 @@ export function CheckoutForm({
   const set = (field: keyof CheckoutData) => (value: string) =>
     setData((current) => ({ ...current, [field]: value }));
 
-  const validateInfo = (): FieldErrors => {
-    const next: FieldErrors = {};
-    if (!/.+@.+\..+/.test(data.email)) next.email = "E-mail inválido";
-    if (!data.firstName.trim()) next.firstName = "Obrigatório";
-    if (!data.lastName.trim()) next.lastName = "Obrigatório";
-    if (data.cpf.replace(/\D/g, "").length !== 11) next.cpf = "CPF incompleto";
-    if (data.phone.replace(/\D/g, "").length < 10)
-      next.phone = "Telefone incompleto";
-    return next;
+  /** O desenho pede um campo só; a API quer nome e sobrenome separados. */
+  const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ");
+  const setFullName = (value: string) => {
+    const parts = value.trim().split(/\s+/);
+    setData((current) => ({
+      ...current,
+      firstName: parts[0] ?? "",
+      lastName: parts.slice(1).join(" "),
+    }));
   };
 
-  const validateDelivery = (): FieldErrors => {
+  const validate = (): FieldErrors => {
     const next: FieldErrors = {};
+    if (!data.firstName.trim()) next.fullName = "Obrigatório";
+    if (!/.+@.+\..+/.test(data.email)) next.email = "E-mail inválido";
+    if (data.phone.replace(/\D/g, "").length < 10)
+      next.phone = "WhatsApp incompleto";
     if (data.zipCode.replace(/\D/g, "").length !== 8)
       next.zipCode = "CEP incompleto";
     if (!data.street.trim()) next.street = "Obrigatório";
     if (!data.number.trim()) next.number = "Obrigatório";
     if (!data.neighborhood.trim()) next.neighborhood = "Obrigatório";
     if (!data.city.trim()) next.city = "Obrigatório";
-    if (!data.state.trim() || data.state.length !== 2)
-      next.state = "UF com 2 letras";
+    if (data.state.trim().length !== 2) next.state = "UF com 2 letras";
     return next;
   };
 
-  const validatePayment = (): FieldErrors => {
-    const next: FieldErrors = {};
-    if (payment === "credit_card") {
-      if (data.cardNumber.replace(/\D/g, "").length !== 16)
-        next.cardNumber = "Número do cartão incompleto";
-      if (!data.cardName.trim()) next.cardName = "Obrigatório";
-      if (data.cardExpiry.length < 5) next.cardExpiry = "Validade incompleta";
-      if (data.cardCvv.length < 3) next.cardCvv = "CVV incompleto";
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const found = validate();
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      // Leva o foco para o primeiro campo com erro, senão o aviso fica fora
+      // da tela num formulário desta altura.
+      const first = document.querySelector<HTMLElement>('[aria-invalid="true"]');
+      first?.focus();
+      return;
     }
-    return next;
-  };
-
-  const validations = [validateInfo, validateDelivery, validatePayment];
-
-  const next = () => {
-    const found = validations[step]();
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
-    setStep((current) => Math.min(current + 1, 2));
-  };
-
-  const back = () => {
-    setErrors({});
-    setStep((current) => Math.max(current - 1, 0));
-  };
-
-  const submit = () => {
-    const found = validatePayment();
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
-    onComplete(data, payment);
+    onComplete(data, paymentMethod);
   };
 
   return (
-    <div>
-      <ol
-        aria-label="Progresso do checkout"
-        className="flex items-center gap-3"
-      >
-        {STEPS.map((stepDef, index) => (
-          <li key={stepDef.id} className="flex flex-1 items-center gap-3">
-            <button
-              type="button"
-              onClick={() =>
-                index < step &&
-                (setStep(index), setErrors({}))
+    <form
+      onSubmit={handleSubmit}
+      className="min-w-[280px] flex-[1_1_min(100%,440px)]"
+      noValidate
+    >
+      <fieldset className="border-0 p-0">
+        <legend className="label text-tertiary">01 · Seus dados</legend>
+        <div className="mt-4 flex flex-wrap gap-3.5">
+          <div className="flex-[1_1_100%]">
+            <Input
+              label="Nome completo"
+              autoComplete="name"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              error={errors.fullName}
+            />
+          </div>
+          <div className="flex-[1_1_220px]">
+            <Input
+              label="E-mail"
+              type="email"
+              autoComplete="email"
+              value={data.email}
+              onChange={(event) => set("email")(event.target.value)}
+              error={errors.email}
+            />
+          </div>
+          <div className="flex-[1_1_160px]">
+            <Input
+              label="WhatsApp"
+              type="tel"
+              autoComplete="tel"
+              value={data.phone}
+              onChange={(event) => set("phone")(maskPhone(event.target.value))}
+              error={errors.phone}
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-8 border-0 p-0">
+        <legend className="label text-tertiary">02 · Entrega</legend>
+        <div className="mt-4 flex flex-wrap gap-3.5">
+          <div className="flex-[1_1_130px]">
+            <Input
+              label="CEP"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              value={data.zipCode}
+              onChange={(event) => set("zipCode")(maskCEP(event.target.value))}
+              className="tabular-nums"
+              error={errors.zipCode}
+            />
+          </div>
+          <div className="flex-[2_1_220px]">
+            <Input
+              label="Endereço"
+              autoComplete="address-line1"
+              value={data.street}
+              onChange={(event) => set("street")(event.target.value)}
+              error={errors.street}
+            />
+          </div>
+          <div className="flex-[1_1_100px]">
+            <Input
+              label="Número"
+              inputMode="numeric"
+              value={data.number}
+              onChange={(event) => set("number")(event.target.value)}
+              error={errors.number}
+            />
+          </div>
+          <div className="flex-[1_1_140px]">
+            <Input
+              label="Complemento"
+              value={data.complement}
+              onChange={(event) => set("complement")(event.target.value)}
+            />
+          </div>
+          {/* Bairro e UF não estão no desenho, mas a etiqueta de envio não
+              sai sem eles — e a API rejeita o pedido sem os dois. */}
+          <div className="flex-[1_1_160px]">
+            <Input
+              label="Bairro"
+              autoComplete="address-level3"
+              value={data.neighborhood}
+              onChange={(event) => set("neighborhood")(event.target.value)}
+              error={errors.neighborhood}
+            />
+          </div>
+          <div className="flex-[1_1_160px]">
+            <Input
+              label="Cidade"
+              autoComplete="address-level2"
+              value={data.city}
+              onChange={(event) => set("city")(event.target.value)}
+              error={errors.city}
+            />
+          </div>
+          <div className="flex-[0_1_90px]">
+            <Input
+              label="UF"
+              maxLength={2}
+              autoComplete="address-level1"
+              value={data.state}
+              onChange={(event) =>
+                set("state")(event.target.value.toUpperCase().slice(0, 2))
               }
-              disabled={index >= step}
-              aria-current={index === step ? "step" : undefined}
-              className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-full text-body-small font-medium transition-colors",
-                index < step && "bg-success text-background",
-                index === step && "bg-primary text-background",
-                index > step &&
-                  "border border-strong text-tertiary",
-                index < step && "cursor-pointer hover:bg-success/90"
-              )}
-            >
-              {index < step ? <CheckCircle2 size={16} /> : index + 1}
-            </button>
-            <span
-              className={cn(
-                "hidden text-caption uppercase sm:block",
-                index === step ? "text-primary" : "text-tertiary"
-              )}
-            >
-              {stepDef.label}
-            </span>
-            {index < STEPS.length - 1 && (
-              <span className="h-px flex-1 bg-border-subtle">
-                <motion.span
-                  initial={false}
-                  animate={{ scaleX: index < step ? 1 : 0 }}
-                  style={{ originX: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="block h-full bg-accent"
-                />
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
+              error={errors.state}
+            />
+          </div>
+        </div>
+      </fieldset>
 
-      <div className="mt-10">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            {step === 0 && (
-              <fieldset className="grid max-w-xl gap-5">
-                <legend className="sr-only">Informações pessoais</legend>
-                <Input
-                  label="E-mail"
-                  type="email"
-                  autoComplete="email"
-                  value={data.email}
-                  onChange={(event) => set("email")(event.target.value)}
-                  error={errors.email}
-                  placeholder="voce@email.com"
-                />
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Input
-                    label="Nome"
-                    autoComplete="given-name"
-                    value={data.firstName}
-                    onChange={(event) => set("firstName")(event.target.value)}
-                    error={errors.firstName}
-                  />
-                  <Input
-                    label="Sobrenome"
-                    autoComplete="family-name"
-                    value={data.lastName}
-                    onChange={(event) => set("lastName")(event.target.value)}
-                    error={errors.lastName}
-                  />
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Input
-                    label="CPF"
-                    inputMode="numeric"
-                    value={data.cpf}
-                    onChange={(event) => set("cpf")(maskCPF(event.target.value))}
-                    className="tabular-nums"
-                    error={errors.cpf}
-                    placeholder="000.000.000-00"
-                  />
-                  <Input
-                    label="Telefone"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={data.phone}
-                    onChange={(event) =>
-                      set("phone")(maskPhone(event.target.value))
-                    }
-                    className="tabular-nums"
-                    error={errors.phone}
-                    placeholder="(11) 90000-0000"
-                  />
-                </div>
-              </fieldset>
-            )}
+      <fieldset className="mt-8 border-0 p-0">
+        <legend className="label text-tertiary">03 · Pagamento</legend>
+        <div className="mt-4 flex flex-wrap gap-2.5">
+          {PAYMENTS.map((option) => {
+            const active = option.id === paymentMethod;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onPaymentMethodChange(option.id)}
+                aria-pressed={active}
+                className={`min-h-14 flex-[1_1_150px] rounded-md border px-4 py-2 text-left transition-colors ${
+                  active
+                    ? "border-primary bg-surface-muted"
+                    : "border-border-strong hover:border-accent"
+                }`}
+              >
+                <span className="block text-[14px] font-semibold">
+                  {option.name}
+                </span>
+                <span className="block text-[12.5px] text-tertiary">
+                  {option.note}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
-            {step === 1 && (
-              <fieldset className="grid max-w-xl gap-5">
-                <legend className="sr-only">Endereço de entrega</legend>
-                <Input
-                  label="CEP"
-                  inputMode="numeric"
-                  autoComplete="postal-code"
-                  value={data.zipCode}
-                  onChange={(event) => set("zipCode")(maskCEP(event.target.value))}
-                  className="tabular-nums"
-                  error={errors.zipCode}
-                  hint="O endereço é preenchido automaticamente pelo CEP em breve"
-                  placeholder="00000-000"
-                />
-                <div className="grid grid-cols-[1fr_100px] gap-5">
-                  <Input
-                    label="Rua"
-                    autoComplete="address-line1"
-                    value={data.street}
-                    onChange={(event) => set("street")(event.target.value)}
-                    error={errors.street}
-                  />
-                  <Input
-                    label="Número"
-                    inputMode="numeric"
-                    value={data.number}
-                    onChange={(event) => set("number")(event.target.value)}
-                    error={errors.number}
-                  />
-                </div>
-                <Input
-                  label="Complemento"
-                  value={data.complement}
-                  onChange={(event) => set("complement")(event.target.value)}
-                  placeholder="Opcional"
-                />
-                <div className="grid gap-5 sm:grid-cols-3">
-                  <Input
-                    label="Bairro"
-                    value={data.neighborhood}
-                    onChange={(event) =>
-                      set("neighborhood")(event.target.value)
-                    }
-                    error={errors.neighborhood}
-                  />
-                  <Input
-                    label="Cidade"
-                    autoComplete="address-level2"
-                    value={data.city}
-                    onChange={(event) => set("city")(event.target.value)}
-                    error={errors.city}
-                  />
-                  <Input
-                    label="UF"
-                    maxLength={2}
-                    value={data.state}
-                    onChange={(event) =>
-                      set("state")(event.target.value.toUpperCase())
-                    }
-                    error={errors.state}
-                    placeholder="SP"
-                  />
-                </div>
-              </fieldset>
-            )}
+      {submitError && (
+        <p role="alert" className="mt-6 text-body-small text-error">
+          {submitError}
+        </p>
+      )}
 
-            {step === 2 && (
-              <fieldset className="max-w-xl">
-                <legend className="text-caption uppercase text-secondary">
-                  Forma de pagamento
-                </legend>
-                <div className="mt-3 space-y-3">
-                  {paymentOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition-colors",
-                        payment === option.id
-                          ? "border-accent bg-accent/5 ring-1 ring-accent"
-                          : "border-strong hover:border-primary/30"
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="payment"
-                        value={option.id}
-                        checked={payment === option.id}
-                        onChange={() => onPaymentMethodChange(option.id)}
-                        className="sr-only"
-                      />
-                      <span
-                        className={cn(
-                          "flex size-11 shrink-0 items-center justify-center rounded-md",
-                          payment === option.id
-                            ? "bg-accent text-background"
-                            : "bg-surface-muted text-secondary"
-                        )}
-                      >
-                        <option.icon size={20} />
-                      </span>
-                      <span>
-                        <span className="block text-body-small font-medium">
-                          {option.label}
-                        </span>
-                        <span className="block text-caption text-tertiary">
-                          {option.description}
-                        </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
+      <button
+        type="submit"
+        disabled={submitting}
+        className="mt-7 min-h-14 w-full rounded-md bg-primary text-[14.5px] font-semibold text-background transition-colors duration-300 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {submitting ? "Enviando…" : `Confirmar pedido · ${formatPrice(total)}`}
+      </button>
 
-                <AnimatePresence>
-                  {payment === "credit_card" && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid gap-5 pt-6">
-                        <Input
-                          label="Número do cartão"
-                          inputMode="numeric"
-                          value={data.cardNumber}
-                          onChange={(event) =>
-                            set("cardNumber")(maskCard(event.target.value))
-                          }
-                            className="tabular-nums"
-                          error={errors.cardNumber}
-                          placeholder="0000 0000 0000 0000"
-                        />
-                        <Input
-                          label="Nome no cartão"
-                          value={data.cardName}
-                          onChange={(event) =>
-                            set("cardName")(event.target.value.toUpperCase())
-                          }
-                          error={errors.cardName}
-                        />
-                        <div className="grid grid-cols-2 gap-5">
-                          <Input
-                            label="Validade"
-                            inputMode="numeric"
-                            value={data.cardExpiry}
-                            onChange={(event) =>
-                              set("cardExpiry")(maskExpiry(event.target.value))
-                            }
-                            className="tabular-nums"
-                            error={errors.cardExpiry}
-                            placeholder="MM/AA"
-                          />
-                          <Input
-                            label="CVV"
-                            inputMode="numeric"
-                            maxLength={4}
-                            value={data.cardCvv}
-                            onChange={(event) =>
-                              set("cardCvv")(
-                                event.target.value.replace(/\D/g, "")
-                              )
-                            }
-                            className="tabular-nums"
-                            error={errors.cardCvv}
-                            placeholder="000"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <p className="mt-6 flex items-center gap-2 text-caption text-tertiary">
-                  <Lock size={13} />
-                  Ambiente seguro — dados protegidos e criptografados
-                </p>
-              </fieldset>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="mt-10 flex flex-wrap items-center gap-4">
-        {step > 0 && (
-          <button
-            type="button"
-            onClick={back}
-            className="inline-flex h-13 items-center rounded-md border border-strong px-8 py-3.5 text-body font-medium transition-colors hover:bg-surface-muted"
-          >
-            Voltar
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={step === 2 ? submit : next}
-          disabled={items.length === 0}
-          className="inline-flex h-13 items-center justify-center rounded-md border border-primary bg-primary px-10 py-3.5 label text-background transition-all hover:bg-transparent hover:text-primary disabled:pointer-events-none disabled:opacity-40"
-        >
-          {step === 2 ? "Confirmar pedido" : "Continuar"}
-        </button>
-      </div>
-    </div>
+      <p className="mt-3.5 text-body-small text-tertiary">
+        Peças sob encomenda: a produção começa depois da confirmação do
+        pagamento. O cartão é cobrado no Mercado Pago, não aqui.
+      </p>
+    </form>
   );
 }

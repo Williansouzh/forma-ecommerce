@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/breadcrumb";
 export const metadata: Metadata = {
   title: "Políticas",
   description:
-    "Prazos, trocas, personalização e cuidados para peças FORMA. produzidas por impressão 3D.",
+    "Prazos, trocas, personalização e cuidados para peças da c3dcriativ produzidas por impressão 3D.",
   alternates: { canonical: "/politicas" },
 };
 
@@ -30,7 +30,7 @@ const policies = [
 
 export default function PoliciesPage() {
   return (
-    <div className="shell pb-24 pt-28 md:pt-36">
+    <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb
         items={[{ label: "Início", href: "/" }, { label: "Políticas" }]}
       />

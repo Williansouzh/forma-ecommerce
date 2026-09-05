@@ -7,6 +7,8 @@ export interface CartItem {
   slug?: string;
   image?: string;
   variantName?: string;
+  /** Dias úteis de produção da peça — o resumo usa o maior da sacola. */
+  productionTime?: number;
 }
 
 export interface CartTotals {

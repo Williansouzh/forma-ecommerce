@@ -8,6 +8,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/colecoes`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE_URL}/personalizados`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE_URL}/atelier`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/sobre`, changeFrequency: "yearly", priority: 0.5 },
   ];
 
   const categoryRoutes: MetadataRoute.Sitemap = CATEGORIES.map((category) => ({

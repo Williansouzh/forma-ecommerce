@@ -1,6 +1,14 @@
 "use client";
 
+import type { Order, OrderStatus } from "@/types/order";
 import type { Product } from "@/types/product";
+import type {
+  Integration,
+  IntegrationKey,
+  IntegrationTestResult,
+} from "@/types/integration";
+import type { StoreSettings } from "@/types/settings";
+import type { CustomRequest, RequestStatus } from "@/types/custom-request";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const BASE = `${API_URL}/api/v1`;
@@ -17,7 +25,7 @@ export interface ProductImageInput {
 }
 
 export type ProductInput = Partial<
-  Omit<Product, "id" | "createdAt" | "updatedAt" | "variants" | "images">
+  Omit<Product, "id" | "createdAt" | "updatedAt" | "images">
 > & {
   images?: ProductImageInput[];
 };
@@ -104,4 +112,105 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<void> {
   await authFetch<unknown>(`/products/${id}`, { method: "DELETE" });
+}
+
+/**
+ * Devolve `null` num 404 — uma API mais antiga que o módulo de pedidos faz o
+ * painel mostrar o estado de espera em vez de zeros que pareceriam reais.
+ */
+export async function listOrders(): Promise<Order[] | null> {
+  const token = getToken();
+  const response = await fetch(`${BASE}/orders?limit=200`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (response.status === 404) return null;
+  if (response.status === 401) {
+    clearToken();
+    throw new Error("Sessão expirada. Faça login novamente.");
+  }
+  if (!response.ok) throw new Error(`Erro ${response.status}`);
+  return response.json() as Promise<Order[]>;
+}
+
+/** O PATCH devolve o pedido e o desfecho do aviso ao cliente. */
+export interface OrderStatusUpdate extends Order {
+  notification?: { sent: boolean; reason: string };
+}
+
+export async function updateOrderStatus(
+  id: string,
+  status: OrderStatus
+): Promise<OrderStatusUpdate> {
+  return authFetch<OrderStatusUpdate>(`/orders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function getSettings(): Promise<StoreSettings> {
+  return authFetch<StoreSettings>("/settings");
+}
+
+export async function updateSettings(
+  input: Partial<StoreSettings>
+): Promise<StoreSettings> {
+  return authFetch<StoreSettings>("/settings", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listIntegrations(): Promise<Integration[]> {
+  return authFetch<Integration[]>("/integrations");
+}
+
+/**
+ * `secrets` é só de escrita: manda o valor novo, e a API devolve de volta
+ * apenas a dica mascarada. Campo em branco não apaga o que já está gravado.
+ */
+export async function updateIntegration(
+  key: IntegrationKey,
+  input: {
+    enabled?: boolean;
+    config?: Record<string, unknown>;
+    secrets?: Record<string, string>;
+    /** Nomes de credenciais a apagar do servidor. */
+    removeSecrets?: string[];
+  }
+): Promise<Integration> {
+  return authFetch<Integration>(`/integrations/${key}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function testMercadoPago(): Promise<IntegrationTestResult> {
+  return authFetch<IntegrationTestResult>("/integrations/mercadopago/test", {
+    method: "POST",
+  });
+}
+
+/** Devolve `null` num 404, como os pedidos: API velha não derruba o painel. */
+export async function listCustomRequests(): Promise<CustomRequest[] | null> {
+  const token = getToken();
+  const response = await fetch(`${BASE}/custom-requests`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (response.status === 404) return null;
+  if (response.status === 401) {
+    clearToken();
+    throw new Error("Sessão expirada. Faça login novamente.");
+  }
+  if (!response.ok) throw new Error(`Erro ${response.status}`);
+  return response.json() as Promise<CustomRequest[]>;
+}
+
+export async function updateCustomRequestStatus(
+  id: string,
+  status: RequestStatus
+): Promise<CustomRequest> {
+  return authFetch<CustomRequest>(`/custom-requests/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
 }

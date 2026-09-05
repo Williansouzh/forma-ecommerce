@@ -1,13 +1,13 @@
 import * as path from "path";
+import * as fs from "fs";
 import * as dotenv from "dotenv";
 
+// O `.env` só existe fora do container: em produção as variáveis vêm do
+// ambiente. Ausência do arquivo é o caso normal, não erro.
 const envPath = path.resolve(process.cwd(), ".env");
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require("fs").accessSync(envPath);
+if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
-  // eslint-disable-next-line no-empty
-} catch {}
+}
 
 export interface ApiConfig {
   port: number;
@@ -18,6 +18,10 @@ export interface ApiConfig {
   adminPassword: string;
   adminName: string;
   seedDemo: boolean;
+  /** Base pública da API, para o Mercado Pago alcançar o webhook. */
+  publicApiUrl: string;
+  /** Base pública da loja, para as back_urls do checkout. */
+  publicSiteUrl: string;
 }
 
 export function configuration(): ApiConfig {
@@ -31,5 +35,9 @@ export function configuration(): ApiConfig {
     adminPassword: process.env.ADMIN_PASSWORD ?? "forma-admin-2026",
     adminName: process.env.ADMIN_NAME ?? "Super Admin",
     seedDemo: process.env.SEED_DEMO !== "false",
+    publicApiUrl:
+      process.env.PUBLIC_API_URL ?? "http://localhost:4000",
+    publicSiteUrl:
+      process.env.PUBLIC_SITE_URL ?? "http://localhost:3000",
   };
 }

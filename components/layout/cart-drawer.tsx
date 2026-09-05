@@ -10,7 +10,7 @@ import {
   getCartTotals,
 } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
-import { ShippingEstimator } from "@/components/shared/shipping-estimator";
+import { ShippingNote } from "@/components/shared/shipping-note";
 import { formatPrice } from "@/lib/utils";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
@@ -235,7 +235,7 @@ export function CartDrawer() {
                     <span>Total</span>
                     <span className="tabular-nums">{formatPrice(totals.total)}</span>
                   </div>
-                  <ShippingEstimator subtotal={totals.subtotal} compact />
+                  <ShippingNote subtotal={totals.subtotal} />
                   <button
                     type="button"
                     onClick={goToCheckout}

@@ -72,7 +72,7 @@ export function PersonalizadosClient() {
   };
 
   return (
-    <div className="pb-24 pt-28 md:pt-36">
+    <div className="pb-24 pt-[clamp(34px,7vh,90px)]">
       <div className="shell">
         <Breadcrumb
           items={[

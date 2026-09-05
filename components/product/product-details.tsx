@@ -1,39 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import type { Product, ProductStatus } from "@/types/product";
-import type { ProductVariant } from "@/types/product";
-import { Button } from "@/components/ui/button";
-import { ColorSelector } from "@/components/ui/color-selector";
-import { QuantitySelector } from "@/components/ui/quantity-selector";
-import { ShippingEstimator } from "@/components/shared/shipping-estimator";
+import type { Product, ProductVariant } from "@/types/product";
 import { useCartStore } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
 import { formatPrice } from "@/lib/utils";
+import { WHATSAPP_URL } from "@/lib/constants";
 
-/** Disponibilidade em prosa, não em badge colorida. */
-const availability: Record<ProductStatus, string> = {
-  in_stock: "Pronto para enviar",
-  low_stock: "Restam poucas peças",
-  made_to_order: "Feito depois do seu pedido",
-  sold_out: "Esgotado por enquanto",
-};
-
-function resolveStatus(product: Product): ProductStatus {
-  if (!product.isAvailable) return "sold_out";
-  if (typeof product.stock === "number" && product.stock === 0) return "sold_out";
-  if (product.price === 0) return "made_to_order";
-  const variants = product.variants ?? [];
-  const totalVariantStock = variants.reduce(
-    (acc, variant) => acc + variant.stock,
-    0
-  );
-  if (variants.length > 0 && totalVariantStock <= 6) return "low_stock";
-  return "in_stock";
-}
-
-export function ProductDetails({ product }: { product: Product }) {
+/**
+ * A coluna que decide a compra. A ordem é a do handoff e não é arbitrária:
+ * categoria, nome, preço, o que é a peça, quando chega, em que cor, quantas —
+ * e só então o botão. A ficha técnica fica por último porque é conferência,
+ * não argumento.
+ */
+export function ProductDetails({
+  product,
+  categoryName,
+}: {
+  product: Product;
+  categoryName?: string;
+}) {
   const [variant, setVariant] = useState<ProductVariant | undefined>(
     product.variants?.[0]
   );
@@ -42,21 +28,44 @@ export function ProductDetails({ product }: { product: Product }) {
   const openCart = useUIStore((state) => state.openCart);
   const pushToast = useUIStore((state) => state.pushToast);
 
-  const status = resolveStatus(product);
+  const soldOut =
+    !product.isAvailable ||
+    product.stock === 0 ||
+    (variant?.stock !== undefined && variant.stock === 0);
   const unitPrice =
     product.price === 0 ? 0 : product.price + (variant?.priceAdjustment ?? 0);
-  const isKeychain = product.tags.some((tag) =>
-    tag.toLowerCase().includes("chaveiro")
-  );
 
-  const finishNote = product.material?.toLowerCase().includes("resina")
-    ? "A resina deixa a superfície lisa e o detalhe fino — dá para ver o desenho de perto."
-    : "Tem linha de camada, sim. É assim que se sabe que foi feito e não fabricado.";
+  const days = product.productionTime;
+  const remaining = variant?.stock ?? product.stock;
+  const availLong = soldOut
+    ? "Esgotada por enquanto — dá para avisar quando voltar à fila."
+    : typeof remaining === "number" && remaining > 0 && remaining <= 3
+      ? `Restam ${remaining} ${remaining === 1 ? "unidade" : "unidades"} desta cor — depois volta para a fila de produção.`
+      : typeof days === "number"
+        ? product.category === "personalizados"
+          ? `Feita depois do seu pedido e enviada em ${days} dias úteis.`
+          : `Impressa depois do seu pedido e enviada em ${days} dias úteis.`
+        : "Produzida sob encomenda.";
 
-  const statusLine =
-    status === "made_to_order" && typeof product.productionTime === "number"
-      ? `${availability[status]} — ${product.productionTime} dias`
-      : availability[status];
+  /** Três parcelas é o que a loja anuncia no checkout; o card repete o mesmo. */
+  const installment = unitPrice > 0 ? Math.round(unitPrice / 3) : 0;
+
+  const specs: [string, string][] = [
+    ["Material", product.material ?? "—"],
+    [
+      "Dimensões",
+      product.dimensions
+        ? `${product.dimensions.width} × ${product.dimensions.height} × ${product.dimensions.depth} mm`
+        : "—",
+    ],
+    ["Peso", typeof product.weight === "number" ? `${product.weight} g` : "—"],
+    ["Altura de camada", "0,12 mm"],
+    [
+      "Produção",
+      typeof days === "number" ? `${days} dias úteis` : "Sob consulta",
+    ],
+    ["Acabamento", "Lixado e conferido à mão"],
+  ];
 
   const addToCart = () => {
     if (unitPrice === 0) {
@@ -75,136 +84,137 @@ export function ProductDetails({ product }: { product: Product }) {
       slug: product.slug,
       image: product.images[0]?.url,
       variantName: variant?.name,
+      productionTime: product.productionTime,
     });
     pushToast(`${product.name} — no carrinho`);
     openCart();
   };
 
-  return (
-    <div>
-      <h1 className="font-display text-heading-1">{product.name}</h1>
+  const maxQuantity = Math.min(99, Math.max(1, remaining ?? 99));
 
-      {/* Preço em serifa. Preço em monoespaçada parece cotação de API. */}
-      <div className="mt-5 flex flex-wrap items-baseline gap-4">
-        <motion.p
-          key={unitPrice}
-          initial={{ opacity: 0.5 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="font-display text-heading-2 tabular-nums"
-        >
+  return (
+    <div className="min-w-[280px] flex-[1_1_min(100%,380px)] self-start lg:sticky lg:top-[100px]">
+      {categoryName && <span className="label text-tertiary">{categoryName}</span>}
+
+      <h1 className="mt-3.5 font-display text-[clamp(32px,4.4vw,56px)] font-light leading-[1.02] tracking-[-0.025em]">
+        {product.name}
+      </h1>
+
+      <div className="mt-[18px] flex flex-wrap items-baseline gap-3.5">
+        <span className="text-[26px] font-semibold tabular-nums">
           {product.price === 0 ? "Sob consulta" : formatPrice(unitPrice)}
-        </motion.p>
-        {product.originalPrice && (
-          <span className="text-body tabular-nums text-tertiary line-through">
-            {formatPrice(product.originalPrice)}
+        </span>
+        {installment > 0 && (
+          <span className="text-[13.5px] text-tertiary">
+            ou 3× de {formatPrice(installment)} sem juros
           </span>
         )}
       </div>
 
-      <p className="mt-2 text-body-small italic text-accent">{statusLine}</p>
-
-      {/* Por que a peça existe vem antes de qualquer milímetro. */}
-      <p className="mt-8 max-w-prose text-body-large text-secondary">
+      <p className="mt-5 text-body text-pretty text-secondary">
         {product.shortDescription}
       </p>
 
-      <p className="mt-4 max-w-prose text-body-small italic text-tertiary">
-        {finishNote}
+      {/* A caixa areia isola o prazo do resto: é o que a pessoa volta para reler. */}
+      <p className="mt-[18px] bg-surface-muted px-3.5 py-3 text-body-small text-primary">
+        {availLong}
       </p>
 
-      <div className="mt-12 space-y-9">
-        {(product.variants?.length ?? 0) > 0 && (
-          <ColorSelector
-            variants={product.variants ?? []}
-            selected={variant}
-            onSelect={(selected) => {
-              setVariant(selected);
-              setQuantity(1);
-            }}
-          />
-        )}
+      {(product.variants?.length ?? 0) > 0 && (
+        <div className="mt-7">
+          <span className="label text-tertiary">Cor do filamento</span>
+          <div className="mt-3 flex flex-wrap gap-2.5">
+            {product.variants?.map((option) => {
+              const active = option.id === variant?.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => {
+                    setVariant(option);
+                    setQuantity(1);
+                  }}
+                  aria-pressed={active}
+                  className={`flex min-h-11 items-center gap-[9px] rounded-md border py-0 pl-2.5 pr-3.5 text-[13px] transition-colors ${
+                    active
+                      ? "border-primary"
+                      : "border-border-strong hover:border-accent"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className="size-[18px] rounded-full border border-border-strong"
+                    style={{ background: option.colorHex }}
+                  />
+                  {option.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-        <QuantitySelector
-          value={quantity}
-          onChange={setQuantity}
-          max={Math.min(99, Math.max(1, product.stock ?? 99))}
-        />
+      <div className="mt-[26px] flex flex-wrap gap-3">
+        <div className="flex items-center rounded-md border border-border-strong">
+          <button
+            type="button"
+            onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+            aria-label="Diminuir quantidade"
+            disabled={quantity <= 1}
+            className="h-[54px] w-[46px] text-lg disabled:opacity-40"
+          >
+            −
+          </button>
+          <span className="min-w-8 text-center text-[15px] font-semibold tabular-nums">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuantity((value) => Math.min(maxQuantity, value + 1))}
+            aria-label="Aumentar quantidade"
+            disabled={quantity >= maxQuantity}
+            className="h-[54px] w-[46px] text-lg disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
 
-        <Button
-          size="xl"
+        <button
+          type="button"
           onClick={addToCart}
-          disabled={status === "sold_out"}
-          className="w-full sm:w-auto"
+          disabled={soldOut}
+          className="min-h-[54px] flex-[1_1_200px] rounded-md bg-primary px-6 text-[14px] font-semibold tracking-[0.02em] text-background transition-colors duration-300 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {status === "sold_out"
+          {soldOut
             ? "Esgotado"
             : unitPrice === 0
               ? "Pedir um orçamento"
-              : `Adicionar — ${formatPrice(unitPrice * quantity)}`}
-        </Button>
-
-        <ShippingEstimator subtotal={unitPrice * quantity} />
+              : "Adicionar à sacola"}
+        </button>
       </div>
 
-      <p className="mt-10 max-w-md text-body-small text-tertiary">
-        {isKeychain
-          ? "Vai com argola presa e embalado para presente."
-          : "Embalado com proteção reforçada."}{" "}
-        Evite deixar a peça em carro fechado, sol forte ou perto de fonte de
-        calor.
-      </p>
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-3.5 inline-flex items-center gap-2 border-b border-accent/40 pb-0.5 text-[13.5px] font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
+      >
+        Prefiro fechar no WhatsApp
+      </a>
 
-      {/* Ficha discreta, no fim, sem réguas de accent e sem monoespaçada. */}
-      <dl className="mt-14 grid grid-cols-2 gap-x-10 gap-y-6 border-t border-border-strong pt-8 text-body-small sm:grid-cols-3">
-        {product.material && (
-          <div>
-            <dt className="label text-tertiary">Material</dt>
-            <dd className="mt-1.5 text-secondary">{product.material}</dd>
+      <dl className="mt-[34px] border-t border-border-strong pt-2">
+        {specs.map(([term, value]) => (
+          <div
+            key={term}
+            className="flex justify-between gap-[18px] border-b border-border-subtle py-[13px]"
+          >
+            <dt className="text-body-small uppercase tracking-[0.1em] text-tertiary">
+              {term}
+            </dt>
+            <dd className="text-right text-[14.5px] tabular-nums">{value}</dd>
           </div>
-        )}
-        {product.dimensions && (
-          <div>
-            <dt className="label text-tertiary">Tamanho</dt>
-            <dd className="mt-1.5 tabular-nums text-secondary">
-              {product.dimensions.width} × {product.dimensions.depth} ×{" "}
-              {product.dimensions.height} mm
-            </dd>
-          </div>
-        )}
-        {typeof product.weight === "number" && (
-          <div>
-            <dt className="label text-tertiary">Peso</dt>
-            <dd className="mt-1.5 tabular-nums text-secondary">
-              {product.weight} g
-            </dd>
-          </div>
-        )}
-        {typeof product.productionTime === "number" && (
-          <div>
-            <dt className="label text-tertiary">Produção</dt>
-            <dd className="mt-1.5 text-secondary">
-              até {product.productionTime} dias úteis
-            </dd>
-          </div>
-        )}
-        <div>
-          <dt className="label text-tertiary">Acabamento</dt>
-          <dd className="mt-1.5 text-secondary">conferido à mão</dd>
-        </div>
-        <div>
-          <dt className="label text-tertiary">Cuidados</dt>
-          <dd className="mt-1.5 text-secondary">longe do calor</dd>
-        </div>
-      </dl>
-
-      <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2" aria-label="Tags do produto">
-        {product.tags.map((tag) => (
-          <li key={tag} className="text-body-small italic text-tertiary">
-            {tag}
-          </li>
         ))}
-      </ul>
+      </dl>
     </div>
   );
 }

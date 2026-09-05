@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 import type { CartItem, CartTotals } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { payableTotal } from "@/lib/cart";
 
 export function OrderSummary({
   items,
@@ -15,8 +16,17 @@ export function OrderSummary({
   totals: CartTotals;
   pixDiscount?: number;
 }) {
-  const targetTotal =
-    totals.total - Math.round(totals.subtotal * pixDiscount);
+  const targetTotal = payableTotal(totals, pixDiscount);
+
+  /**
+   * O pedido inteiro sai junto, então quem manda no prazo é a peça mais
+   * demorada da sacola — não a média nem a primeira.
+   */
+  const productionDays = items.reduce<number | null>((slowest, item) => {
+    const days = item.productionTime;
+    if (typeof days !== "number") return slowest;
+    return slowest === null ? days : Math.max(slowest, days);
+  }, null);
   const spring = useSpring(targetTotal, { stiffness: 120, damping: 22 });
   const display = useTransform(spring, (value) =>
     formatPrice(Math.max(0, Math.round(value)))
@@ -31,7 +41,7 @@ export function OrderSummary({
       aria-label="Resumo do pedido"
       className="h-fit rounded-lg border bg-surface p-6 lg:sticky lg:top-28"
     >
-      <h2 className="font-display text-heading-3">Resumo do pedido</h2>
+      <h2 className="label text-tertiary">Resumo</h2>
 
       <ul className="mt-6 space-y-4">
         {items.map((item) => (
@@ -85,6 +95,12 @@ export function OrderSummary({
             <dd className="tabular-nums">
               −{formatPrice(Math.round(totals.subtotal * pixDiscount))}
             </dd>
+          </div>
+        )}
+        {productionDays !== null && (
+          <div className="flex justify-between text-secondary">
+            <dt>Prazo de produção</dt>
+            <dd className="tabular-nums">até {productionDays} dias úteis</dd>
           </div>
         )}
         <div className="flex justify-between border-t border-border-subtle pt-3 text-heading-3">

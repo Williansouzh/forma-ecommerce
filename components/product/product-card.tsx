@@ -7,6 +7,7 @@ import type { Product } from "@/types/product";
 import { useUIStore } from "@/stores/ui-store";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice, cn } from "@/lib/utils";
+import { availabilityNote } from "@/lib/product-availability";
 
 type CardVariant = "large" | "medium" | "tall" | "wide" | "horizontal";
 
@@ -30,17 +31,6 @@ const ratio: Record<CardVariant, string> = {
   horizontal: "aspect-square",
 };
 
-/** Estoque se diz com palavra, não com semáforo. */
-function availabilityNote(product: Product): string | null {
-  const soldOut = !product.isAvailable || product.stock === 0;
-  if (soldOut) return "Esgotado";
-  if (product.price === 0) return "Sob encomenda";
-  if (typeof product.stock === "number" && product.stock <= 3) {
-    return product.stock === 1 ? "Última peça" : `Restam ${product.stock}`;
-  }
-  return null;
-}
-
 export function ProductCard({
   product,
   variant = "medium",
@@ -58,8 +48,12 @@ export function ProductCard({
   const note = availabilityNote(product);
   const firstVariant = product.variants?.[0];
 
-  // Material e cor viram uma linha sussurrada, não uma ficha técnica.
-  const whisper = [product.material, firstVariant?.name]
+  // Material e cores viram uma linha sussurrada, não uma ficha técnica.
+  const colorCount = product.variants?.length ?? 0;
+  const whisper = [
+    product.material,
+    colorCount > 1 ? `${colorCount} cores` : firstVariant?.name,
+  ]
     .filter(Boolean)
     .join(", ");
 
@@ -73,6 +67,7 @@ export function ProductCard({
       slug: product.slug,
       image: primaryImage?.url,
       variantName: firstVariant?.name,
+      productionTime: product.productionTime,
     });
     pushToast(`${product.name} — no carrinho`);
     openCart();
