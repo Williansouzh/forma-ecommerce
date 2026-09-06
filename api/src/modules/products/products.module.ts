@@ -6,12 +6,14 @@ import {
   Product,
   ProductSchema,
 } from "./schemas/product.schema";
+import { InventoryModule } from "../inventory/inventory.module";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
     ]),
+    InventoryModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

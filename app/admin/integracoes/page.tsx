@@ -509,6 +509,8 @@ export default function AdminIntegrationsPage() {
             </div>
           </section>
 
+          <ShopeeCredentials row={find("shopee")} save={save} />
+
           <div className="mt-5 flex flex-wrap gap-5">
             {SMALL_CARDS.map((card) => {
               const row = find(card.key);
@@ -553,5 +555,140 @@ export default function AdminIntegrationsPage() {
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * As credenciais da Shopee: `partner_id` público e `partner_key` privada.
+ *
+ * Fica aqui, junto das outras credenciais, e não na página da Shopee, por dois
+ * motivos: é o mesmo cofre (`Integration.secrets`, `select: false`) que já
+ * guarda o token do Mercado Pago, e a página da Shopee trata de OPERAÇÃO —
+ * conectar loja, associar peça, conciliar —, não de segredo.
+ *
+ * A partner_key entra e não volta: o campo mostra só a dica mascarada, e a
+ * mesma chave assina as chamadas de saída e confere a assinatura do webhook.
+ */
+function ShopeeCredentials({
+  row,
+  save,
+}: {
+  row?: Integration;
+  save: (
+    key: IntegrationKey,
+    input: Parameters<typeof updateIntegration>[1],
+    message?: string
+  ) => Promise<void>;
+}) {
+  return (
+    <section className="mt-5 border border-border-subtle bg-surface p-[18px] sm:p-6 lg:p-[30px]">
+      <div className="flex flex-wrap items-center gap-3.5">
+        <div className="min-w-0 flex-1 basis-[260px]">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-2xl">Shopee</h2>
+            <Tag on={row?.enabled ?? false} />
+          </div>
+          <p className="mt-2 text-sm text-secondary">
+            Credenciais do app na Shopee Open Platform. Depois de gravá-las,
+            autorize a loja e administre as associações em{" "}
+            <a href="/admin/shopee" className="underline hover:text-accent">
+              Shopee
+            </a>
+            .
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            void save(
+              "shopee",
+              { enabled: !row?.enabled },
+              row?.enabled ? "Shopee desligada" : "Shopee ligada"
+            )
+          }
+          className={cn(
+            "min-h-[44px] shrink-0 rounded-md border px-[18px] font-semibold transition-colors",
+            row?.enabled
+              ? "border-border-strong bg-transparent text-primary hover:border-primary"
+              : "border-primary bg-primary text-background hover:border-accent hover:bg-accent"
+          )}
+        >
+          {row?.enabled ? "Desligar" : "Ligar"}
+        </button>
+      </div>
+
+      <div className="mt-[22px] flex flex-wrap gap-3.5">
+        <label className={cn(labelClass, "flex-1 basis-[220px]")}>
+          Partner ID
+          <input
+            defaultValue={String(row?.config.partnerId ?? "")}
+            placeholder="1009999"
+            inputMode="numeric"
+            onBlur={(event) =>
+              void save("shopee", {
+                config: { partnerId: event.target.value.trim() },
+              })
+            }
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[260px]")}>
+          <SecretLabel
+            title="Partner key"
+            stored={row?.secretHints.partnerKey}
+            onRemove={() =>
+              void save(
+                "shopee",
+                { removeSecrets: ["partnerKey"] },
+                "Partner key removida do servidor"
+              )
+            }
+          />
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder={row?.secretHints.partnerKey ?? "não gravada"}
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (!value) return;
+              event.target.value = "";
+              void save(
+                "shopee",
+                { secrets: { partnerKey: value } },
+                "Partner key gravada no servidor"
+              );
+            }}
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[180px]")}>
+          Região
+          <select
+            value={String(row?.config.region ?? "BR")}
+            onChange={(event) =>
+              void save(
+                "shopee",
+                { config: { region: event.target.value } },
+                `Região: ${event.target.value}`
+              )
+            }
+            className={fieldClass}
+          >
+            <option value="BR">Brasil (produção)</option>
+            <option value="GLOBAL">Global (produção)</option>
+            <option value="SANDBOX">Sandbox (homologação)</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="mt-4 bg-surface-muted px-3.5 py-3 text-[13px]">
+        Webhook: <strong>POST /api/v1/shopee/webhook</strong>
+        {row?.secretHints.partnerKey
+          ? " — a partner_key confere a assinatura de cada push. O corpo do push nunca decide estoque."
+          : " — sem partner_key gravada, toda notificação é recusada."}
+      </div>
+    </section>
   );
 }

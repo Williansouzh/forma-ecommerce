@@ -6,7 +6,10 @@ import { AppModule } from "./app.module";
 import type { ApiConfig } from "./config/configuration";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // `rawBody` é o que permite conferir a assinatura do push da Shopee sobre
+  // os bytes EXATOS que chegaram. Sem isto sobraria re-serializar o objeto já
+  // parseado, que reordena chaves e faz o HMAC falhar sem explicação.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get(ConfigService<ApiConfig>);
 
   app.setGlobalPrefix("api/v1");

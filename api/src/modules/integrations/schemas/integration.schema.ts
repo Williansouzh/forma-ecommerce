@@ -7,6 +7,7 @@ export const INTEGRATION_KEYS = [
   "melhorenvio",
   "instagram",
   "nfe",
+  "shopee",
 ] as const;
 export type IntegrationKey = (typeof INTEGRATION_KEYS)[number];
 

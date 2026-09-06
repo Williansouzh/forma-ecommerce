@@ -18,6 +18,9 @@ const checkOnly = process.argv.includes("--check");
 
 async function main(): Promise<void> {
   process.env.SEED_DEMO = "false";
+  // O worker da Shopee não pode subir só para gerar o contrato: ele varreria
+  // pedidos e tentaria falar com a API real usando um banco descartável.
+  process.env.SHOPEE_WORKER = "off";
   process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27018/openapi";
 
   const app = await NestFactory.create(AppModule, { logger: false });

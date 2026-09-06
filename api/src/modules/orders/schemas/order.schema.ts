@@ -20,11 +20,35 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const PAYMENT_METHODS = ["pix", "credit_card", "boleto"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
+/**
+ * De onde veio o pedido. `site` é o checkout da loja; `shopee`, um pedido
+ * importado do marketplace. O canal é do PEDIDO, não do estoque — o estoque
+ * continua sendo um só, e é justamente por isso que a origem precisa estar
+ * gravada aqui.
+ */
+export const ORDER_CHANNELS = ["site", "shopee"] as const;
+export type OrderChannel = (typeof ORDER_CHANNELS)[number];
+
 export type OrderDocument = HydratedDocument<Order>;
+
+/** Identidade do pedido no sistema de origem, quando ele nasceu fora daqui. */
+export class ExternalRefEmbed {
+  source!: OrderChannel;
+  shopId!: string;
+  orderSn!: string;
+  /** Último `order_status` visto na origem, para descartar evento atrasado. */
+  remoteStatus?: string;
+}
 
 export class OrderItemEmbed {
   productId!: string;
   name!: string;
+  /**
+   * Id da variação escolhida (`variants[].id`). O carrinho sempre soube qual
+   * era; o pedido só guardava o NOME dela, que não serve para achar o saldo
+   * certo — duas variações podem ter nomes parecidos e o estoque é por id.
+   */
+  variantId?: string;
   variantName?: string;
   quantity!: number;
   price!: number;
@@ -64,6 +88,7 @@ export class Order {
         _id: false,
         productId: String,
         name: String,
+        variantId: String,
         variantName: String,
         quantity: Number,
         price: Number,
@@ -104,11 +129,37 @@ export class Order {
   @Prop({ trim: true })
   paymentUrl?: string;
 
+  @Prop({ required: true, enum: ORDER_CHANNELS, default: "site" })
+  channel: OrderChannel;
+
+  /**
+   * Presente só em pedido importado. O índice único parcial abaixo é o que
+   * garante que reimportar o mesmo `order_sn` não crie um segundo pedido.
+   */
+  @Prop({ type: Object })
+  externalRef?: ExternalRefEmbed;
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+/**
+ * Um pedido por `order_sn` de cada loja — a trava de duplicidade da
+ * importação, no banco e não em código.
+ *
+ * PARCIAL de propósito: os pedidos da loja não têm `externalRef`, e um índice
+ * único comum trataria todos esses `null` como o mesmo valor, deixando gravar
+ * só o primeiro. O filtro restringe a restrição a quem tem a chave.
+ */
+OrderSchema.index(
+  { "externalRef.source": 1, "externalRef.shopId": 1, "externalRef.orderSn": 1 },
+  {
+    unique: true,
+    partialFilterExpression: { "externalRef.orderSn": { $exists: true } },
+  },
+);
 
 OrderSchema.set("toJSON", {
   virtuals: true,

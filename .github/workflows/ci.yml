@@ -56,8 +56,17 @@ jobs:
 
       # As invariantes do webhook: sem segredo recusa, assinatura de outro
       # pagamento recusa, corpo adulterado recusa.
+      #
+      # E as do estoque: guarda atômica contra estoque negativo, índice único
+      # contra baixa dupla, FEFO, e a integração com a Shopee. Esses testes
+      # rodam contra o mongod do serviço acima de propósito — as regras se
+      # apoiam em `findOneAndUpdate` condicional e índice único, que são
+      # comportamento do BANCO. Um repositório falso os deixaria verdes e
+      # quebraria em produção.
       - name: Testes
         run: npm test
+        env:
+          MONGODB_TEST_URI: mongodb://127.0.0.1:27018
 
       - name: Build
         run: npm run build

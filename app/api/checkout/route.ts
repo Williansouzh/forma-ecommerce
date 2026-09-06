@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
     items: items.map((item) => ({
       productId: item.productId,
       name: item.name ?? "Peça",
+      // O `variantId` sempre existiu no carrinho e parava aqui. Sem ele, a
+      // API não tem como saber DE QUAL variação baixar o estoque — e reservar
+      // no produto inteiro venderia a cor errada.
+      ...(item.variantId ? { variantId: item.variantId } : {}),
       ...(item.variantName ? { variantName: item.variantName } : {}),
       quantity: item.quantity,
       price: item.price,

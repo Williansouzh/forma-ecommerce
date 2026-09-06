@@ -8,6 +8,9 @@ import { RolesGuard } from "./common/guards/roles.guard";
 import { AuthModule } from "./modules/auth/auth.module";
 import { CustomRequestsModule } from "./modules/custom-requests/custom-requests.module";
 import { IntegrationsModule } from "./modules/integrations/integrations.module";
+import { InventoryModule } from "./modules/inventory/inventory.module";
+import { OutboxModule } from "./modules/outbox/outbox.module";
+import { ShopeeModule } from "./modules/shopee/shopee.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
@@ -43,6 +46,9 @@ import { SeedService } from "./database/seed.service";
     OrdersModule,
     SettingsModule,
     IntegrationsModule,
+    InventoryModule,
+    OutboxModule,
+    ShopeeModule,
     CustomRequestsModule,
     PaymentsModule,
     NotificationsModule,

@@ -21,6 +21,21 @@ E-commerce premium da marca **FORMA.** — estúdio de design + loja de colecion
 - SEO: metadata dinâmica, JSON-LD (Product, BreadcrumbList, Organization, WebSite+SearchAction), sitemap e robots
 - Acessibilidade WCAG AA: skip link, focus visible, aria labels, `prefers-reduced-motion`
 
+## Estoque e canais de venda
+
+O sistema é a **fonte oficial do estoque**: ledger imutável, lotes com validade,
+FEFO, reserva no checkout e COGS congelado na venda. A Shopee é tratada como
+canal — recebe o saldo, não o define.
+
+- Arquitetura: [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- Integração com a Shopee: [`docs/SHOPEE.md`](docs/SHOPEE.md)
+- Operação (backup, restauração, contrato): [`docs/RUNBOOK.md`](docs/RUNBOOK.md)
+
+> Ajuste de estoque agora passa por `POST /api/v1/inventory/adjust` (com motivo)
+> ou `/inventory/receive`. O campo `product.stock` virou **projeção** do ledger:
+> escrevê-lo pelo `PATCH /products/:id` grava um número que a próxima
+> movimentação sobrescreve.
+
 ## Comandos
 
 ```bash
@@ -28,6 +43,12 @@ npm install
 npm run dev    # desenvolvimento
 npm run build  # produção
 npm start      # servir build
+npm test       # testes da loja
+```
+
+```bash
+docker compose up -d mongo   # os testes da API precisam de mongod
+cd api && npm test           # webhooks, estoque, FEFO, concorrência, Shopee
 ```
 
 ## Estrutura
