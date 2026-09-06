@@ -4,7 +4,8 @@ export type IntegrationKey =
   | "melhorenvio"
   | "instagram"
   | "nfe"
-  | "shopee";
+  | "shopee"
+  | "r2";
 
 export interface Integration {
   key: IntegrationKey;

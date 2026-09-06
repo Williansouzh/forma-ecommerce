@@ -1,3 +1,5 @@
+import { configuredImageHost } from "./image-host";
+
 export type CspMode = "off" | "report-only" | "enforce";
 
 /**
@@ -62,14 +64,18 @@ function apiOrigin(): string | null {
 export function buildContentSecurityPolicy(): string {
   const isProduction = process.env.NODE_ENV === "production";
   const api = apiOrigin();
+  const imageHost = configuredImageHost();
 
   const directives = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
     // `data:` e `blob:` porque o next/image roda com `dangerouslyAllowSVG` e
-    // serve placeholder embutido.
-    "img-src 'self' data: blob:",
+    // serve placeholder embutido. O host das imagens entra quando o bucket R2
+    // está configurado — sem ele aqui, a foto do produto é bloqueada pelo
+    // navegador e o resto da página carrega normalmente, que é o tipo de
+    // falha que ninguém associa à CSP.
+    ["img-src 'self' data: blob:", imageHost?.origin].filter(Boolean).join(" "),
     // Fontes são self-hosted pelo next/font — nada de fonts.gstatic aqui.
     "font-src 'self'",
     `connect-src ${["'self'", api, isProduction ? null : "ws:", isProduction ? null : "wss:"].filter(Boolean).join(" ")}`,

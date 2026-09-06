@@ -123,6 +123,22 @@ Detalhes em [`docs/SHOPEE.md`](docs/SHOPEE.md).
 
 ---
 
+## Imagens
+
+As fotos de produto ficam num bucket Cloudflare R2 e são servidas por domínio
+personalizado. O arquivo sobe para a API (bytes crus, sem multipart), que
+valida pelos **magic bytes**, gera a chave e assina o PUT com SigV4 escrito à
+mão — nenhuma credencial chega ao navegador e o bucket não precisa de CORS.
+
+SVG é recusado na entrada: o `next.config.ts` roda com `dangerouslyAllowSVG`, e
+SVG servido de um domínio nosso seria XSS armazenado.
+
+O host das imagens vive em `lib/security/image-host.ts` e alimenta tanto o
+`img-src` da CSP quanto o `images.remotePatterns` do Next — se divergissem, a
+página carregaria e só a foto sumiria.
+
+Detalhes em [`docs/IMAGENS.md`](docs/IMAGENS.md).
+
 ## Segurança
 
 - Credenciais externas vivem em `integrations.secrets` com `select: false`. O

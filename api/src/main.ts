@@ -1,6 +1,7 @@
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
 import type { ApiConfig } from "./config/configuration";
@@ -9,7 +10,21 @@ async function bootstrap() {
   // `rawBody` é o que permite conferir a assinatura do push da Shopee sobre
   // os bytes EXATOS que chegaram. Sem isto sobraria re-serializar o objeto já
   // parseado, que reordena chaves e faz o HMAC falhar sem explicação.
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
+
+  /**
+   * Upload de imagem chega como binário cru, e o limite padrão do Express é
+   * 100 kB — qualquer foto de produto seria recusada com 413 antes de o
+   * controller existir. O parser `raw` cobre só os tipos de imagem e o
+   * octet-stream; o `json` fica com o limite padrão, porque nenhum payload
+   * desta API é grande e afrouxar isso seria abrir superfície de graça.
+   */
+  app.useBodyParser("raw", {
+    limit: "10mb",
+    type: ["image/*", "application/octet-stream"],
+  });
   const config = app.get(ConfigService<ApiConfig>);
 
   app.setGlobalPrefix("api/v1");

@@ -24,6 +24,7 @@ import type {
   ShopeeSuggestion,
   ShopeeSyncResult,
 } from "@/types/shopee";
+import type { MediaStatus, UploadedImage } from "@/types/media";
 import type { components } from "@/types/generated/api-v1";
 
 /**
@@ -254,6 +255,67 @@ export async function updateIntegration(
 export async function testMercadoPago(): Promise<IntegrationTestResult> {
   return authFetch<IntegrationTestResult>("/integrations/mercadopago/test", {
     method: "POST",
+  });
+}
+
+// ── Imagens (Cloudflare R2) ────────────────────────────────────────────────
+
+export async function getMediaStatus(): Promise<MediaStatus> {
+  return authFetch<MediaStatus>("/media/status");
+}
+
+export async function testR2(): Promise<{ ok: boolean; message: string }> {
+  return authFetch<{ ok: boolean; message: string }>("/media/test", {
+    method: "POST",
+  });
+}
+
+/**
+ * Sobe o arquivo para a API, que assina e grava no R2.
+ *
+ * O corpo vai CRU, não em `multipart/form-data`: a API já recebe bytes brutos
+ * (foi o que a assinatura do webhook da Shopee exigiu), e assim nem o
+ * navegador precisa de credencial nem o bucket precisa de política de CORS.
+ *
+ * O `Content-Type` daqui é só cortesia — quem decide o tipo gravado são os
+ * bytes, do lado do servidor.
+ */
+export async function uploadProductImage(file: File): Promise<UploadedImage> {
+  const token = getToken();
+  const response = await fetch(`${BASE}/media/products`, {
+    method: "POST",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: file,
+  });
+
+  if (response.status === 401) {
+    clearToken();
+    throw new Error("Sessão expirada. Faça login novamente.");
+  }
+  // 413 vem do Express, ANTES do controller, e não traz corpo JSON — sem este
+  // caso a pessoa veria "Erro 413" e nenhuma pista do que fazer.
+  if (response.status === 413) {
+    throw new Error("Arquivo grande demais para o servidor aceitar.");
+  }
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as
+      | { message?: string | string[] }
+      | null;
+    const message = Array.isArray(body?.message)
+      ? body.message.join(", ")
+      : body?.message;
+    throw new Error(message ?? `Erro ${response.status}`);
+  }
+  return response.json() as Promise<UploadedImage>;
+}
+
+export async function deleteProductImage(key: string): Promise<void> {
+  await authFetch<unknown>("/media/products", {
+    method: "DELETE",
+    body: JSON.stringify({ key }),
   });
 }
 

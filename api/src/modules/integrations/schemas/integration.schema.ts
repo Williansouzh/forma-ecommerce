@@ -8,6 +8,7 @@ export const INTEGRATION_KEYS = [
   "instagram",
   "nfe",
   "shopee",
+  "r2",
 ] as const;
 export type IntegrationKey = (typeof INTEGRATION_KEYS)[number];
 
