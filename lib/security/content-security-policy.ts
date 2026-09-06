@@ -39,8 +39,29 @@ export function configuredCspMode(): CspMode {
  * sendo o React escapando conteúdo e nenhum `dangerouslySetInnerHTML` com
  * dado de usuário — hoje só há três, todos com JSON-LD que nós montamos.
  */
+/**
+ * A origem da API, quando ela não é a mesma da loja.
+ *
+ * O painel fala com a API direto do navegador (`NEXT_PUBLIC_API_URL`), e em
+ * desenvolvimento isso é `localhost:4001` contra uma loja em `localhost:3222`
+ * — portas diferentes são origens diferentes, e `connect-src 'self'` bloqueia.
+ * Foi assim que a primeira versão desta política derrubou o login do painel:
+ * a página abria sem violação nenhuma, e só o `fetch` era barrado.
+ */
+function apiOrigin(): string | null {
+  const raw = process.env.NEXT_PUBLIC_API_URL;
+  if (!raw) return null;
+  try {
+    const origin = new URL(raw).origin;
+    return origin === "null" ? null : origin;
+  } catch {
+    return null;
+  }
+}
+
 export function buildContentSecurityPolicy(): string {
   const isProduction = process.env.NODE_ENV === "production";
+  const api = apiOrigin();
 
   const directives = [
     "default-src 'self'",
@@ -51,7 +72,7 @@ export function buildContentSecurityPolicy(): string {
     "img-src 'self' data: blob:",
     // Fontes são self-hosted pelo next/font — nada de fonts.gstatic aqui.
     "font-src 'self'",
-    `connect-src 'self'${isProduction ? "" : " ws: wss:"}`,
+    `connect-src ${["'self'", api, isProduction ? null : "ws:", isProduction ? null : "wss:"].filter(Boolean).join(" ")}`,
     "media-src 'self'",
     "worker-src 'self' blob:",
     "manifest-src 'self'",

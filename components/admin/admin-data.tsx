@@ -18,6 +18,7 @@ import {
 import type { CustomRequest } from "@/types/custom-request";
 import type { Order } from "@/types/order";
 import type { Product } from "@/types/product";
+import { inCatalogOrder } from "@/lib/catalog-order";
 
 interface AdminData {
   products: Product[];
@@ -60,7 +61,9 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
         listOrders().catch(() => null),
         listCustomRequests().catch(() => null),
       ]);
-      setProducts(rows);
+      // Mesma âncora da vitrine: a API entrega na ordem de inserção do Mongo,
+      // e o painel lista as peças na ordem do catálogo para bater com a loja.
+      setProducts(inCatalogOrder(rows));
       setOrders(orderRows);
       setCustomRequests(requestRows);
       setError(null);
