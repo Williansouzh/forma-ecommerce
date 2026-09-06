@@ -11,6 +11,7 @@ import { IntegrationsModule } from "./modules/integrations/integrations.module";
 import { InventoryModule } from "./modules/inventory/inventory.module";
 import { OutboxModule } from "./modules/outbox/outbox.module";
 import { ShopeeModule } from "./modules/shopee/shopee.module";
+import { StorageModule } from "./modules/storage/storage.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
@@ -49,6 +50,7 @@ import { SeedService } from "./database/seed.service";
     InventoryModule,
     OutboxModule,
     ShopeeModule,
+    StorageModule,
     CustomRequestsModule,
     PaymentsModule,
     NotificationsModule,

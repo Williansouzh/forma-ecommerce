@@ -29,6 +29,7 @@ canal — recebe o saldo, não o define.
 
 - Arquitetura: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - Integração com a Shopee: [`docs/SHOPEE.md`](docs/SHOPEE.md)
+- Imagens de produto no Cloudflare R2: [`docs/IMAGENS.md`](docs/IMAGENS.md)
 - Operação (backup, restauração, contrato): [`docs/RUNBOOK.md`](docs/RUNBOOK.md)
 
 > Ajuste de estoque agora passa por `POST /api/v1/inventory/adjust` (com motivo)

@@ -197,6 +197,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Media_uploadProductImage"];
+        /**
+         * Remove um objeto do bucket. Separado do produto de propósito: apagar a
+         *     imagem junto com o produto arriscaria derrubar uma foto que outro produto
+         *     ainda usa, e o custo de um objeto órfão é irrisório perto disso.
+         */
+        delete: operations["Media_removeProductImage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Media_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Media_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orders": {
         parameters: {
             query?: never;
@@ -978,6 +1031,7 @@ export interface components {
             reason: string;
             variantId?: string;
         };
+        RemoveImageDto: Record<string, unknown>;
         RetryMessageDto: {
             id?: string;
             /** @description Sem `id`, reprocessa a fila de mortas inteira do tópico. */
@@ -1311,7 +1365,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key: "mercadopago" | "whatsapp" | "melhorenvio" | "instagram" | "nfe" | "shopee";
+                key: "mercadopago" | "whatsapp" | "melhorenvio" | "instagram" | "nfe" | "shopee" | "r2";
             };
             cookie?: never;
         };
@@ -1437,6 +1491,80 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["StockBatch"];
                 };
+            };
+        };
+    };
+    Media_uploadProductImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Media_removeProductImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoveImageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Media_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Media_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

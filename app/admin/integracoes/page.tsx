@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   listIntegrations,
   testMercadoPago,
+  testR2,
   updateIntegration,
 } from "@/lib/admin-api";
 import { cn } from "@/lib/utils";
@@ -511,6 +512,8 @@ export default function AdminIntegrationsPage() {
 
           <ShopeeCredentials row={find("shopee")} save={save} />
 
+          <R2Credentials row={find("r2")} save={save} />
+
           <div className="mt-5 flex flex-wrap gap-5">
             {SMALL_CARDS.map((card) => {
               const row = find(card.key);
@@ -688,6 +691,190 @@ function ShopeeCredentials({
         {row?.secretHints.partnerKey
           ? " — a partner_key confere a assinatura de cada push. O corpo do push nunca decide estoque."
           : " — sem partner_key gravada, toda notificação é recusada."}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Credenciais do bucket R2 onde ficam as imagens de produto.
+ *
+ * As chaves S3 entram e não voltam — mesmo cofre do Mercado Pago e da Shopee.
+ * O `publicBaseUrl` é a única parte que precisa existir ANTES do primeiro
+ * upload: guardar um objeto num bucket sem domínio de leitura gasta
+ * armazenamento para produzir uma imagem quebrada na vitrine, e a API recusa
+ * o envio justamente para não deixar isso acontecer.
+ */
+function R2Credentials({
+  row,
+  save,
+}: {
+  row?: Integration;
+  save: (
+    key: IntegrationKey,
+    input: Parameters<typeof updateIntegration>[1],
+    message?: string
+  ) => Promise<void>;
+}) {
+  const pushToast = useUIStore((state) => state.pushToast);
+  const [testing, setTesting] = useState(false);
+  const publicBaseUrl = String(row?.config.publicBaseUrl ?? "");
+
+  const runTest = async () => {
+    setTesting(true);
+    try {
+      const result = await testR2();
+      pushToast(result.message, result.ok ? "success" : "error");
+    } catch (err) {
+      pushToast(err instanceof Error ? err.message : "Falha ao testar", "error");
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <section className="mt-5 border border-border-subtle bg-surface p-[18px] sm:p-6 lg:p-[30px]">
+      <div className="flex flex-wrap items-center gap-3.5">
+        <div className="min-w-0 flex-1 basis-[260px]">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-2xl">Imagens (Cloudflare R2)</h2>
+            <Tag on={row?.enabled ?? false} />
+          </div>
+          <p className="mt-2 text-sm text-secondary">
+            Guarda as fotos dos produtos. O arquivo sobe para a API, que assina
+            e grava no bucket — a chave nunca passa pelo navegador.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            void save(
+              "r2",
+              { enabled: !row?.enabled },
+              row?.enabled ? "Envio de imagens desligado" : "Envio de imagens ligado"
+            )
+          }
+          className={cn(
+            "min-h-[44px] shrink-0 rounded-md border px-[18px] font-semibold transition-colors",
+            row?.enabled
+              ? "border-border-strong bg-transparent text-primary hover:border-primary"
+              : "border-primary bg-primary text-background hover:border-accent hover:bg-accent"
+          )}
+        >
+          {row?.enabled ? "Desligar" : "Ligar"}
+        </button>
+      </div>
+
+      <div className="mt-[22px] flex flex-wrap gap-3.5">
+        <label className={cn(labelClass, "flex-1 basis-[280px]")}>
+          Account ID
+          <input
+            defaultValue={String(row?.config.accountId ?? "")}
+            placeholder="o Account ID da sua conta Cloudflare"
+            onBlur={(event) =>
+              void save("r2", { config: { accountId: event.target.value.trim() } })
+            }
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[180px]")}>
+          Bucket
+          <input
+            defaultValue={String(row?.config.bucket ?? "")}
+            placeholder="forma-data"
+            onBlur={(event) =>
+              void save("r2", { config: { bucket: event.target.value.trim() } })
+            }
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[280px]")}>
+          Domínio público de leitura
+          <input
+            defaultValue={publicBaseUrl}
+            placeholder="https://img.seudominio.com"
+            onBlur={(event) =>
+              void save("r2", {
+                config: { publicBaseUrl: event.target.value.trim() },
+              })
+            }
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[260px]")}>
+          <SecretLabel
+            title="Access Key ID"
+            stored={row?.secretHints.accessKeyId}
+            onRemove={() =>
+              void save("r2", { removeSecrets: ["accessKeyId"] }, "Access Key ID removida")
+            }
+          />
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder={row?.secretHints.accessKeyId ?? "não gravada"}
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (!value) return;
+              event.target.value = "";
+              void save("r2", { secrets: { accessKeyId: value } }, "Access Key ID gravada");
+            }}
+            className={fieldClass}
+          />
+        </label>
+
+        <label className={cn(labelClass, "flex-1 basis-[260px]")}>
+          <SecretLabel
+            title="Secret Access Key"
+            stored={row?.secretHints.secretAccessKey}
+            onRemove={() =>
+              void save("r2", { removeSecrets: ["secretAccessKey"] }, "Secret Access Key removida")
+            }
+          />
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder={row?.secretHints.secretAccessKey ?? "não gravada"}
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (!value) return;
+              event.target.value = "";
+              void save("r2", { secrets: { secretAccessKey: value } }, "Secret Access Key gravada");
+            }}
+            className={fieldClass}
+          />
+        </label>
+      </div>
+
+      <div className="mt-[18px] flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => void runTest()}
+          disabled={testing}
+          className="ml-auto min-h-[42px] rounded-md border border-border-strong px-4 text-[13.5px] font-semibold transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+        >
+          {testing ? "Testando…" : "Testar conexão"}
+        </button>
+      </div>
+
+      <div className="mt-4 bg-surface-muted px-3.5 py-3 text-[13px]">
+        {publicBaseUrl ? (
+          <>
+            O mesmo domínio precisa estar em{" "}
+            <strong>NEXT_PUBLIC_IMAGE_BASE_URL</strong> no build da loja — é dele
+            que saem a política de CSP e os hosts autorizados do{" "}
+            <code>next/image</code>. Divergindo, a página carrega e só a foto
+            some.
+          </>
+        ) : (
+          <>
+            Sem domínio público de leitura, o envio é recusado: um objeto que
+            ninguém consegue ler viraria imagem quebrada na vitrine.
+          </>
+        )}
       </div>
     </section>
   );

@@ -514,7 +514,8 @@
                 "melhorenvio",
                 "instagram",
                 "nfe",
-                "shopee"
+                "shopee",
+                "r2"
               ],
               "type": "string"
             }
@@ -1169,6 +1170,78 @@
         },
         "tags": [
           "Settings"
+        ]
+      }
+    },
+    "/api/v1/media/status": {
+      "get": {
+        "operationId": "Media_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/test": {
+      "post": {
+        "operationId": "Media_test",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/products": {
+      "post": {
+        "operationId": "Media_uploadProductImage",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Media"
+        ]
+      },
+      "delete": {
+        "operationId": "Media_removeProductImage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveImageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Remove um objeto do bucket. Separado do produto de propósito: apagar a\nimagem junto com o produto arriscaria derrubar uma foto que outro produto\nainda usa, e o custo de um objeto órfão é irrisório perto disso.",
+        "tags": [
+          "Media"
         ]
       }
     },
@@ -2684,6 +2757,10 @@
             "minLength": 1
           }
         }
+      },
+      "RemoveImageDto": {
+        "type": "object",
+        "properties": {}
       },
       "CustomRequest": {
         "type": "object",

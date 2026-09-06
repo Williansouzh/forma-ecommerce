@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Upload } from "lucide-react";
 import { CATEGORIES } from "@/data/categories";
-import { createProduct, updateProduct, type ProductInput } from "@/lib/admin-api";
+import {
+  createProduct,
+  getMediaStatus,
+  updateProduct,
+  uploadProductImage,
+  type ProductInput,
+} from "@/lib/admin-api";
+import type { MediaStatus } from "@/types/media";
 import {
   centsToInput,
   parsePriceToCents,
@@ -15,6 +22,11 @@ import type { Product } from "@/types/product";
 interface ImageRow {
   url: string;
   alt: string;
+}
+
+/** Um MB legível, para a mensagem de limite. */
+function megabytes(bytes: number): string {
+  return `${Math.round(bytes / 1048576)} MB`;
 }
 
 interface ProductFormProps {
@@ -40,6 +52,24 @@ export function ProductForm({ product }: ProductFormProps) {
       ? product.images.map((image) => ({ url: image.url, alt: image.alt }))
       : [{ url: "", alt: "" }]
   );
+  /**
+   * Estado do armazenamento. Carregado uma vez: sem R2 configurado o campo de
+   * URL continua sendo o caminho — imagem em `/public` nunca deixou de valer,
+   * e o upload é adição, não substituição.
+   */
+  const [media, setMedia] = useState<MediaStatus | null>(null);
+  const [uploading, setUploading] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  useEffect(() => {
+    getMediaStatus()
+      .then(setMedia)
+      // Uma API mais antiga que este módulo não pode derrubar o formulário:
+      // sem status, o campo de URL segue funcionando como sempre.
+      .catch(() => setMedia(null));
+  }, []);
+
   const [material, setMaterial] = useState(product?.material ?? "");
   const [productionTime, setProductionTime] = useState(
     typeof product?.productionTime === "number" ? String(product.productionTime) : ""
@@ -60,6 +90,39 @@ export function ProductForm({ product }: ProductFormProps) {
   const [isFeatured, setIsFeatured] = useState(product?.isFeatured ?? false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  /**
+   * Sobe o arquivo e escreve a URL devolvida na linha.
+   *
+   * O `alt` NÃO é preenchido a partir do nome do arquivo: `IMG_4821.jpg` como
+   * texto alternativo é pior que vazio, porque parece preenchido e não
+   * descreve nada para quem usa leitor de tela.
+   */
+  const handleUpload = async (index: number, file: File) => {
+    setUploadError(null);
+    if (media && file.size > media.maxBytes) {
+      setUploadError(
+        `"${file.name}" tem ${(file.size / 1048576).toFixed(1)} MB e o limite é ${megabytes(media.maxBytes)}.`
+      );
+      return;
+    }
+
+    setUploading(index);
+    try {
+      const stored = await uploadProductImage(file);
+      updateImage(index, { url: stored.url });
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Falha ao enviar a imagem"
+      );
+    } finally {
+      setUploading(null);
+      // Permite reenviar o MESMO arquivo depois de um erro: sem limpar, o
+      // `change` não dispara na segunda escolha do mesmo caminho.
+      const input = fileInputs.current[index];
+      if (input) input.value = "";
+    }
+  };
 
   const updateImage = (index: number, patch: Partial<ImageRow>) => {
     setImages((current) =>
@@ -189,11 +252,54 @@ export function ProductForm({ product }: ProductFormProps) {
           </button>
         </div>
         <p className="mt-2 text-micro text-tertiary">
-          A primeira imagem é a principal. Use caminhos de /public ou URLs completas.
+          A primeira imagem é a principal.{" "}
+          {media?.configured
+            ? `Envie um arquivo (até ${megabytes(media.maxBytes)}, JPEG/PNG/WebP/AVIF) ou cole um caminho de /public.`
+            : "Use caminhos de /public ou URLs completas."}
         </p>
+
+        {media && !media.configured && (
+          <p className="mt-2 text-micro text-tertiary">
+            O envio de arquivos aparece aqui quando o bucket R2 estiver
+            configurado em Integrações.
+          </p>
+        )}
+
+        {uploadError && (
+          <p role="alert" className="mt-3 rounded-md bg-error/10 px-3 py-2 text-micro text-error">
+            {uploadError}
+          </p>
+        )}
+
         <div className="mt-4 space-y-3">
           {images.map((image, index) => (
             <div key={index} className="flex flex-col gap-2 sm:flex-row">
+              {media?.configured && (
+                <>
+                  <input
+                    ref={(element) => {
+                      fileInputs.current[index] = element;
+                    }}
+                    type="file"
+                    accept={media.acceptedTypes.join(",")}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleUpload(index, file);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputs.current[index]?.click()}
+                    disabled={uploading !== null}
+                    aria-label={`Enviar arquivo para a imagem ${index + 1}`}
+                    className="inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border border-strong px-3 text-micro uppercase text-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+                  >
+                    <Upload size={13} />
+                    {uploading === index ? "Enviando…" : "Enviar"}
+                  </button>
+                </>
+              )}
               <input
                 aria-label={`URL da imagem ${index + 1}`}
                 placeholder="/images/products/…"
