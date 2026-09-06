@@ -1,6 +1,8 @@
 export interface OrderItem {
   productId: string;
   name: string;
+  /** Id da variação escolhida — é por ele que o estoque acha o saldo certo. */
+  variantId?: string;
   variantName?: string;
   quantity: number;
   price: number;
@@ -37,6 +39,18 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+/** De onde veio o pedido: o checkout da loja ou um marketplace. */
+export type OrderChannel = "site" | "shopee";
+
+/** Identidade do pedido na origem, quando ele nasceu fora daqui. */
+export interface ExternalRef {
+  source: OrderChannel;
+  shopId: string;
+  orderSn: string;
+  /** Último status visto na origem — o que descarta evento atrasado. */
+  remoteStatus?: string;
+}
+
 export interface Order {
   id: string;
   /** Código curto que o cliente lê e cita no WhatsApp: C3D-4820. */
@@ -50,6 +64,10 @@ export interface Order {
   shipping: number;
   discount: number;
   total: number;
+  /** Ausente nos pedidos antigos; a API assume `site` como padrão. */
+  channel?: OrderChannel;
+  /** Presente só em pedido importado de um marketplace. */
+  externalRef?: ExternalRef;
   /**
    * String quando vem da API — JSON não tem `Date`. O tipo diz a verdade
    * para ninguém chamar `.getTime()` num texto e descobrir em produção.

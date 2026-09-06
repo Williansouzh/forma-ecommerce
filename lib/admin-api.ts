@@ -9,6 +9,21 @@ import type {
 } from "@/types/integration";
 import type { StoreSettings } from "@/types/settings";
 import type { CustomRequest, RequestStatus } from "@/types/custom-request";
+import type {
+  OutboxStatus,
+  PushSignatureScheme,
+  ShopeeConnection,
+  ShopeeEventRow,
+  ShopeeLink,
+  ShopeeLinkStatus,
+  ShopeeListing,
+  ShopeeMetrics,
+  ShopeeQueueMessage,
+  ShopeeQueueStats,
+  ShopeeReconciliationReport,
+  ShopeeSuggestion,
+  ShopeeSyncResult,
+} from "@/types/shopee";
 import type { components } from "@/types/generated/api-v1";
 
 /**
@@ -240,6 +255,154 @@ export async function testMercadoPago(): Promise<IntegrationTestResult> {
   return authFetch<IntegrationTestResult>("/integrations/mercadopago/test", {
     method: "POST",
   });
+}
+
+// ── Shopee ─────────────────────────────────────────────────────────────────
+
+/**
+ * A área de Shopee do painel.
+ *
+ * Nenhuma destas funções recebe ou devolve credencial: `partner_key`, access
+ * token e refresh token entram pelo formulário de Integrações (só de escrita,
+ * como o do Mercado Pago) e nunca voltam. Aqui trafega estado e comando.
+ */
+export async function getShopeeConnection(): Promise<ShopeeConnection> {
+  return authFetch<ShopeeConnection>("/shopee/connection");
+}
+
+export async function getShopeeAuthorizationUrl(
+  redirectUri: string
+): Promise<{ url: string }> {
+  return authFetch<{ url: string }>("/shopee/authorize-url", {
+    method: "POST",
+    body: JSON.stringify({ redirectUri }),
+  });
+}
+
+export async function connectShopee(
+  code: string,
+  shopId: string
+): Promise<ShopeeConnection> {
+  return authFetch<ShopeeConnection>("/shopee/connect", {
+    method: "POST",
+    body: JSON.stringify({ code, shopId }),
+  });
+}
+
+export async function disconnectShopee(): Promise<ShopeeConnection> {
+  return authFetch<ShopeeConnection>("/shopee/disconnect", { method: "POST" });
+}
+
+export async function updateShopeeSettings(input: {
+  autoSync?: boolean;
+  defaultSafetyMargin?: number;
+  pushSignatureScheme?: PushSignatureScheme;
+}): Promise<ShopeeConnection> {
+  return authFetch<ShopeeConnection>("/shopee/settings", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listShopeeLinks(): Promise<ShopeeLink[]> {
+  return authFetch<ShopeeLink[]>("/shopee/links");
+}
+
+export async function listShopeeListings(): Promise<ShopeeListing[]> {
+  return authFetch<ShopeeListing[]>("/shopee/listings");
+}
+
+export async function listShopeeSuggestions(): Promise<ShopeeSuggestion[]> {
+  return authFetch<ShopeeSuggestion[]>("/shopee/suggestions");
+}
+
+export async function saveShopeeLink(input: {
+  productId: string;
+  variantId?: string;
+  itemId: string;
+  modelId?: string;
+  shopeeSku?: string;
+  status?: ShopeeLinkStatus;
+  safetyMargin?: number;
+  autoSync?: boolean;
+}): Promise<ShopeeLink> {
+  return authFetch<ShopeeLink>("/shopee/links", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteShopeeLink(id: string): Promise<void> {
+  await authFetch<unknown>(`/shopee/links/${id}`, { method: "DELETE" });
+}
+
+export async function syncShopeeSku(
+  productId: string,
+  variantId?: string
+): Promise<ShopeeSyncResult> {
+  return authFetch<ShopeeSyncResult>("/shopee/sync", {
+    method: "POST",
+    body: JSON.stringify({ productId, variantId }),
+  });
+}
+
+export async function syncAllShopee(): Promise<{ queued: number }> {
+  return authFetch<{ queued: number }>("/shopee/sync-all", { method: "POST" });
+}
+
+/** `dryRun` lista as divergências sem escrever nada na Shopee. */
+export async function reconcileShopee(
+  dryRun: boolean
+): Promise<ShopeeReconciliationReport> {
+  return authFetch<ShopeeReconciliationReport>("/shopee/reconcile", {
+    method: "POST",
+    body: JSON.stringify({ dryRun }),
+  });
+}
+
+export async function drainShopeeQueue(): Promise<unknown> {
+  return authFetch<unknown>("/shopee/drain", { method: "POST" });
+}
+
+export async function pollShopeeOrders(): Promise<{
+  found: number;
+  enqueued: number;
+}> {
+  return authFetch<{ found: number; enqueued: number }>("/shopee/poll-orders", {
+    method: "POST",
+  });
+}
+
+export async function listShopeeOrders(): Promise<Order[]> {
+  return authFetch<Order[]>("/shopee/orders");
+}
+
+export async function listShopeeEvents(): Promise<ShopeeEventRow[]> {
+  return authFetch<ShopeeEventRow[]>("/shopee/events");
+}
+
+export async function getShopeeQueue(status?: OutboxStatus): Promise<{
+  messages: ShopeeQueueMessage[];
+  stats: ShopeeQueueStats;
+}> {
+  const query = status ? `?status=${status}` : "";
+  return authFetch<{ messages: ShopeeQueueMessage[]; stats: ShopeeQueueStats }>(
+    `/shopee/queue${query}`
+  );
+}
+
+export async function retryShopeeMessage(input: {
+  id?: string;
+  topic?: string;
+}): Promise<{ retried: number }> {
+  return authFetch<{ retried: number }>("/shopee/queue/retry", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getShopeeMetrics(): Promise<ShopeeMetrics> {
+  return authFetch<ShopeeMetrics>("/shopee/metrics");
 }
 
 /** Devolve `null` num 404, como os pedidos: API velha não derruba o painel. */

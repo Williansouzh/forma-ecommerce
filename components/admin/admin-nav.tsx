@@ -35,6 +35,7 @@ export function AdminNav() {
     { href: "/admin/produtos", name: "Produtos", count: products.length },
     { href: "/admin/pedidos", name: "Pedidos", count: pending },
     { href: "/admin/integracoes", name: "Integrações" },
+    { href: "/admin/shopee", name: "Shopee" },
     { href: "/admin/configuracoes", name: "Configurações" },
   ];
 

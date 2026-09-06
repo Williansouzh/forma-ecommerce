@@ -219,6 +219,7 @@
             }
           }
         },
+        "summary": "Mudança de `stock` aqui vira ajuste no ledger, assinado por quem pediu —\nver `ProductsService.update`.",
         "tags": [
           "Products"
         ]
@@ -242,6 +243,130 @@
         },
         "tags": [
           "Products"
+        ]
+      }
+    },
+    "/api/v1/inventory/{productId}": {
+      "get": {
+        "operationId": "Inventory_get",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Inventory"
+        ]
+      }
+    },
+    "/api/v1/inventory/receive": {
+      "post": {
+        "operationId": "Inventory_receive",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveStockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockBatch"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Inventory"
+        ]
+      }
+    },
+    "/api/v1/inventory/adjust": {
+      "post": {
+        "operationId": "Inventory_adjust",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustStockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Inventory"
+        ]
+      }
+    },
+    "/api/v1/inventory/loss": {
+      "post": {
+        "operationId": "Inventory_loss",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterLossDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Inventory"
         ]
       }
     },
@@ -388,7 +513,8 @@
                 "whatsapp",
                 "melhorenvio",
                 "instagram",
-                "nfe"
+                "nfe",
+                "shopee"
               ],
               "type": "string"
             }
@@ -439,6 +565,559 @@
         },
         "tags": [
           "Integrations"
+        ]
+      }
+    },
+    "/api/v1/shopee/connection": {
+      "get": {
+        "operationId": "Shopee_connection",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/authorize-url": {
+      "post": {
+        "operationId": "Shopee_authorizeUrl",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeUrlDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Monta a URL de autorização. O lojista é quem abre e autoriza.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/connect": {
+      "post": {
+        "operationId": "Shopee_connect",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectShopeeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Recebe o `code` do retorno da autorização e grava o par de tokens.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/disconnect": {
+      "post": {
+        "operationId": "Shopee_disconnect",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/settings": {
+      "post": {
+        "operationId": "Shopee_settings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShopeeSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/links": {
+      "get": {
+        "operationId": "Shopee_listLinks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      },
+      "post": {
+        "operationId": "Shopee_upsertLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertLinkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopeeProductLink"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/listings": {
+      "get": {
+        "operationId": "Shopee_listings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Anúncios da Shopee, para escolher o que associar.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/suggestions": {
+      "get": {
+        "operationId": "Shopee_suggestions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Propõe associações por SKU. Nada é aplicado: a resposta traz o grau de\nconfiança, e o que for ambíguo espera uma decisão humana.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/links/{id}": {
+      "delete": {
+        "operationId": "Shopee_removeLink",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/sync": {
+      "post": {
+        "operationId": "Shopee_syncOne",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncSkuDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/sync-all": {
+      "post": {
+        "operationId": "Shopee_syncAll",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Enfileira todos os SKUs associados.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/reconcile": {
+      "post": {
+        "operationId": "Shopee_reconcile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconcileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Conciliação completa sob demanda; `dryRun` mostra sem corrigir.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/poll-orders": {
+      "post": {
+        "operationId": "Shopee_pollOrders",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Força a varredura de pedidos, sem esperar o intervalo.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/drain": {
+      "post": {
+        "operationId": "Shopee_drain",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Roda uma volta da fila na hora — útil para não esperar o tick.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/orders": {
+      "get": {
+        "operationId": "Shopee_listOrders",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/events": {
+      "get": {
+        "operationId": "Shopee_listEvents",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopeeEvent"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/queue": {
+      "get": {
+        "operationId": "Shopee_queue",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "topic",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "A fila: pendentes, em processamento e a fila de mortas.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/queue/retry": {
+      "post": {
+        "operationId": "Shopee_retry",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Reprocessa uma mensagem morta, ou todas de um tópico.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/metrics": {
+      "get": {
+        "operationId": "Shopee_metrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Métricas do worker mais o estado da fila.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/stock/{productId}": {
+      "get": {
+        "operationId": "Shopee_stockFor",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "O saldo de um SKU do ponto de vista da integração.",
+        "tags": [
+          "Shopee"
+        ]
+      }
+    },
+    "/api/v1/shopee/webhook": {
+      "post": {
+        "operationId": "ShopeeWebhook_handle",
+        "parameters": [
+          {
+            "name": "authorization",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-shopee-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "O endpoint que a Shopee chama.\n\nPúblico porque a Shopee não tem sessão — quem autentica é a assinatura,\nexatamente como no webhook do Mercado Pago. Sem `partner_key` gravada,\nTODA notificação é recusada: um endpoint aberto que mexe em estoque é um\nconvite.\n\nResponde depressa e delega: o processamento vai para a fila persistente.\nPush que demora vira reenvio, e reenvio vira trabalho repetido — que a\nchave de idempotência absorveria, mas de graça é melhor.",
+        "tags": [
+          "ShopeeWebhook"
         ]
       }
     },
@@ -1115,6 +1794,156 @@
           }
         }
       },
+      "ReceiveStockDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variantId": {
+            "type": "string",
+            "description": "String vazia (ou ausente) para produto simples."
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "unitCost": {
+            "type": "number",
+            "description": "Custo unitário em CENTAVOS — é o que congela no COGS da venda.",
+            "minimum": 0
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId",
+          "quantity"
+        ]
+      },
+      "StockBatch": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "`required` do Mongoose recusa string vazia (o teste de `required` para\nString é `length > 0`), e vazio é justamente o valor válido do produto\nsimples. O default garante a presença; o tipo garante o resto."
+          },
+          "code": {
+            "type": "string",
+            "description": "Código legível do lote: `L-2026-09-05-01`, o que estiver na etiqueta."
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quanto entrou. Nunca muda depois da entrada."
+          },
+          "consumed": {
+            "type": "number",
+            "description": "Quanto já saiu por venda confirmada. Só cresce."
+          },
+          "lost": {
+            "type": "number",
+            "description": "Quanto saiu por perda ou vencimento. Só cresce."
+          },
+          "unitCost": {
+            "type": "number",
+            "description": "Custo unitário em CENTAVOS. É o que congela no COGS da venda."
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Validade. Ausente = não vence (o caso normal de peça impressa). Presente,\nmanda no FEFO e faz o lote sair do disponível quando passa."
+          },
+          "expired": {
+            "type": "boolean",
+            "description": "Verdadeiro depois que a rotina de vencimento já baixou o que sobrou."
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "variantId",
+          "code",
+          "quantity",
+          "consumed",
+          "lost",
+          "unitCost",
+          "expired",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AdjustStockDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variantId": {
+            "type": "string"
+          },
+          "delta": {
+            "type": "number",
+            "description": "Positivo entra, negativo sai. Zero é recusado pelo serviço."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "productId",
+          "delta",
+          "reason"
+        ]
+      },
+      "RegisterLossDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variantId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "productId",
+          "quantity",
+          "reason"
+        ]
+      },
       "OrderItemEmbed": {
         "type": "object",
         "properties": {
@@ -1123,6 +1952,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "Id da variação escolhida (`variants[].id`). O carrinho sempre soube qual\nera; o pedido só guardava o NOME dela, que não serve para achar o saldo\ncerto — duas variações podem ter nomes parecidos e o estoque é por id."
           },
           "variantName": {
             "type": "string"
@@ -1205,6 +2038,33 @@
           "country"
         ]
       },
+      "ExternalRefEmbed": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "shopee",
+              "site"
+            ]
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "orderSn": {
+            "type": "string"
+          },
+          "remoteStatus": {
+            "type": "string",
+            "description": "Último `order_status` visto na origem, para descartar evento atrasado."
+          }
+        },
+        "required": [
+          "source",
+          "shopId",
+          "orderSn"
+        ]
+      },
       "Order": {
         "type": "object",
         "properties": {
@@ -1236,8 +2096,8 @@
             "enum": [
               "printing",
               "pending",
-              "paid",
               "processing",
+              "paid",
               "finishing",
               "shipped",
               "delivered",
@@ -1264,6 +2124,21 @@
           "paymentUrl": {
             "type": "string"
           },
+          "channel": {
+            "enum": [
+              "shopee",
+              "site"
+            ],
+            "type": "string"
+          },
+          "externalRef": {
+            "description": "Presente só em pedido importado. O índice único parcial abaixo é o que\ngarante que reimportar o mesmo `order_sn` não crie um segundo pedido.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExternalRefEmbed"
+              }
+            ]
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -1287,6 +2162,7 @@
           "shipping",
           "discount",
           "total",
+          "channel",
           "createdAt",
           "updatedAt"
         ]
@@ -1301,6 +2177,9 @@
           "name": {
             "type": "string",
             "minLength": 1
+          },
+          "variantId": {
+            "type": "string"
           },
           "variantName": {
             "type": "string"
@@ -1447,8 +2326,8 @@
             "enum": [
               "printing",
               "pending",
-              "paid",
               "processing",
+              "paid",
               "finishing",
               "shipped",
               "delivered",
@@ -1484,6 +2363,294 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "AuthorizeUrlDto": {
+        "type": "object",
+        "properties": {
+          "redirectUri": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "redirectUri"
+        ]
+      },
+      "ConnectShopeeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "shopId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "shopId"
+        ]
+      },
+      "ShopeeSettingsDto": {
+        "type": "object",
+        "properties": {
+          "autoSync": {
+            "type": "boolean"
+          },
+          "defaultSafetyMargin": {
+            "type": "number",
+            "minimum": 0
+          },
+          "pushSignatureScheme": {
+            "type": "string",
+            "enum": [
+              "authorization",
+              "x-shopee-signature"
+            ]
+          }
+        }
+      },
+      "UpsertLinkDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variantId": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string"
+          },
+          "modelId": {
+            "type": "string"
+          },
+          "shopeeSku": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "internalSku": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "error",
+              "pending",
+              "active",
+              "disabled"
+            ]
+          },
+          "safetyMargin": {
+            "type": "number",
+            "minimum": 0
+          },
+          "autoSync": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "productId",
+          "itemId"
+        ]
+      },
+      "ShopeeProductLink": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "String vazia para produto simples — mesma convenção do estoque."
+          },
+          "internalSku": {
+            "type": "string",
+            "description": "SKU interno, quando existir. Só orienta o casamento; não é a chave."
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string",
+            "description": "`item_id` do anúncio na Shopee."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "`model_id` da variação. `\"0\"` é o valor que a própria Shopee usa para\nitem sem variação, e é o que vai em `update_stock`."
+          },
+          "shopeeSku": {
+            "type": "string",
+            "description": "SKU cadastrado do lado da Shopee, para conferência humana."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "error",
+              "pending",
+              "active",
+              "disabled"
+            ]
+          },
+          "safetyMargin": {
+            "type": "number",
+            "description": "Quantas unidades segurar deste anúncio. Por SKU porque a peça que vende\nmuito precisa de mais folga que a que vende uma por mês."
+          },
+          "autoSync": {
+            "type": "boolean",
+            "description": "Desliga a sincronização automática deste SKU sem apagar a associação."
+          },
+          "lastSyncedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastPushedStock": {
+            "type": "number",
+            "description": "Último saldo que ENVIAMOS. Serve para não repetir chamada à toa."
+          },
+          "lastRemoteStock": {
+            "type": "number",
+            "description": "Último saldo que a Shopee nos DISSE ter. A base da divergência."
+          },
+          "lastRemoteCheckedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "failureCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "variantId",
+          "internalSku",
+          "shopId",
+          "itemId",
+          "modelId",
+          "shopeeSku",
+          "status",
+          "safetyMargin",
+          "autoSync",
+          "failureCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SyncSkuDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId"
+        ]
+      },
+      "ReconcileDto": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "description": "Só lista as divergências, sem escrever nada na Shopee."
+          }
+        }
+      },
+      "ShopeeEvent": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "`SHOPEE:<shopId>:<orderSn>:<eventType>`"
+          },
+          "shopId": {
+            "type": "string"
+          },
+          "orderSn": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Status da Shopee, ou o nome do gatilho quando não é de pedido."
+          },
+          "pushCode": {
+            "type": "number",
+            "description": "`code` do push, quando veio por push. Ausente na varredura periódica."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "processed",
+              "ignored",
+              "failed"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "description": "Por que foi ignorado, ou o que foi feito. Texto para gente ler."
+          },
+          "correlationId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "shopId",
+          "orderSn",
+          "eventType",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "RetryMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Sem `id`, reprocessa a fila de mortas inteira do tópico."
           }
         }
       },

@@ -22,6 +22,9 @@ export class OrderItemDto {
   name!: string;
 
   @IsOptional() @IsString()
+  variantId?: string;
+
+  @IsOptional() @IsString()
   variantName?: string;
 
   @IsInt() @Min(1)

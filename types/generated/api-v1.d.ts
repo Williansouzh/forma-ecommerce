@@ -133,6 +133,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventory/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Inventory_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Inventory_adjust"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/loss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Inventory_loss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/receive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Inventory_receive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orders": {
         parameters: {
             query?: never;
@@ -241,6 +305,10 @@ export interface paths {
         delete: operations["Products_remove"];
         options?: never;
         head?: never;
+        /**
+         * Mudança de `stock` aqui vira ajuste no ledger, assinado por quem pediu —
+         *     ver `ProductsService.update`.
+         */
         patch: operations["Products_update"];
         trace?: never;
     };
@@ -277,6 +345,369 @@ export interface paths {
         patch: operations["Settings_update"];
         trace?: never;
     };
+    "/api/v1/shopee/authorize-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Monta a URL de autorização. O lojista é quem abre e autoriza. */
+        post: operations["Shopee_authorizeUrl"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recebe o `code` do retorno da autorização e grava o par de tokens. */
+        post: operations["Shopee_connect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Shopee_connection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Shopee_disconnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/drain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Roda uma volta da fila na hora — útil para não esperar o tick. */
+        post: operations["Shopee_drain"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Shopee_listEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Shopee_listLinks"];
+        put?: never;
+        post: operations["Shopee_upsertLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/links/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["Shopee_removeLink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Anúncios da Shopee, para escolher o que associar. */
+        get: operations["Shopee_listings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas do worker mais o estado da fila. */
+        get: operations["Shopee_metrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["Shopee_listOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/poll-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Força a varredura de pedidos, sem esperar o intervalo. */
+        post: operations["Shopee_pollOrders"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A fila: pendentes, em processamento e a fila de mortas. */
+        get: operations["Shopee_queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/queue/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reprocessa uma mensagem morta, ou todas de um tópico. */
+        post: operations["Shopee_retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Conciliação completa sob demanda; `dryRun` mostra sem corrigir. */
+        post: operations["Shopee_reconcile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Shopee_settings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/stock/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** O saldo de um SKU do ponto de vista da integração. */
+        get: operations["Shopee_stockFor"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propõe associações por SKU. Nada é aplicado: a resposta traz o grau de
+         *     confiança, e o que for ambíguo espera uma decisão humana.
+         */
+        get: operations["Shopee_suggestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["Shopee_syncOne"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/sync-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enfileira todos os SKUs associados. */
+        post: operations["Shopee_syncAll"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopee/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * O endpoint que a Shopee chama.
+         *
+         *     Público porque a Shopee não tem sessão — quem autentica é a assinatura,
+         *     exatamente como no webhook do Mercado Pago. Sem `partner_key` gravada,
+         *     TODA notificação é recusada: um endpoint aberto que mexe em estoque é um
+         *     convite.
+         *
+         *     Responde depressa e delega: o processamento vai para a fila persistente.
+         *     Push que demora vira reenvio, e reenvio vira trabalho repetido — que a
+         *     chave de idempotência absorveria, mas de graça é melhor.
+         */
+        post: operations["ShopeeWebhook_handle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -300,6 +731,20 @@ export interface components {
             state: string;
             street: string;
             zipCode: string;
+        };
+        AdjustStockDto: {
+            /** @description Positivo entra, negativo sai. Zero é recusado pelo serviço. */
+            delta: number;
+            productId: string;
+            reason: string;
+            variantId?: string;
+        };
+        AuthorizeUrlDto: {
+            redirectUri: string;
+        };
+        ConnectShopeeDto: {
+            code: string;
+            shopId: string;
         };
         CreateCustomRequestDto: {
             budget?: number;
@@ -396,18 +841,33 @@ export interface components {
             height: number;
             width: number;
         };
+        ExternalRefEmbed: {
+            orderSn: string;
+            /** @description Último `order_status` visto na origem, para descartar evento atrasado. */
+            remoteStatus?: string;
+            shopId: string;
+            /** @enum {string} */
+            source: "shopee" | "site";
+        };
         LoginDto: {
             /** Format: email */
             email: string;
             password: string;
         };
         Order: {
+            /** @enum {string} */
+            channel: "shopee" | "site";
             /** @description Código curto que a pessoa lê e diz no WhatsApp: C3D-4820. */
             code: string;
             /** Format: date-time */
             createdAt: string;
             customer: components["schemas"]["CustomerEmbed"];
             discount: number;
+            /**
+             * @description Presente só em pedido importado. O índice único parcial abaixo é o que
+             *     garante que reimportar o mesmo `order_sn` não crie um segundo pedido.
+             */
+            externalRef?: components["schemas"]["ExternalRefEmbed"];
             id: string;
             items: components["schemas"]["OrderItemEmbed"][];
             /** @enum {string} */
@@ -418,7 +878,7 @@ export interface components {
             shipping: number;
             shippingAddress?: components["schemas"]["AddressEmbed"];
             /** @enum {string} */
-            status: "printing" | "pending" | "paid" | "processing" | "finishing" | "shipped" | "delivered" | "cancelled";
+            status: "printing" | "pending" | "processing" | "paid" | "finishing" | "shipped" | "delivered" | "cancelled";
             subtotal: number;
             total: number;
             /** Format: date-time */
@@ -429,6 +889,7 @@ export interface components {
             price: number;
             productId: string;
             quantity: number;
+            variantId?: string;
             variantName?: string;
         };
         OrderItemEmbed: {
@@ -436,6 +897,12 @@ export interface components {
             price: number;
             productId: string;
             quantity: number;
+            /**
+             * @description Id da variação escolhida (`variants[].id`). O carrinho sempre soube qual
+             *     era; o pedido só guardava o NOME dela, que não serve para achar o saldo
+             *     certo — duas variações podem ter nomes parecidos e o estoque é por id.
+             */
+            variantId?: string;
             variantName?: string;
         };
         Product: {
@@ -491,6 +958,134 @@ export interface components {
             priceAdjustment: number;
             stock: number;
         };
+        ReceiveStockDto: {
+            code?: string;
+            expiresAt?: string;
+            productId: string;
+            quantity: number;
+            /** @description Custo unitário em CENTAVOS — é o que congela no COGS da venda. */
+            unitCost?: number;
+            /** @description String vazia (ou ausente) para produto simples. */
+            variantId?: string;
+        };
+        ReconcileDto: {
+            /** @description Só lista as divergências, sem escrever nada na Shopee. */
+            dryRun?: boolean;
+        };
+        RegisterLossDto: {
+            productId: string;
+            quantity: number;
+            reason: string;
+            variantId?: string;
+        };
+        RetryMessageDto: {
+            id?: string;
+            /** @description Sem `id`, reprocessa a fila de mortas inteira do tópico. */
+            topic?: string;
+        };
+        ShopeeEvent: {
+            correlationId?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Status da Shopee, ou o nome do gatilho quando não é de pedido. */
+            eventType: string;
+            id: string;
+            /** @description `SHOPEE:<shopId>:<orderSn>:<eventType>` */
+            key: string;
+            orderSn: string;
+            /** @description Por que foi ignorado, ou o que foi feito. Texto para gente ler. */
+            outcome?: string;
+            /** @description `code` do push, quando veio por push. Ausente na varredura periódica. */
+            pushCode?: number;
+            shopId: string;
+            /** @enum {string} */
+            status: "received" | "processed" | "ignored" | "failed";
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ShopeeProductLink: {
+            /** @description Desliga a sincronização automática deste SKU sem apagar a associação. */
+            autoSync: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            failureCount: number;
+            id: string;
+            /** @description SKU interno, quando existir. Só orienta o casamento; não é a chave. */
+            internalSku: string;
+            /** @description `item_id` do anúncio na Shopee. */
+            itemId: string;
+            lastError?: string;
+            /** @description Último saldo que ENVIAMOS. Serve para não repetir chamada à toa. */
+            lastPushedStock?: number;
+            /** Format: date-time */
+            lastRemoteCheckedAt?: string;
+            /** @description Último saldo que a Shopee nos DISSE ter. A base da divergência. */
+            lastRemoteStock?: number;
+            /** Format: date-time */
+            lastSyncedAt?: string;
+            /**
+             * @description `model_id` da variação. `"0"` é o valor que a própria Shopee usa para
+             *     item sem variação, e é o que vai em `update_stock`.
+             */
+            modelId: string;
+            productId: string;
+            /**
+             * @description Quantas unidades segurar deste anúncio. Por SKU porque a peça que vende
+             *     muito precisa de mais folga que a que vende uma por mês.
+             */
+            safetyMargin: number;
+            /** @description SKU cadastrado do lado da Shopee, para conferência humana. */
+            shopeeSku: string;
+            shopId: string;
+            /** @enum {string} */
+            status: "error" | "pending" | "active" | "disabled";
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description String vazia para produto simples — mesma convenção do estoque. */
+            variantId: string;
+        };
+        ShopeeSettingsDto: {
+            autoSync?: boolean;
+            defaultSafetyMargin?: number;
+            /** @enum {string} */
+            pushSignatureScheme?: "authorization" | "x-shopee-signature";
+        };
+        StockBatch: {
+            /** @description Código legível do lote: `L-2026-09-05-01`, o que estiver na etiqueta. */
+            code: string;
+            /** @description Quanto já saiu por venda confirmada. Só cresce. */
+            consumed: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Verdadeiro depois que a rotina de vencimento já baixou o que sobrou. */
+            expired: boolean;
+            /**
+             * Format: date-time
+             * @description Validade. Ausente = não vence (o caso normal de peça impressa). Presente,
+             *     manda no FEFO e faz o lote sair do disponível quando passa.
+             */
+            expiresAt?: string;
+            id: string;
+            /** @description Quanto saiu por perda ou vencimento. Só cresce. */
+            lost: number;
+            productId: string;
+            /** @description Quanto entrou. Nunca muda depois da entrada. */
+            quantity: number;
+            /** @description Custo unitário em CENTAVOS. É o que congela no COGS da venda. */
+            unitCost: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * @description `required` do Mongoose recusa string vazia (o teste de `required` para
+             *     String é `length > 0`), e vazio é justamente o valor válido do produto
+             *     simples. O default garante a presença; o tipo garante o resto.
+             */
+            variantId: string;
+        };
+        SyncSkuDto: {
+            productId: string;
+            variantId?: string;
+        };
         UpdateCustomRequestStatusDto: {
             /** @enum {string} */
             status: "received" | "analyzing" | "quoted" | "approved" | "modeling" | "printing" | "finished";
@@ -513,7 +1108,7 @@ export interface components {
         };
         UpdateOrderStatusDto: {
             /** @enum {string} */
-            status: "printing" | "pending" | "paid" | "processing" | "finishing" | "shipped" | "delivered" | "cancelled";
+            status: "printing" | "pending" | "processing" | "paid" | "finishing" | "shipped" | "delivered" | "cancelled";
         };
         UpdateProductDto: {
             badge?: string;
@@ -544,6 +1139,18 @@ export interface components {
             /** @description Em centavos. */
             freeShippingThreshold?: number;
             pixDiscountPercent?: number;
+        };
+        UpsertLinkDto: {
+            autoSync?: boolean;
+            internalSku?: string;
+            itemId: string;
+            modelId?: string;
+            productId: string;
+            safetyMargin?: number;
+            shopeeSku?: string;
+            /** @enum {string} */
+            status?: "error" | "pending" | "active" | "disabled";
+            variantId?: string;
         };
     };
     responses: never;
@@ -704,7 +1311,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key: "mercadopago" | "whatsapp" | "melhorenvio" | "instagram" | "nfe";
+                key: "mercadopago" | "whatsapp" | "melhorenvio" | "instagram" | "nfe" | "shopee";
             };
             cookie?: never;
         };
@@ -739,6 +1346,96 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Inventory_get: {
+        parameters: {
+            query?: {
+                variantId?: string;
+            };
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Inventory_adjust: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdjustStockDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Inventory_loss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterLossDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Inventory_receive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceiveStockDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockBatch"];
                 };
             };
         };
@@ -996,6 +1693,446 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateSettingsDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_authorizeUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorizeUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_connect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectShopeeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_connection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_disconnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_drain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_listEvents: {
+        parameters: {
+            query?: {
+                limit?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopeeEvent"][];
+                };
+            };
+        };
+    };
+    Shopee_listLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_upsertLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertLinkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopeeProductLink"];
+                };
+            };
+        };
+    };
+    Shopee_removeLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_listings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_metrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_listOrders: {
+        parameters: {
+            query?: {
+                limit?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Order"][];
+                };
+            };
+        };
+    };
+    Shopee_pollOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_queue: {
+        parameters: {
+            query?: {
+                status?: string;
+                topic?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetryMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_reconcile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconcileDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShopeeSettingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
+            };
+        };
+    };
+    Shopee_stockFor: {
+        parameters: {
+            query?: {
+                variantId?: string;
+            };
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_suggestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, unknown>[];
+                };
+            };
+        };
+    };
+    Shopee_syncOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SyncSkuDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Shopee_syncAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ShopeeWebhook_handle: {
+        parameters: {
+            query?: never;
+            header: {
+                authorization: string;
+                "x-shopee-signature": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

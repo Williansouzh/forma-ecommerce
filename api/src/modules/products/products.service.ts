@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
+import { randomUUID } from "crypto";
 import {
   Product,
   ProductDocument,
 } from "./schemas/product.schema";
 import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
+import { InventoryService } from "../inventory/inventory.service";
 
 export interface ProductQuery {
   category?: string;
@@ -31,6 +33,7 @@ export class ProductsService {
   constructor(
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
+    private readonly inventory: InventoryService,
   ) {}
 
   async findAll(query: ProductQuery): Promise<Product[]> {
@@ -109,15 +112,108 @@ export class ProductsService {
     return mapId(created.toObject() as unknown as RawProduct);
   }
 
-  async update(id: string, dto: UpdateProductDto): Promise<Product> {
+  /**
+   * Atualiza o cadastro. Quantidade NÃO é campo de cadastro.
+   *
+   * `stock` e `variants[].stock` são projeção do ledger: gravá-los aqui com um
+   * `$set` produziria um número que a próxima venda sobrescreveria, e — pior —
+   * um saldo sem lote, sem custo e sem linha de auditoria explicando de onde
+   * veio. O painel continua editando o campo como sempre; o que mudou é que a
+   * diferença vira um AJUSTE no domínio de estoque, com motivo e ator.
+   *
+   * Os outros campos seguem pelo caminho de antes.
+   */
+  async update(
+    id: string,
+    dto: UpdateProductDto,
+    actor?: string,
+  ): Promise<Product> {
     if (!Types.ObjectId.isValid(id)) {
       throw new NotFoundException("Produto não encontrado");
     }
+
+    const { stock, variants, ...rest } = dto as UpdateProductDto & {
+      stock?: number;
+      variants?: { id: string; stock?: number }[];
+    };
+
+    const before = await this.productModel.findById(id).lean<RawProduct | null>();
+    if (!before) throw new NotFoundException("Produto não encontrado");
+
+    /**
+     * O saldo declarado precisa entrar no ledger ANTES do `$set`.
+     *
+     * O `$set` reescreve o array de variações inteiro, e o schema repõe o
+     * default `stock: 0` em cada uma. Se o domínio de estoque ainda não
+     * conhecesse aquele SKU, ele adotaria o zero como saldo de abertura e a
+     * peça sumiria do estoque por causa de uma edição de NOME. `getStock`
+     * força a adoção do saldo real primeiro.
+     */
+    await this.inventory.getStock({ productId: id, variantId: "" });
+    for (const variant of before.variants ?? []) {
+      await this.inventory.getStock({ productId: id, variantId: variant.id });
+    }
+
+    // As variações entram no `$set` porque carregam nome, cor e preço, mas o
+    // `stock` de cada uma é substituído pelo valor projetado — o `$set` não
+    // pode ser o caminho por onde uma quantidade muda.
+    const set: Record<string, unknown> = { ...rest };
+    if (variants) {
+      const projected = new Map(
+        (before.variants ?? []).map((variant) => [variant.id, variant.stock]),
+      );
+      set.variants = variants.map((variant) => ({
+        ...variant,
+        stock: projected.get(variant.id) ?? 0,
+      }));
+    }
+
     const updated = await this.productModel
-      .findByIdAndUpdate(id, { $set: dto }, { new: true })
+      .findByIdAndUpdate(id, { $set: set }, { new: true })
       .lean<RawProduct | null>();
     if (!updated) throw new NotFoundException("Produto não encontrado");
-    return mapId(updated);
+
+    const correlationId = randomUUID();
+
+    if (typeof stock === "number") {
+      await this.applyStockEdit(id, "", stock, actor, correlationId);
+    }
+    for (const variant of variants ?? []) {
+      if (typeof variant.stock === "number") {
+        await this.applyStockEdit(id, variant.id, variant.stock, actor, correlationId);
+      }
+    }
+
+    // Relê: o ajuste projetou o saldo de volta depois do `$set` acima.
+    const fresh = await this.productModel.findById(id).lean<RawProduct | null>();
+    return mapId(fresh ?? updated);
+  }
+
+  /**
+   * Transforma "o campo agora vale N" na diferença correspondente.
+   *
+   * Ajustar para MENOS do que existe em lote é recusado pelo domínio, e a
+   * recusa sobe para o painel — melhor um erro claro que um saldo que o ledger
+   * não sustenta.
+   */
+  private async applyStockEdit(
+    productId: string,
+    variantId: string,
+    target: number,
+    actor: string | undefined,
+    correlationId: string,
+  ): Promise<void> {
+    const sku = { productId, variantId };
+    const current = await this.inventory.getStock(sku);
+    const delta = Math.trunc(target) - current.available;
+    if (delta === 0) return;
+
+    await this.inventory.adjust(sku, delta, {
+      channel: "ADMIN",
+      actor,
+      reason: `Ajuste pelo cadastro do produto (${current.available} → ${Math.trunc(target)})`,
+      correlationId,
+    });
   }
 
   async remove(id: string): Promise<void> {

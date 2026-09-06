@@ -3,7 +3,8 @@ export type IntegrationKey =
   | "whatsapp"
   | "melhorenvio"
   | "instagram"
-  | "nfe";
+  | "nfe"
+  | "shopee";
 
 export interface Integration {
   key: IntegrationKey;
