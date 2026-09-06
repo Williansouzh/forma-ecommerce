@@ -140,6 +140,11 @@ direção que permite ligar um segundo canal sem tocar em lote, ledger ou FEFO.
 
 ## 3. Cadastrar o aplicativo na Shopee Open Platform
 
+> **Só quer ligar a loja?** O passo a passo operacional, com o que clicar e o
+> que costuma dar errado em cada etapa, está em
+> [`CONECTAR_SHOPEE.md`](CONECTAR_SHOPEE.md). Esta seção é a referência
+> resumida.
+
 1. Crie a conta de parceiro em <https://open.shopee.com> e registre um app.
 2. Anote **Partner ID** (público) e **Partner Key** (privada — trate como senha).
 3. Cadastre a **Redirect URL** da autorização:
