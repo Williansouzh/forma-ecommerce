@@ -9,6 +9,58 @@ import type {
 } from "@/types/integration";
 import type { StoreSettings } from "@/types/settings";
 import type { CustomRequest, RequestStatus } from "@/types/custom-request";
+import type { components } from "@/types/generated/api-v1";
+
+/**
+ * As formas que a API realmente devolve, geradas do contrato OpenAPI.
+ *
+ * O painel afirmava os tipos de domínio direto sobre o JSON (`as Promise<T>`),
+ * sem nada ligando os dois. Foi assim que a vitrine passou a montar
+ * `id: undefined` em todo produto: o contrato dizia `_id`, o fio mandava `id`
+ * e ninguém checava. Aqui as respostas passam a ser tipadas pelo contrato, e
+ * a conversão para o tipo de domínio fica explícita onde as formas diferem.
+ */
+type ApiProduct = components["schemas"]["Product"];
+type ApiOrder = components["schemas"]["Order"];
+type ApiCustomRequest = components["schemas"]["CustomRequest"];
+
+/**
+ * Trava de compilação, campo a campo.
+ *
+ * Preferimos isto a `as Promise<T>` em cada chamada — cast cala o compilador
+ * sem provar nada. E preferimos campo a campo a um `Api extends Partial<D>`
+ * genérico: a versão genérica reprovava sem conseguir dizer QUAL campo
+ * divergia, e guarda que fica vermelha sem apontar o lugar é pior que guarda
+ * nenhuma.
+ *
+ * Cada linha abaixo quebra sozinha, com o nome do campo no erro.
+ */
+/**
+ * Em caso de divergência devolve o NOME do campo, não `never`: `never` é
+ * atribuível a qualquer tipo, então uma trava que falha para `never` não
+ * falha nunca. Já quase passou batido aqui.
+ */
+type Campo<Api, Dominio, K extends keyof Api & keyof Dominio> =
+  Api[K] extends Dominio[K] ? true : K;
+
+const _confere: true[] = [
+  null as unknown as Campo<ApiProduct, Product, "id">,
+  null as unknown as Campo<ApiProduct, Product, "slug">,
+  null as unknown as Campo<ApiProduct, Product, "price">,
+  null as unknown as Campo<ApiProduct, Product, "category">,
+  null as unknown as Campo<ApiProduct, Product, "isFeatured">,
+  null as unknown as Campo<ApiOrder, Order, "id">,
+  null as unknown as Campo<ApiOrder, Order, "code">,
+  null as unknown as Campo<ApiOrder, Order, "status">,
+  null as unknown as Campo<ApiOrder, Order, "total">,
+  null as unknown as Campo<ApiOrder, Order, "createdAt">,
+  null as unknown as Campo<ApiOrder, Order, "customer">,
+  null as unknown as Campo<ApiOrder, Order, "items">,
+  null as unknown as Campo<ApiCustomRequest, CustomRequest, "id">,
+  null as unknown as Campo<ApiCustomRequest, CustomRequest, "status">,
+  null as unknown as Campo<ApiCustomRequest, CustomRequest, "createdAt">,
+];
+void _confere;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const BASE = `${API_URL}/api/v1`;

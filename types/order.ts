@@ -50,5 +50,9 @@ export interface Order {
   shipping: number;
   discount: number;
   total: number;
-  createdAt: Date;
+  /**
+   * String quando vem da API — JSON não tem `Date`. O tipo diz a verdade
+   * para ninguém chamar `.getTime()` num texto e descobrir em produção.
+   */
+  createdAt: string | Date;
 }

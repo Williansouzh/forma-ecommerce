@@ -32,7 +32,7 @@ const BASE = `${API_URL}/api/v1`;
 function mapProduct(raw: ApiProduct): Product {
   const localProduct = getProduct(raw.slug);
   const mappedImages = raw.images.map((image, index) => ({
-    id: `${raw._id}-img-${index}`,
+    id: `${raw.id}-img-${index}`,
     url: image.url,
     alt: image.alt,
     isPrimary: index === 0,
@@ -40,7 +40,7 @@ function mapProduct(raw: ApiProduct): Product {
   }));
 
   return {
-    id: raw._id,
+    id: raw.id,
     slug: raw.slug,
     name: raw.name,
     description: raw.description,

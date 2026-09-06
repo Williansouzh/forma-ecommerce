@@ -756,9 +756,6 @@
       "Product": {
         "type": "object",
         "properties": {
-          "_id": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
@@ -841,10 +838,13 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "id": {
+            "type": "string"
           }
         },
         "required": [
-          "_id",
+          "id",
           "name",
           "slug",
           "description",
@@ -1208,9 +1208,6 @@
       "Order": {
         "type": "object",
         "properties": {
-          "_id": {
-            "type": "string"
-          },
           "code": {
             "type": "string",
             "description": "Código curto que a pessoa lê e diz no WhatsApp: C3D-4820."
@@ -1274,10 +1271,13 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "id": {
+            "type": "string"
           }
         },
         "required": [
-          "_id",
+          "id",
           "code",
           "items",
           "customer",
@@ -1521,9 +1521,6 @@
       "CustomRequest": {
         "type": "object",
         "properties": {
-          "_id": {
-            "type": "string"
-          },
           "code": {
             "type": "string"
           },
@@ -1582,10 +1579,13 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "id": {
+            "type": "string"
           }
         },
         "required": [
-          "_id",
+          "id",
           "code",
           "customerName",
           "customerEmail",

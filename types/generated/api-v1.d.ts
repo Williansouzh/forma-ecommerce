@@ -367,7 +367,6 @@ export interface components {
             phone: string;
         };
         CustomRequest: {
-            _id: string;
             /** @description Em centavos, quando a pessoa informa um teto. */
             budget?: number;
             code: string;
@@ -378,6 +377,7 @@ export interface components {
             customerPhone?: string;
             deadline?: string;
             description: string;
+            id: string;
             referenceImages: string[];
             /** @enum {string} */
             status: "received" | "analyzing" | "quoted" | "approved" | "modeling" | "printing" | "finished";
@@ -402,13 +402,13 @@ export interface components {
             password: string;
         };
         Order: {
-            _id: string;
             /** @description Código curto que a pessoa lê e diz no WhatsApp: C3D-4820. */
             code: string;
             /** Format: date-time */
             createdAt: string;
             customer: components["schemas"]["CustomerEmbed"];
             discount: number;
+            id: string;
             items: components["schemas"]["OrderItemEmbed"][];
             /** @enum {string} */
             paymentMethod: "pix" | "credit_card" | "boleto";
@@ -439,7 +439,6 @@ export interface components {
             variantName?: string;
         };
         Product: {
-            _id: string;
             badge?: string;
             /** @enum {string} */
             category: "decoracao" | "geek" | "presentes" | "utilidades" | "personalizados";
@@ -447,6 +446,7 @@ export interface components {
             createdAt: string;
             description: string;
             dimensions?: components["schemas"]["DimensionsEmbed"];
+            id: string;
             images: components["schemas"]["ProductImageEmbed"][];
             isAvailable: boolean;
             /** @description Peça que aceita personalização (nome, cor, medida) sob encomenda. */
