@@ -9,23 +9,33 @@ nenhuma**.
 
 ---
 
-## O que você vai ter no fim
+## Escolha o porteiro antes de tudo
+
+A API e o Mongo **nunca** publicam porta. Quem expõe é um dos dois porteiros, e
+a escolha depende de uma única coisa: **você tem um domínio na sua conta
+Cloudflare?**
+
+| | `--profile caddy` | `--profile tunnel` |
+|---|---|---|
+| Precisa de domínio próprio | **não** — DuckDNS dá um de graça | **sim**, na conta Cloudflare |
+| Portas abertas | 80 e 443 | **nenhuma** |
+| Certificado | Let's Encrypt, o Caddy renova | a Cloudflare cuida |
+| Custo | zero | zero |
+
+**Sem domínio, use `caddy`.** Trocar depois é trocar uma palavra no comando —
+nada mais no arquivo muda.
 
 ```
-Cloudflare (loja, Workers)  ──▶  api.seudominio.com
-                                        │
-                                  Cloudflare Tunnel
-                                        │  (conexão aberta DE DENTRO)
-                                 ┌──────▼──────────────────┐
-                                 │  EC2 t3.micro           │
-                                 │  cloudflared → api → mongo │
-                                 └─────────────────────────┘
-                                   Security Group: nada entra
-```
+                    ┌─ perfil caddy ──────────────────────────┐
+forma-api           │  :80 :443  caddy → api → mongo          │
+  .duckdns.org  ───▶│  Security Group: só 80 e 443            │
+                    └─────────────────────────────────────────┘
 
-Nenhum serviço publica porta. O `cloudflared` abre a conexão de dentro para
-fora, então o Security Group pode recusar **todo** tráfego de entrada — sem
-certificado para renovar, sem Elastic IP, sem porta 443 exposta a varredura.
+                    ┌─ perfil tunnel ─────────────────────────┐
+api.seudominio.com  │  cloudflared → api → mongo              │
+              ─────▶│  Security Group: NADA entra             │
+                    └─────────────────────────────────────────┘
+```
 
 ---
 
@@ -100,12 +110,58 @@ sudo dpkg-reconfigure --priority=low unattended-upgrades
 
 ---
 
-## 2 · Criar o túnel
+## 2A · Nome grátis com DuckDNS  *(perfil `caddy` — sem domínio próprio)*
 
-No **Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel**:
+**Pule para 2B se você tem domínio na Cloudflare.**
+
+O DuckDNS dá um subdomínio permanente e gratuito. Não é bonito, mas é um nome
+DNS de verdade: o Let's Encrypt emite certificado para ele, e a Shopee e o
+Mercado Pago aceitam sem diferença.
+
+1. Entre em <https://www.duckdns.org> e faça login (GitHub, Google…)
+2. Em **domains**, escolha um nome — `forma-api`, por exemplo — e **add domain**
+3. Na coluna **current ip**, ponha o **IP público da sua EC2** e **update ip**
+4. Guarde o **token** da conta: serve se um dia quiser atualizar o IP por script
+
+Você fica com `forma-api.duckdns.org`. Confirme que resolve **antes** de subir —
+o Let's Encrypt confirma a posse batendo na porta 80, e falha se o nome ainda
+não apontar para a instância:
+
+```bash
+dig +short forma-api.duckdns.org     # tem de devolver o IP da EC2
+```
+
+> **O IP da EC2 muda ao parar e iniciar a instância.** Se isso acontecer,
+> atualize no DuckDNS. Um Elastic IP evita o problema, mas a AWS cobra por
+> endereço IPv4 público desde 2024 — no free tier legado isso está coberto por
+> 12 meses; no modelo de créditos, sai do saldo.
+
+### Security Group para este perfil
+
+Entrada: **80** e **443** de `0.0.0.0/0`. Nada além. A 80 é necessária: é por
+ela que o Let's Encrypt confirma que o nome é seu.
+
+---
+
+## 2B · Criar o túnel  *(perfil `tunnel` — exige domínio na Cloudflare)*
+
+### O que um túnel é
+
+Normalmente você **abre uma porta** e espera que só gente boa bata nela. O
+túnel inverte: um programa (`cloudflared`) roda dentro da EC2 e **liga para a
+Cloudflare**, mantendo a linha aberta. As requisições chegam na Cloudflare e
+são empurradas por essa linha já existente — por isso não há porta de entrada,
+nem certificado para instalar, nem necessidade de IP fixo.
+
+### Os passos
+
+No painel da Cloudflare em **Networking → Tunnels** (o caminho antigo,
+**Zero Trust → Networks → Tunnels**, também serve) → **Create a tunnel**:
 
 1. Tipo **Cloudflared**, dê um nome (`forma-api`)
-2. Copie o **token** que aparece — é ele que vai no `.env`
+2. A tela seguinte oferece instaladores para vários sistemas — **ignore todos**,
+   o `cloudflared` já está no compose. O que você quer é só o **token**: é o
+   texto longo que aparece depois de `--token` no comando de instalação
 3. Em **Public Hostnames**, adicione:
 
 | Campo | Valor |
@@ -114,8 +170,9 @@ No **Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel**:
 | Domain | `seudominio.com` |
 | Service | `HTTP` → `api:4000` |
 
-`api:4000` é o nome do serviço na rede do compose. O `cloudflared` roda ao lado
-da API e a alcança por dentro — por isso a API não precisa publicar porta.
+`api:4000` é o **nome do serviço na rede do compose**, não um IP. O
+`cloudflared` roda como contêiner ao lado da API e a alcança por dentro — é por
+isso que a API não publica porta.
 
 > **Guarde o token como senha.** Quem o tiver publica um túnel na sua conta.
 
@@ -145,7 +202,9 @@ O `GHCR_TOKEN` é um Personal Access Token com escopo `read:packages`.
 
 ```bash
 mkdir -p ~/forma && cd ~/forma
-curl -fsSLO https://raw.githubusercontent.com/SEU_USUARIO/forma-ecommerce/main/docker-compose.prod.yml
+BASE=https://raw.githubusercontent.com/SEU_USUARIO/forma-ecommerce/main
+curl -fsSLO "$BASE/docker-compose.prod.yml"
+curl -fsSLO "$BASE/Caddyfile"        # só para o perfil caddy
 ```
 
 Crie o `.env` ao lado:
@@ -159,20 +218,44 @@ ADMIN_EMAIL=voce@seudominio.com
 ADMIN_PASSWORD=<uma senha forte, não a do exemplo>
 ADMIN_NAME=Seu Nome
 
-PUBLIC_API_URL=https://api.seudominio.com
-PUBLIC_SITE_URL=https://seudominio.com
-CORS_ORIGIN=https://seudominio.com
+# Sem domínio próprio (perfil caddy):
+API_DOMAIN=forma-api.duckdns.org
+PUBLIC_API_URL=https://forma-api.duckdns.org
 
-CLOUDFLARE_TUNNEL_TOKEN=<o token do passo 2>
+# Com domínio na Cloudflare (perfil tunnel), troque as duas de cima por:
+#   CLOUDFLARE_TUNNEL_TOKEN=<o token do passo 2B>
+#   PUBLIC_API_URL=https://api.seudominio.com
+
+PUBLIC_SITE_URL=https://sua-loja.workers.dev
+CORS_ORIGIN=https://sua-loja.workers.dev
 ENV
 
 chmod 600 .env
 ```
 
+Suba com o perfil que você escolheu — **sem `--profile` nada é exposto**:
+
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+# sem domínio próprio
+docker compose -f docker-compose.prod.yml --profile caddy up -d
+
+# ou, com domínio na Cloudflare
+docker compose -f docker-compose.prod.yml --profile tunnel up -d
+```
+
+```bash
 docker compose -f docker-compose.prod.yml ps
-curl -s https://api.seudominio.com/api/v1/health
+curl -s https://SEU-ENDERECO/api/v1/health
+```
+
+### Como saber se o porteiro subiu
+
+```bash
+# perfil caddy — procure "certificate obtained successfully"
+docker compose -f docker-compose.prod.yml logs caddy | tail -20
+
+# perfil tunnel — procure "Registered tunnel connection" (normalmente quatro)
+docker compose -f docker-compose.prod.yml logs cloudflared | tail -20
 ```
 
 > **Troque `ADMIN_PASSWORD`.** O padrão do repositório (`forma-admin-2026`)
@@ -243,7 +326,10 @@ commit que funcionava e repita.
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
-| `api.seudominio.com` não responde | túnel fora do ar | `docker compose -f docker-compose.prod.yml logs cloudflared` |
+| Nada responde, e você não passou `--profile` | sem porteiro, nada é exposto | suba com `--profile caddy` ou `--profile tunnel` |
+| Caddy não consegue o certificado | o nome não aponta para a instância, ou a 80 está fechada | `dig +short SEU-NOME`; libere a 80 no Security Group |
+| Funcionava e parou depois de parar/iniciar a instância | o IP público mudou | atualize o IP no DuckDNS |
+| Domínio não responde (perfil tunnel) | túnel fora do ar | `logs cloudflared` |
 | 502 pelo túnel | a API não subiu | `logs api` — provavelmente falta variável no `.env` |
 | API reinicia sozinha | OOM | confira o swap (`free -h`) e `docker stats` |
 | Mongo não sobe | volume corrompido, ou disco cheio | `df -h`; restaure pelo RUNBOOK |
