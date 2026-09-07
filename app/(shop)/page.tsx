@@ -11,6 +11,8 @@ import { CTASection } from "@/components/sections/cta-section";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/schema-org";
 import { withProductCounts } from "@/data/categories";
 import { fetchProducts } from "@/lib/api";
+import { getStoreSettings } from "@/lib/settings";
+import { resolveHomeMedia } from "@/lib/home-media";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,13 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const products = await fetchProducts();
+  const [products, settings] = await Promise.all([
+    fetchProducts(),
+    getStoreSettings(),
+  ]);
+  // `getStoreSettings` nunca lança: com a API fora, `homeMedia` vem indefinido
+  // e a vitrine mostra as imagens embutidas, como sempre mostrou.
+  const media = resolveHomeMedia(settings.homeMedia);
 
   return (
     <>
@@ -37,14 +45,14 @@ export default async function HomePage() {
         lookbook e chamada. As seções numeradas (01–05) contam com essa
         sequência — trocar duas de lugar quebra a contagem visível na tela.
       */}
-      <HeroSection />
+      <HeroSection image={media.hero} videoPoster={media.atelierHero} />
       <MarqueeStrip />
       <FeaturedProducts />
       <AtelierQuote />
       <CategoryIndex categories={withProductCounts(products)} />
       <CustomOrderSection />
-      <ProcessSection />
-      <LookbookSection />
+      <ProcessSection videoPoster={media.atelierProcess} />
+      <LookbookSection photos={media.lookbook} />
       <CTASection />
     </>
   );

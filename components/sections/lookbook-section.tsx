@@ -1,51 +1,20 @@
 import Image from "next/image";
 import { SectionHeading } from "@/components/sections/section-heading";
+import { DEFAULT_LOOKBOOK } from "@/lib/home-media";
+import type { LookbookImage } from "@/types/settings";
 
 /** As peças na casa de quem comprou, com o cômodo e o bairro. */
-const LOOKBOOK = [
-  {
-    src: "/images/products/cactos-03.jpg",
-    alt: "Cactos impressos em 3D em fileira sobre estante",
-    room: "Estante",
-    place: "Catolé",
-  },
-  {
-    src: "/images/products/vaso-canelado-02.jpg",
-    alt: "Vaso canelado com flores sobre mesa de madeira",
-    room: "Sala",
-    place: "Bodocongó",
-  },
-  {
-    src: "/images/products/suporte-02.jpg",
-    alt: "Suporte de celular impresso em 3D na mesa de trabalho",
-    room: "Home office",
-    place: "Centro",
-  },
-  {
-    src: "/images/products/dino-01.jpg",
-    alt: "Mini dinossauros impressos em 3D com arco de exposição",
-    room: "Quarto",
-    place: "Alto Branco",
-  },
-  {
-    src: "/images/products/vaso-nervura-02.jpg",
-    alt: "Vaso nervurado rosa com bandeja",
-    room: "Aparador",
-    place: "Liberdade",
-  },
-  {
-    src: "/images/products/painel-02.jpg",
-    alt: "Painel de cores impresso em 3D em detalhe",
-    room: "Ateliê",
-    place: "Campina Grande",
-  },
-];
+/**
+ * As seis fotos vêm de fora desde que o painel pode trocá-las; os valores
+ * antigos viraram o padrão em `lib/home-media.ts`. A tira é duplicada abaixo
+ * para rolar sem emenda, então o tamanho seis não é decoração.
+ */
 
 function Figure({
   photo,
   hidden,
 }: {
-  photo: (typeof LOOKBOOK)[number];
+  photo: LookbookImage;
   hidden?: boolean;
 }) {
   return (
@@ -55,7 +24,7 @@ function Figure({
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-surface-muted">
         <Image
-          src={photo.src}
+          src={photo.url}
           alt={hidden ? "" : photo.alt}
           fill
           sizes="(max-width: 768px) 78vw, 420px"
@@ -74,7 +43,8 @@ function Figure({
  * As peças fora do estúdio. A faixa rola sozinha e pausa no hover — quem quis
  * olhar uma foto não deveria correr atrás dela.
  */
-export function LookbookSection() {
+export function LookbookSection({ photos: configured }: { photos?: LookbookImage[] } = {}) {
+  const photos = configured ?? DEFAULT_LOOKBOOK;
   return (
     <section aria-labelledby="lookbook-titulo" className="pt-[clamp(64px,12vh,150px)]">
       <div className="shell">
@@ -88,11 +58,11 @@ export function LookbookSection() {
 
       <div className="group mt-[34px] overflow-hidden">
         <div className="flex w-max animate-marquee-slow gap-[clamp(14px,2vw,28px)] pl-[clamp(14px,2vw,28px)] group-hover:[animation-play-state:paused]">
-          {LOOKBOOK.map((photo) => (
-            <Figure key={photo.src} photo={photo} />
+          {photos.map((photo) => (
+            <Figure key={photo.url} photo={photo} />
           ))}
-          {LOOKBOOK.map((photo) => (
-            <Figure key={`${photo.src}-loop`} photo={photo} hidden />
+          {photos.map((photo) => (
+            <Figure key={`${photo.url}-loop`} photo={photo} hidden />
           ))}
         </div>
       </div>
