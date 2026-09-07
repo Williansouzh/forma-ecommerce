@@ -19,21 +19,21 @@ export function ProcessSection({ videoPoster }: { videoPoster?: HomeImage } = {}
     <section
       id="processo"
       aria-labelledby="processo-titulo"
-      className="ink relative mt-[clamp(72px,14vh,170px)] overflow-hidden py-[clamp(60px,12vh,150px)]"
+      className="ink section-rhythm relative overflow-hidden py-[clamp(48px,7vw,88px)]"
     >
       <div className="shell">
-        <span className="label text-tertiary">04 · Do digital ao real</span>
+        <span className="label text-tertiary">Do digital ao real</span>
 
         <div className="mt-5 flex flex-wrap items-end gap-[clamp(24px,5vw,70px)]">
           <h2
             id="processo-titulo"
-            className="min-w-0 flex-[1_1_min(100%,460px)] font-display text-[clamp(32px,6vw,84px)] font-light leading-[0.98] tracking-[-0.03em]"
+            className="min-w-0 flex-[1_1_min(100%,460px)] font-display text-display-1"
           >
-            Sete horas
-            <br />
-            de máquina
-            <br />
-            <span className="type-outline italic">por objeto.</span>
+            Sete horas de máquina
+            {/* O contorno de 1px em corpo de 84px lia como fonte que não
+                carregou, e texto vazado não tem razão de contraste. A segunda
+                linha se diferencia por cor. */}
+            <span className="block text-accent">por objeto.</span>
           </h2>
 
           <p className="max-w-[400px] flex-[1_1_min(100%,300px)] text-body text-secondary">
@@ -43,7 +43,7 @@ export function ProcessSection({ videoPoster }: { videoPoster?: HomeImage } = {}
           </p>
         </div>
 
-        <div className="mt-[clamp(40px,8vh,88px)] flex flex-wrap gap-[clamp(18px,3vw,40px)]">
+        <div className="mt-10 flex flex-wrap gap-[clamp(18px,3vw,40px)]">
           <div className="min-w-[240px] flex-[1_1_min(100%,300px)] border border-border-strong p-[22px]">
             <div className="relative h-[clamp(240px,40vh,380px)] overflow-hidden bg-surface">
               <AtelierVideo
@@ -52,9 +52,9 @@ export function ProcessSection({ videoPoster }: { videoPoster?: HomeImage } = {}
                 alt={poster.alt}
               />
             </div>
-            <div className="mt-3.5 flex justify-between text-[10.5px] font-semibold uppercase tracking-[0.16em] text-tertiary">
+            <div className="data mt-3.5 flex justify-between text-[13px] text-tertiary">
               <span>Nº 001 · em produção</span>
-              <span className="text-clay">0,12 mm</span>
+              <span className="text-accent">0,12 mm</span>
             </div>
           </div>
 

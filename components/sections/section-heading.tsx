@@ -1,9 +1,12 @@
 import Link from "next/link";
 
 /**
- * O cabeçalho numerado que abre cada seção da home: número miúdo, título em
- * serifa e uma régua embaixo. As seções são numeradas porque a home é lida em
- * ordem — o número diz onde a pessoa está, não decora.
+ * O cabeçalho que abre cada seção: título e uma régua embaixo.
+ *
+ * A numeração 01–05 saiu. Ela sugeria uma sequência que a home não tem — as
+ * seções não são etapas de nada, e o número precisava ser reescrito toda vez
+ * que a ordem mudava. Onde existe sequência de verdade (as etapas do
+ * processo), a contagem continua.
  */
 export function SectionHeading({
   number,
@@ -12,7 +15,8 @@ export function SectionHeading({
   action,
   note,
 }: {
-  number: string;
+  /** Só quando o conteúdo é de fato uma sequência. */
+  number?: string;
   title: string;
   id?: string;
   /** Link à direita, na mesma linha de base do título. */
@@ -21,9 +25,11 @@ export function SectionHeading({
   note?: string;
 }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-strong pb-[22px]">
+    <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-strong pb-5">
       <div className="flex items-baseline gap-4">
-        <span className="text-micro font-bold text-quaternary">{number}</span>
+        {number && (
+          <span className="data text-[13px] text-tertiary">{number}</span>
+        )}
         <h2 id={id} className="font-display text-display-2">
           {title}
         </h2>
@@ -32,13 +38,13 @@ export function SectionHeading({
       {action && (
         <Link
           href={action.href}
-          className="border-b border-accent/40 pb-[3px] text-caption uppercase text-primary transition-colors duration-300 hover:border-accent hover:text-accent"
+          className="nav-link text-body-small font-medium text-primary transition-colors duration-200 hover:text-accent"
         >
           {action.label}
         </Link>
       )}
 
-      {note && <span className="text-caption uppercase text-quaternary">{note}</span>}
+      {note && <span className="text-body-small text-tertiary">{note}</span>}
     </div>
   );
 }

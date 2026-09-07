@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
@@ -9,125 +7,129 @@ import { DEFAULT_ATELIER_POSTERS, DEFAULT_HERO } from "@/lib/home-media";
 import type { HomeImage } from "@/types/settings";
 
 /**
- * A foto ocupa a tela inteira e o texto se apoia nela pela base — é a peça que
- * apresenta o ateliê, não um bloco de texto ao lado de uma imagem. O degradê
- * existe só para o texto ter contraste; a foto continua sendo o assunto.
+ * A vitrine responde quatro perguntas antes de qualquer rolagem: o que a loja
+ * vende, o diferencial, para quem, e o que fazer agora.
  *
- * O `slowzoom` roda em 20s: quem olha por três segundos não percebe, quem
- * fica parado percebe. Zoom mais rápido viraria banner de campanha.
- */
-/**
- * A foto vem de fora desde que o painel pode trocá-la. O padrão continua
- * aqui como reserva: sem nada configurado, ou com a API fora, a vitrine é a
- * mesma de sempre.
+ * A versão anterior era uma foto sangrada de 88vh com "Feito camada por
+ * camada, à mão" em 152px. Bonita, e sobre método: quem chegava não descobria
+ * ali o que estava à venda. A manchete agora nomeia três peças que existem no
+ * catálogo — dragão articulado, vaso canelado, tag de pet — porque a amplitude
+ * é o argumento, e nomear é mais rápido que descrever.
+ *
+ * A altura passou a ser a do conteúdo. `88vh` empurrava produto, preço e
+ * categoria inteiramente para fora da primeira tela.
  */
 interface HeroSectionProps {
   image?: HomeImage;
   videoPoster?: HomeImage;
 }
 
-/** Os quatro selos da régua inferior — onde fica, desde quando, para onde envia. */
+/** Onde fica, desde quando, para onde envia. Prova barata e verdadeira. */
 const CREDENTIALS = [
-  { label: "Nº 001 · Vaso Canelado" },
-  { label: "Campina Grande — PB" },
-  { label: "Ateliê desde 2024" },
-  { label: "Envio para todo o Brasil", accent: true },
+  "Ateliê em Campina Grande — PB",
+  "Desde 2024",
+  "Envio para todo o Brasil",
 ];
 
 export function HeroSection({ image, videoPoster }: HeroSectionProps = {}) {
   const hero = image ?? DEFAULT_HERO;
   const poster = videoPoster ?? DEFAULT_ATELIER_POSTERS.atelierHero;
+
   return (
-    <section
-      aria-label="Apresentação"
-      className="ink relative flex min-h-[clamp(560px,88vh,900px)] items-end overflow-hidden"
-    >
-      <Image
-        src={hero.url}
-        alt={hero.alt}
-        fill
-        priority
-        sizes="100vw"
-        className="animate-slowzoom object-cover saturate-[0.92] brightness-[0.82] [transform-origin:60%_40%]"
-      />
+    <section aria-label="Apresentação" className="shell pt-8 md:pt-14">
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-[clamp(32px,5vw,72px)]">
+        {/* O texto vem primeiro também no celular: é o que responde "o que é
+            isto?" sem custar uma rolagem. */}
+        <div className="min-w-0 flex-[1_1_min(100%,480px)]">
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="h-px w-8 bg-border-strong" />
+            <span className="label text-tertiary">
+              Ateliê de impressão 3D
+            </span>
+          </div>
 
-      {/* Só para o texto respirar sobre a foto — não é efeito de cor. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(to_top,rgba(27,26,21,0.88)_0%,rgba(27,26,21,0.42)_45%,rgba(27,26,21,0.18)_100%)]"
-      />
+          {/* Escala própria, menor que `display-1`: a manchete nomeia três
+              peças e ocupa cinco linhas — a 88px ela empurrava os botões para
+              fora da primeira tela, que é justamente o que se queria corrigir. */}
+          <h1 className="mt-5 font-display text-[clamp(32px,4.2vw,56px)] font-bold leading-[1.05] tracking-[-0.025em] text-balance">
+            Um dragão articulado, um vaso canelado e o chaveiro do seu cachorro.
+          </h1>
 
-      <div className="shell relative w-full py-[clamp(40px,8vh,96px)] pb-[clamp(28px,5vh,56px)]">
-        <div className="mb-[clamp(18px,4vh,34px)] flex animate-fade-in items-center gap-3">
-          <span aria-hidden className="h-px w-[34px] bg-border-strong" />
-          <span className="label text-secondary">
-            Ateliê de impressão 3D · Campina Grande
-          </span>
-        </div>
-
-        <h1 className="font-display text-[clamp(46px,10.5vw,152px)] font-light leading-[0.9] tracking-[-0.03em] text-balance">
-          <span className="block animate-fade-up">Feito camada</span>
-          <span className="block animate-fade-up [animation-delay:130ms]">
-            por camada,
-          </span>
-          <span className="type-outline block animate-fade-up italic [animation-delay:260ms]">
-            à mão.
-          </span>
-        </h1>
-
-        <div className="mt-[clamp(26px,5vh,48px)] flex flex-wrap items-end gap-x-[clamp(20px,4vw,56px)] gap-y-8">
-          <p className="max-w-md flex-[1_1_300px] text-body text-secondary">
-            Não temos estoque parado. Cada objeto é impresso depois do seu
-            pedido, em 0,12 mm por camada, lixado e conferido peça por peça no
-            nosso ateliê em Campina Grande.
+          <p className="mt-6 max-w-[46ch] text-body-large text-secondary">
+            Tudo impresso em 3D aqui em Campina Grande, uma peça por vez, na cor
+            que você escolher. Nada fica em estoque parado — a sua sai depois
+            que você pede.
           </p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/colecoes"
-              className="group inline-flex min-h-[52px] items-center gap-3 rounded-md bg-primary px-[26px] text-[14px] font-semibold tracking-[0.02em] text-background transition-colors duration-300 hover:bg-accent hover:text-primary"
+              className="group inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-md bg-primary px-6 text-[15px] font-semibold text-background transition-colors duration-200 hover:bg-accent sm:w-auto"
             >
-              Explorar coleção
+              Ver a coleção
               <ArrowRight
                 size={17}
-                strokeWidth={1}
+                strokeWidth={1.75}
                 aria-hidden
-                className="transition-transform duration-300 group-hover:translate-x-1"
+                className="transition-transform duration-200 group-hover:translate-x-1"
               />
             </Link>
             <Link
               href="/personalizados"
-              className="inline-flex min-h-[52px] items-center rounded-md border border-border-strong px-6 text-[14px] font-medium text-primary transition-colors duration-300 hover:border-primary hover:bg-surface-muted"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-md border border-border-strong px-6 text-[15px] font-medium text-primary transition-colors duration-200 hover:border-primary sm:w-auto"
             >
               Quero uma peça minha
             </Link>
           </div>
+
+          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t border-border-subtle pt-4 text-[13px] text-tertiary">
+            {CREDENTIALS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
 
-        <div className="mt-[clamp(28px,6vh,58px)] flex flex-wrap gap-x-[clamp(14px,3vw,44px)] gap-y-2 border-t border-border-subtle pt-4 text-micro uppercase text-tertiary">
-          {CREDENTIALS.map((item) => (
-            <span key={item.label} className={item.accent ? "text-clay" : undefined}>
-              {item.label}
-            </span>
-          ))}
-        </div>
-      </div>
+        <div className="min-w-0 flex-[1_1_min(100%,520px)]">
+          <div className="relative aspect-[4/5] overflow-hidden bg-surface-muted sm:aspect-[5/4] lg:aspect-square">
+            {/* Sem `saturate` e sem `brightness`: a foto de produto é a ficha
+                técnica de cor, e três filtros empilhados mudavam o que o
+                cliente achava que estava comprando. */}
+            <Image
+              src={hero.url}
+              alt={hero.alt}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 620px"
+              className="object-cover motion-safe:md:animate-slowzoom"
+            />
+          </div>
 
-      {/* A impressora rodando agora. Fica no alto à direita, longe do título. */}
-      <div className="absolute right-[clamp(16px,4vw,64px)] top-[clamp(80px,14vh,150px)] hidden w-[168px] animate-fade-in rounded-lg border border-border-strong bg-[rgba(27,26,21,0.62)] p-3.5 backdrop-blur-[10px] [animation-delay:900ms] sm:block">
-        <div className="flex items-center gap-[7px] text-[10px] font-bold uppercase tracking-[0.18em] text-tertiary">
-          <span aria-hidden className="size-1.5 animate-breathe rounded-full bg-clay" />
-          Ao vivo
-        </div>
-        <div className="relative mt-3 h-[118px] overflow-hidden bg-surface">
-          <AtelierVideo
-            src={ATELIER_MEDIA.hero.src}
-            poster={poster.url}
-            alt={poster.alt}
-          />
-        </div>
-        <div className="mt-2.5 text-[10.5px] uppercase tracking-[0.12em] text-tertiary">
-          Camada 47 · 0,12 mm
+          {/*
+            A impressora rodando agora. Antes era `hidden sm:block`: o elemento
+            mais difícil de copiar do site inteiro sumia justamente onde está a
+            maior parte do tráfego. Agora é uma faixa, e ela aparece sempre.
+          */}
+          <div className="mt-3 flex items-center gap-4 border border-border-subtle p-3">
+            <div className="relative aspect-square w-16 shrink-0 overflow-hidden bg-surface-muted">
+              <AtelierVideo
+                src={ATELIER_MEDIA.hero.src}
+                poster={poster.url}
+                alt={poster.alt}
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-caption uppercase text-tertiary">
+                <span
+                  aria-hidden
+                  className="size-1.5 shrink-0 rounded-full bg-accent motion-safe:animate-breathe"
+                />
+                Ao vivo no ateliê
+              </div>
+              <p className="data mt-1 text-[13px] text-secondary">
+                Nº 001 · Vaso Canelado · camada 47 · 0,12 mm
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

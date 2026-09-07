@@ -225,7 +225,7 @@ export default function CartPage() {
               </h2>
               <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
                 {suggestions.map((product) => (
-                  <ProductCard key={product.id} product={product} variant="medium" />
+                  <ProductCard key={product.id} product={product} variant="grid" />
                 ))}
               </div>
             </section>

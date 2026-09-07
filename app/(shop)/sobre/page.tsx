@@ -60,7 +60,7 @@ export default function SobrePage() {
               alt={photo.alt}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover saturate-[0.94]"
+              className="object-cover"
             />
           </div>
         ))}

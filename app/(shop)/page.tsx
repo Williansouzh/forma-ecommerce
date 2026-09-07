@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/sections/hero-section";
-import { MarqueeStrip } from "@/components/sections/marquee-strip";
 import { LookbookSection } from "@/components/sections/lookbook-section";
 import { FeaturedProducts } from "@/components/sections/featured-products";
 import { CategoryIndex } from "@/components/sections/category-grid";
 import { CustomOrderSection } from "@/components/sections/custom-order-section";
-import { AtelierQuote } from "@/components/sections/atelier-quote";
 import { ProcessSection } from "@/components/sections/process-section";
+import { FaqSection } from "@/components/sections/faq-section";
 import { CTASection } from "@/components/sections/cta-section";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/schema-org";
 import { withProductCounts } from "@/data/categories";
@@ -17,9 +16,9 @@ import { resolveHomeMedia } from "@/lib/home-media";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "c3dcriativ — Objetos pequenos para casa",
+  title: "c3dcriativ — Objetos impressos em 3D, um por vez",
   description:
-    "Decoração, chaveiros e presentes feitos em pequena escala, com textura aparente, cor quente e acabamento manual.",
+    "Vasos, articulados, chaveiros e presentes impressos em 3D em Campina Grande. Você escolhe a cor; a peça é impressa depois do pedido.",
   alternates: { canonical: "/" },
 };
 
@@ -41,18 +40,24 @@ export default async function HomePage() {
         }}
       />
       {/*
-        A ordem é a do handoff: vitrine, respiro, coleções, encomenda, oficina,
-        lookbook e chamada. As seções numeradas (01–05) contam com essa
-        sequência — trocar duas de lugar quebra a contagem visível na tela.
+        A ordem espelha a jornada de compra, e não a ordem em que a marca
+        gostaria de se apresentar.
+
+        Descoberta (vitrine, coleções) → consideração (peças, sob medida) →
+        confiança (oficina, casa de quem comprou, dúvidas) → ação (fecho).
+
+        Antes eram nove seções, cinco delas sobre o ateliê e duas sobre
+        produto. Saíram a faixa de palavras rolando — que gastava a posição
+        mais valiosa da página depois do hero repetindo os rótulos do menu — e
+        a citação do ateliê, que era a terceira seção institucional seguida.
       */}
       <HeroSection image={media.hero} videoPoster={media.atelierHero} />
-      <MarqueeStrip />
-      <FeaturedProducts />
-      <AtelierQuote />
       <CategoryIndex categories={withProductCounts(products)} />
+      <FeaturedProducts />
       <CustomOrderSection />
       <ProcessSection videoPoster={media.atelierProcess} />
       <LookbookSection photos={media.lookbook} />
+      <FaqSection />
       <CTASection />
     </>
   );

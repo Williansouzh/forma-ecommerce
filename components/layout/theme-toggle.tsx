@@ -29,10 +29,12 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      // Sem rótulo até hidratar, para não piscar o estado errado.
-      className="nav-link text-body-small text-tertiary transition-colors duration-300 hover:text-primary"
+      // "Luz baixa" era encantador e ilegível como controle: ninguém que
+      // quer o modo escuro procura por isso em 11px ao lado do copyright.
+      aria-label={dark ? "Mudar para o tema claro" : "Mudar para o tema escuro"}
+      className="nav-link text-body-small text-tertiary transition-colors duration-200 hover:text-primary"
     >
-      {ready ? (dark ? "Luz do dia" : "Luz baixa") : "Luz baixa"}
+      {ready ? (dark ? "Tema claro" : "Tema escuro") : "Tema escuro"}
     </button>
   );
 }

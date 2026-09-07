@@ -38,7 +38,7 @@ export function ProductGallery({ product }: { product: Product }) {
               priority
               unoptimized={activeImage?.url.endsWith(".svg")}
               sizes="(max-width: 1024px) 100vw, 560px"
-              className="object-cover saturate-[0.94] transition-transform duration-[1200ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-[1.16]"
+              className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover:scale-[1.06]"
             />
           </motion.div>
         </AnimatePresence>

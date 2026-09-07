@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         alt={photo.alt}
                         fill
                         sizes="(max-width: 640px) 100vw, 260px"
-                        className="object-cover saturate-[0.94] transition-transform duration-[800ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover:scale-105"
                       />
                     )}
                   </div>
