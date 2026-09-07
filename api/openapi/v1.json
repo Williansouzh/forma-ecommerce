@@ -1529,9 +1529,10 @@
           "category": {
             "enum": [
               "decoracao",
-              "geek",
+              "colecionaveis",
+              "brinquedos",
+              "jogos",
               "presentes",
-              "utilidades",
               "personalizados"
             ],
             "type": "string"
@@ -1714,9 +1715,10 @@
             "type": "string",
             "enum": [
               "decoracao",
-              "geek",
+              "colecionaveis",
+              "brinquedos",
+              "jogos",
               "presentes",
-              "utilidades",
               "personalizados"
             ]
           },
@@ -1809,9 +1811,10 @@
             "type": "string",
             "enum": [
               "decoracao",
-              "geek",
+              "colecionaveis",
+              "brinquedos",
+              "jogos",
               "presentes",
-              "utilidades",
               "personalizados"
             ]
           },
