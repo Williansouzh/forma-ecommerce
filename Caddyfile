@@ -1,0 +1,23 @@
+# Porteiro da API em produção, quando a entrada é por porta aberta.
+#
+# O Caddy resolve TLS sozinho: pede o certificado ao Let's Encrypt na primeira
+# subida e renova antes de vencer, sem cron nem script. É por isso que ele está
+# aqui em vez de nginx + certbot — a peça que mais dá manutenção some.
+#
+# `API_DOMAIN` vem do .env. Com DuckDNS, é algo como forma-api.duckdns.org.
+
+{$API_DOMAIN} {
+	# A API não publica porta: só existe dentro da rede do compose, e o Caddy
+	# a alcança pelo nome do serviço.
+	reverse_proxy api:4000
+
+	# O Caddy compacta por padrão; o que interessa aqui é o log em uma linha
+	# por requisição, para dar para ler `docker compose logs caddy`.
+	log {
+		output stdout
+		format console
+	}
+
+	# Cabeçalhos de segurança são responsabilidade da aplicação (o Helmet da
+	# API já os põe). Repetir aqui só criaria duas fontes de verdade.
+}

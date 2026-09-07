@@ -3,11 +3,22 @@
 # A LOJA NÃO ESTÁ AQUI — ela é servida pela Cloudflare a partir do repositório.
 # Este arquivo sobe só o que precisa de um servidor de verdade.
 #
-# Nenhum serviço publica porta. A entrada é o `cloudflared`, que abre a conexão
-# DE DENTRO PARA FORA: o Security Group da instância pode recusar todo tráfego
-# de entrada, inclusive na 443, e a API continua acessível pelo domínio.
+# A API e o Mongo NUNCA publicam porta. Quem expõe é um dos dois porteiros, e
+# você escolhe qual pelo PERFIL — os dois entregam HTTPS, e trocar depois é
+# trocar uma palavra no comando:
 #
-#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml --profile caddy  up -d
+#   docker compose -f docker-compose.prod.yml --profile tunnel up -d
+#
+# `caddy`   — precisa só de um nome DNS apontando para o IP da instância, e o
+#             DuckDNS dá um de graça. Abre 80 e 443. Certificado do Let's
+#             Encrypt, renovado sozinho.
+#
+# `tunnel`  — não abre porta nenhuma, mas exige um DOMÍNIO na sua conta
+#             Cloudflare. É o melhor arranjo quando você tiver um.
+#
+# Sem `--profile`, sobem só a API e o banco — que ficam inalcançáveis de fora.
+# É de propósito: escolher o porteiro é decisão consciente.
 #
 # As variáveis vêm de um `.env` ao lado deste arquivo — ver docs/DEPLOY_EC2.md.
 
@@ -61,7 +72,39 @@ services:
     mem_limit: 320m
     restart: unless-stopped
 
+  # ── Porteiro A: nome do DuckDNS + certificado do Let's Encrypt ──────────
+  caddy:
+    profiles: ["caddy"]
+    image: caddy:2-alpine
+    container_name: forma-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # O Caddy pede o certificado PARA ESTE NOME. Ele precisa resolver para o
+      # IP desta instância antes da primeira subida — o Let's Encrypt confirma
+      # a posse batendo na porta 80.
+      # Sem `:?` aqui, e o motivo não é descuido: o compose interpola o
+      # arquivo INTEIRO antes de aplicar o perfil, então exigir a variável do
+      # Caddy quebraria quem usa o túnel, e vice-versa. Cada porteiro falha
+      # sozinho na subida — o Caddy não sobe sem nome, o cloudflared não sobe
+      # sem token — e a mensagem de cada um diz o que falta.
+      API_DOMAIN: ${API_DOMAIN:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Os certificados vivem aqui. Sem volume, cada `up -d` pediria tudo de
+      # novo e esbarraria no limite do Let's Encrypt — cinco por semana, e a
+      # espera é de dias.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    mem_limit: 128m
+    restart: unless-stopped
+
+  # ── Porteiro B: túnel da Cloudflare (exige domínio na conta) ────────────
   cloudflared:
+    profiles: ["tunnel"]
     image: cloudflare/cloudflared:latest
     container_name: forma-tunnel
     # `--no-autoupdate` porque quem decide quando trocar a versão é o deploy,
@@ -69,7 +112,9 @@ services:
     # API sem ninguém saber por quê.
     command: tunnel --no-autoupdate run
     environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?defina CLOUDFLARE_TUNNEL_TOKEN no .env}
+      # Ver a nota em `caddy.environment.API_DOMAIN`: variável de perfil não
+      # pode ser obrigatória no arquivo, senão quebra o outro perfil.
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
       - api
     mem_limit: 128m
@@ -77,3 +122,5 @@ services:
 
 volumes:
   forma-mongo-data:
+  caddy-data:
+  caddy-config:
