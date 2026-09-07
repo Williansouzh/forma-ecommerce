@@ -140,6 +140,24 @@ export function ImageUploadButton({
 export function StorageNotice({ media }: { media: MediaStatus | null }) {
   if (!media || media.configured) return null;
 
+  // Configuração ERRADA e configuração AUSENTE pedem respostas diferentes.
+  // "falta configurar" para quem já configurou é a mensagem que faz a pessoa
+  // conferir o que já está certo em vez do que está errado.
+  if (media.publicUrlProblem) {
+    return (
+      <p
+        role="alert"
+        className="rounded-md bg-error/10 px-3 py-2 text-[12.5px] text-error"
+      >
+        {media.publicUrlProblem} Corrija em{" "}
+        <a href="/admin/integracoes" className="underline">
+          Integrações → Imagens
+        </a>
+        .
+      </p>
+    );
+  }
+
   return (
     <p className="rounded-md bg-surface-muted px-3 py-2 text-[12.5px] text-secondary">
       O envio de arquivos está desligado: falta configurar o bucket em{" "}
