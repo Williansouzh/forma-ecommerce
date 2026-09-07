@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { CATEGORIES, canonicalCategory } from "@/data/categories";
+import { createProduct, updateProduct, type ProductInput } from "@/lib/admin-api";
 import {
-  createProduct,
-  getMediaStatus,
-  updateProduct,
-  uploadProductImage,
-  type ProductInput,
-} from "@/lib/admin-api";
-import type { MediaStatus } from "@/types/media";
+  ImageUploadButton,
+  StorageNotice,
+  megabytes,
+  useMediaStatus,
+} from "@/components/admin/image-upload";
 import {
   centsToInput,
   parsePriceToCents,
@@ -24,10 +23,6 @@ interface ImageRow {
   alt: string;
 }
 
-/** Um MB legível, para a mensagem de limite. */
-function megabytes(bytes: number): string {
-  return `${Math.round(bytes / 1048576)} MB`;
-}
 
 interface ProductFormProps {
   product?: Product;
@@ -60,23 +55,8 @@ export function ProductForm({ product }: ProductFormProps) {
       ? product.images.map((image) => ({ url: image.url, alt: image.alt }))
       : [{ url: "", alt: "" }]
   );
-  /**
-   * Estado do armazenamento. Carregado uma vez: sem R2 configurado o campo de
-   * URL continua sendo o caminho — imagem em `/public` nunca deixou de valer,
-   * e o upload é adição, não substituição.
-   */
-  const [media, setMedia] = useState<MediaStatus | null>(null);
-  const [uploading, setUploading] = useState<number | null>(null);
+  const media = useMediaStatus();
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputs = useRef<Record<number, HTMLInputElement | null>>({});
-
-  useEffect(() => {
-    getMediaStatus()
-      .then(setMedia)
-      // Uma API mais antiga que este módulo não pode derrubar o formulário:
-      // sem status, o campo de URL segue funcionando como sempre.
-      .catch(() => setMedia(null));
-  }, []);
 
   const [material, setMaterial] = useState(product?.material ?? "");
   const [productionTime, setProductionTime] = useState(
@@ -98,39 +78,6 @@ export function ProductForm({ product }: ProductFormProps) {
   const [isFeatured, setIsFeatured] = useState(product?.isFeatured ?? false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
-  /**
-   * Sobe o arquivo e escreve a URL devolvida na linha.
-   *
-   * O `alt` NÃO é preenchido a partir do nome do arquivo: `IMG_4821.jpg` como
-   * texto alternativo é pior que vazio, porque parece preenchido e não
-   * descreve nada para quem usa leitor de tela.
-   */
-  const handleUpload = async (index: number, file: File) => {
-    setUploadError(null);
-    if (media && file.size > media.maxBytes) {
-      setUploadError(
-        `"${file.name}" tem ${(file.size / 1048576).toFixed(1)} MB e o limite é ${megabytes(media.maxBytes)}.`
-      );
-      return;
-    }
-
-    setUploading(index);
-    try {
-      const stored = await uploadProductImage(file);
-      updateImage(index, { url: stored.url });
-    } catch (error) {
-      setUploadError(
-        error instanceof Error ? error.message : "Falha ao enviar a imagem"
-      );
-    } finally {
-      setUploading(null);
-      // Permite reenviar o MESMO arquivo depois de um erro: sem limpar, o
-      // `change` não dispara na segunda escolha do mesmo caminho.
-      const input = fileInputs.current[index];
-      if (input) input.value = "";
-    }
-  };
 
   const updateImage = (index: number, patch: Partial<ImageRow>) => {
     setImages((current) =>
@@ -277,15 +224,9 @@ export function ProductForm({ product }: ProductFormProps) {
           imagem. Um controle desabilitado que diz o motivo ensina; um controle
           ausente só confunde.
         */}
-        {media && !media.configured && (
-          <p className="mt-2.5 rounded-md bg-surface-muted px-3 py-2 text-micro text-secondary">
-            O envio de arquivos está desligado: falta configurar o bucket em{" "}
-            <a href="/admin/integracoes" className="underline hover:text-accent">
-              Integrações → Imagens
-            </a>
-            . Enquanto isso, cole o caminho da imagem no campo ao lado.
-          </p>
-        )}
+        <div className="mt-2.5">
+          <StorageNotice media={media} />
+        </div>
 
         {uploadError && (
           <p role="alert" className="mt-3 rounded-md bg-error/10 px-3 py-2 text-micro text-error">
@@ -296,33 +237,17 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="mt-4 space-y-3">
           {images.map((image, index) => (
             <div key={index} className="flex flex-col gap-2 sm:flex-row">
-              <input
-                ref={(element) => {
-                  fileInputs.current[index] = element;
+              <ImageUploadButton
+                media={media}
+                disabled={saving}
+                label={`Enviar arquivo para a imagem ${index + 1}`}
+                onError={setUploadError}
+                onUploaded={(url: string) => {
+                  setUploadError(null);
+                  updateImage(index, { url });
                 }}
-                type="file"
-                accept={(media?.acceptedTypes ?? ["image/*"]).join(",")}
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleUpload(index, file);
-                }}
+                className="self-end"
               />
-              <button
-                type="button"
-                onClick={() => fileInputs.current[index]?.click()}
-                disabled={!media?.configured || uploading !== null}
-                title={
-                  media?.configured
-                    ? undefined
-                    : "Configure o bucket em Integrações → Imagens"
-                }
-                aria-label={`Enviar arquivo para a imagem ${index + 1}`}
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border border-strong px-3 text-micro uppercase text-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Upload size={13} />
-                {uploading === index ? "Enviando…" : "Enviar"}
-              </button>
               <input
                 aria-label={`URL da imagem ${index + 1}`}
                 placeholder="/images/products/…"

@@ -1,14 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Upload } from "lucide-react";
+import { getSettings, updateSettings } from "@/lib/admin-api";
 import {
-  getMediaStatus,
-  getSettings,
-  updateSettings,
-  uploadProductImage,
-} from "@/lib/admin-api";
+  ImageUploadButton,
+  StorageNotice,
+  useMediaStatus,
+} from "@/components/admin/image-upload";
 import {
   HOME_SLOTS,
   resolveHomeMedia,
@@ -34,7 +33,7 @@ function isDefault(value: HomeImage | undefined): boolean {
 export default function AdminHomePage() {
   const pushToast = useUIStore((state) => state.pushToast);
   const [media, setMedia] = useState<HomeMedia>({});
-  const [storage, setStorage] = useState<MediaStatus | null>(null);
+  const storage = useMediaStatus();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -49,9 +48,6 @@ export default function AdminHomePage() {
       } finally {
         setLoading(false);
       }
-      // O status do armazenamento é secundário: sem ele a tela ainda serve
-      // para colar caminhos de /public.
-      getMediaStatus().then(setStorage).catch(() => setStorage(null));
     })();
   }, []);
 
@@ -114,15 +110,9 @@ export default function AdminHomePage() {
         </p>
       )}
 
-      {storage && !storage.configured && (
-        <p className="mt-6 rounded-md bg-surface-muted px-4 py-3 text-body-small text-secondary">
-          O envio de arquivos está desligado: falta configurar o bucket em{" "}
-          <a href="/admin/integracoes" className="underline hover:text-accent">
-            Integrações → Imagens
-          </a>
-          . Enquanto isso, cole o caminho de uma imagem de <code>/public</code>.
-        </p>
-      )}
+      <div className="mt-6">
+        <StorageNotice media={storage} />
+      </div>
 
       {HOME_SLOTS.map((slot) => (
         <ImageSlot
@@ -206,85 +196,6 @@ export default function AdminHomePage() {
 
 // ── Peças ──────────────────────────────────────────────────────────────────
 
-/** O botão de envio, o campo de URL e a prévia — a mecânica repetida. */
-function useUploader(
-  storage: MediaStatus | null,
-  onUploaded: (url: string) => void,
-  onError: (message: string) => void,
-) {
-  const input = useRef<HTMLInputElement | null>(null);
-  const [sending, setSending] = useState(false);
-
-  const send = async (file: File) => {
-    if (storage && file.size > storage.maxBytes) {
-      onError(
-        `"${file.name}" tem ${(file.size / 1048576).toFixed(1)} MB e o limite é ${Math.round(storage.maxBytes / 1048576)} MB.`,
-      );
-      return;
-    }
-    setSending(true);
-    try {
-      const stored = await uploadProductImage(file);
-      onUploaded(stored.url);
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Falha ao enviar a imagem");
-    } finally {
-      setSending(false);
-      // Sem limpar, escolher o MESMO arquivo depois de um erro não dispara
-      // `change` de novo.
-      if (input.current) input.current.value = "";
-    }
-  };
-
-  return { input, sending, send };
-}
-
-function UploadButton({
-  storage,
-  sending,
-  disabled,
-  onFile,
-  inputRef,
-  label,
-}: {
-  storage: MediaStatus | null;
-  sending: boolean;
-  disabled: boolean;
-  onFile: (file: File) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  label: string;
-}) {
-  return (
-    <>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={(storage?.acceptedTypes ?? ["image/*"]).join(",")}
-        className="hidden"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (file) onFile(file);
-        }}
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={!storage?.configured || disabled || sending}
-        title={
-          storage?.configured
-            ? undefined
-            : "Configure o bucket em Integrações → Imagens"
-        }
-        aria-label={label}
-        className="inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-md border border-border-strong px-3.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Upload size={14} />
-        {sending ? "Enviando…" : "Enviar"}
-      </button>
-    </>
-  );
-}
-
 function Preview({ image }: { image: HomeImage }) {
   return (
     <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-md border border-border-subtle bg-surface-muted sm:w-[180px]">
@@ -337,14 +248,6 @@ function ImageSlot({
   onReset: () => void;
 }) {
   const [message, setMessage] = useState<string | null>(null);
-  const { input, sending, send } = useUploader(
-    storage,
-    (url) => {
-      setMessage(null);
-      onChange({ url, alt: value.alt });
-    },
-    setMessage,
-  );
 
   return (
     <section className={sectionClass}>
@@ -380,13 +283,15 @@ function ImageSlot({
                 className={fieldClass}
               />
             </label>
-            <UploadButton
-              storage={storage}
-              sending={sending || busy}
-              disabled={disabled}
-              inputRef={input}
-              onFile={(file) => void send(file)}
+            <ImageUploadButton
+              media={storage}
+              disabled={disabled || busy}
               label={`Enviar arquivo para ${name}`}
+              onError={setMessage}
+              onUploaded={(url: string) => {
+                setMessage(null);
+                onChange({ url, alt: value.alt });
+              }}
             />
           </div>
 
@@ -429,14 +334,6 @@ function LookbookSlot({
   onReset: () => void;
 }) {
   const [message, setMessage] = useState<string | null>(null);
-  const { input, sending, send } = useUploader(
-    storage,
-    (url) => {
-      setMessage(null);
-      onChange({ ...photo, url });
-    },
-    setMessage,
-  );
 
   return (
     <div className="flex flex-col gap-3 border border-border-subtle p-3.5">
@@ -479,13 +376,16 @@ function LookbookSlot({
             className={fieldClass}
           />
         </label>
-        <UploadButton
-          storage={storage}
-          sending={sending || busy}
-          disabled={disabled}
-          inputRef={input}
-          onFile={(file) => void send(file)}
+        <ImageUploadButton
+          media={storage}
+          size="compact"
+          disabled={disabled || busy}
           label={`Enviar arquivo para a foto ${index + 1} do lookbook`}
+          onError={setMessage}
+          onUploaded={(url: string) => {
+            setMessage(null);
+            onChange({ ...photo, url });
+          }}
         />
       </div>
 

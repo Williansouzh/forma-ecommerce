@@ -16,6 +16,11 @@ import {
   summarize,
   validateProductInput,
 } from "@/lib/product-input";
+import {
+  ImageUploadButton,
+  StorageNotice,
+  useMediaStatus,
+} from "@/components/admin/image-upload";
 import { useUIStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types/product";
@@ -87,6 +92,7 @@ export function ProductDrawer({
   const pushToast = useUIStore((state) => state.pushToast);
   const [draft, setDraft] = useState<DraftState>(() => toDraft(product));
   const [error, setError] = useState<string | null>(null);
+  const media = useMediaStatus();
   const [saving, setSaving] = useState(false);
   const [addingColor, setAddingColor] = useState(false);
   const [colorName, setColorName] = useState("");
@@ -261,9 +267,10 @@ export function ProductDrawer({
                     Adicionar foto
                   </button>
                   <p className="text-[12.5px] text-tertiary">
-                    Até {MAX_IMAGES} fotos. A primeira é a capa na loja. O upload
-                    direto depende do storage — por ora, cole a URL.
+                    Até {MAX_IMAGES} fotos. A primeira é a capa na loja. Envie
+                    um arquivo em cada linha ou cole o caminho.
                   </p>
+                  <StorageNotice media={media} />
                 </div>
               </div>
 
@@ -271,6 +278,22 @@ export function ProductDrawer({
                 <div className="mt-3 space-y-2">
                   {draft.images.map((image, index) => (
                     <div key={index} className="flex gap-2">
+                      <ImageUploadButton
+                        media={media}
+                        size="compact"
+                        disabled={saving}
+                        label={`Enviar arquivo para a foto ${index + 1}`}
+                        onError={setError}
+                        onUploaded={(url) => {
+                          setError(null);
+                          set(
+                            "images",
+                            draft.images.map((row, i) =>
+                              i === index ? { ...row, url } : row
+                            )
+                          );
+                        }}
+                      />
                       <input
                         aria-label={`URL da foto ${index + 1}`}
                         placeholder="/images/products/…"
