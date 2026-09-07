@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CATEGORIES, type Category } from "@/data/categories";
+import {
+  CATEGORIES,
+  storefrontCategories,
+  type Category,
+} from "@/data/categories";
 
 /**
  * As coleções logo abaixo da vitrine, no lugar onde antes rolava uma faixa de
@@ -79,8 +83,10 @@ export function CategoryIndex({
         </Link>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-5">
-        {categories.map((category) => (
+      {/* Família sem peça não vira prateleira vazia na loja — ver
+          `storefrontCategories`. No painel as seis continuam disponíveis. */}
+      <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
+        {storefrontCategories(categories).map((category) => (
           <CategoryBlock key={category.slug} category={category} />
         ))}
       </div>

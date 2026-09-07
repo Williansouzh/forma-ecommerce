@@ -5,6 +5,8 @@ import { randomUUID } from "crypto";
 import {
   Product,
   ProductDocument,
+  canonicalCategory,
+  categoryAliases,
 } from "./schemas/product.schema";
 import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
 import { InventoryService } from "../inventory/inventory.service";
@@ -38,7 +40,12 @@ export class ProductsService {
 
   async findAll(query: ProductQuery): Promise<Product[]> {
     const filter: Record<string, unknown> = {};
-    if (query.category) filter.category = query.category;
+    // `$in` com os apelidos em vez de igualdade: enquanto o script de
+    // migração não rodou, a coleção "Casa e decoração" precisa devolver
+    // também as peças que ainda estão gravadas como `utilidades`.
+    if (query.category) {
+      filter.category = { $in: categoryAliases(query.category) };
+    }
     if (query.featured === "1" || query.featured === "true") {
       filter.isFeatured = true;
     }
@@ -90,7 +97,7 @@ export class ProductsService {
     limit = 4,
   ): Promise<Product[]> {
     const rows = await this.productModel
-      .find({ slug: { $ne: slug }, category })
+      .find({ slug: { $ne: slug }, category: { $in: categoryAliases(category) } })
       .limit(limit)
       .lean<RawProduct[]>();
     return rows.map(mapId);
@@ -101,7 +108,15 @@ export class ProductsService {
       _id: string;
       total: number;
     }>([{ $group: { _id: "$category", total: { $sum: 1 } } }]);
-    return Object.fromEntries(rows.map((row) => [row._id, row.total]));
+    // Dobra o legado no canônico: durante a janela de migração, uma peça em
+    // `utilidades` tem de contar para "Casa e decoração", senão a vitrine
+    // anuncia menos peças do que a coleção mostra.
+    const totals: Record<string, number> = {};
+    for (const row of rows) {
+      const slug = canonicalCategory(row._id);
+      totals[slug] = (totals[slug] ?? 0) + row.total;
+    }
+    return totals;
   }
 
   async create(dto: CreateProductDto): Promise<Product> {

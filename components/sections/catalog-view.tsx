@@ -4,7 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { SlidersHorizontal, X } from "lucide-react";
 import type { Product } from "@/types/product";
-import { CATEGORIES, type CategoryColor } from "@/data/categories";
+import {
+  storefrontCategories,
+  type Category,
+  type CategoryColor,
+} from "@/data/categories";
 import { ProductCard } from "@/components/product/product-card";
 import {
   DEADLINES,
@@ -57,11 +61,18 @@ function Select<T extends string>({
 export function CatalogView({
   products,
   title,
+  categories = [],
   activeSlug = "todos",
   showFilters = true,
 }: {
   products: Product[];
   title: string;
+  /**
+   * Contadas sobre o catálogo **inteiro**, não sobre `products`. Numa página
+   * de categoria `products` já vem filtrado — contar ali daria zero para todas
+   * as outras famílias e esconderia todos os chips menos o aberto.
+   */
+  categories?: Category[];
   /** Slug da categoria aberta, ou "todos" na coleção completa. */
   activeSlug?: string;
   /** A busca não mostra os chips: clicar num deles abandonaria o resultado. */
@@ -106,7 +117,9 @@ export function CatalogView({
     color?: CategoryColor;
   }[] = [
     { slug: "todos", name: "Tudo", href: "/colecoes" },
-    ...CATEGORIES.map((category) => ({
+    // Os chips seguem a mesma regra da vitrine: categoria sem peça não vira
+    // um chip que leva a uma coleção vazia.
+    ...storefrontCategories(categories).map((category) => ({
       slug: category.slug,
       name: category.name,
       href: `/colecoes/${category.slug}`,

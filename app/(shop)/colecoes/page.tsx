@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { fetchProducts } from "@/lib/api";
+import { withProductCounts } from "@/data/categories";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { CatalogView } from "@/components/sections/catalog-view";
 
@@ -18,7 +19,11 @@ export default async function CollectionsPage() {
   return (
     <div className="shell pb-24 pt-[clamp(30px,6vh,70px)]">
       <Breadcrumb items={[{ label: "Início", href: "/" }, { label: "Coleção" }]} />
-      <CatalogView products={products} title="Coleção completa" />
+      <CatalogView
+        products={products}
+        title="Coleção completa"
+        categories={withProductCounts(products)}
+      />
     </div>
   );
 }
