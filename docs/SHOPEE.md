@@ -140,6 +140,12 @@ direção que permite ligar um segundo canal sem tocar em lote, ledger ou FEFO.
 
 ## 3. Cadastrar o aplicativo na Shopee Open Platform
 
+> **Só quer ligar a loja?** O passo a passo operacional, com o que clicar e o
+> que costuma dar errado em cada etapa, está em
+> [`CONECTAR_SHOPEE.md`](CONECTAR_SHOPEE.md). A referência das rotas —
+> parâmetros, limites e o que ainda não usamos — está em
+> [`SHOPEE_API.md`](SHOPEE_API.md). Esta seção é a referência resumida.
+
 1. Crie a conta de parceiro em <https://open.shopee.com> e registre um app.
 2. Anote **Partner ID** (público) e **Partner Key** (privada — trate como senha).
 3. Cadastre a **Redirect URL** da autorização:
@@ -225,11 +231,15 @@ Se aparecer, troque o esquema e repita.
 
 **O desenho não depende de acertar isso de primeira.** O corpo do push nunca
 decide estoque: o handler enfileira e o worker **relê o pedido** em
-`get_order_detail`, autenticado. O mesmo vale para o `code` do push — a lista
-de códigos tratados como "pedido mudou" está em `ORDER_PUSH_CODES`
-(`shopee-webhook.controller.ts`), e um código de fora dela é registrado e
-ignorado. O custo de errar é **latência**, não estoque errado: a varredura
-periódica importa o pedido minutos depois.
+`get_order_detail`, autenticado. Um código de push fora da lista tratada é
+registrado e ignorado, e a varredura periódica importa o pedido minutos
+depois. O custo de errar é **latência**, não estoque errado.
+
+> O mapeamento dos códigos de push **foi confirmado** desde então, na
+> especificação de `v2.push.set_app_push_config`: `3 = Order status update`,
+> que é o que `ORDER_PUSH_CODES` já tratava. A tabela completa está em
+> [`SHOPEE_API.md`](SHOPEE_API.md#códigos-de-push). Continua em aberto apenas
+> o **formato da assinatura**.
 
 Requisitos de infraestrutura:
 

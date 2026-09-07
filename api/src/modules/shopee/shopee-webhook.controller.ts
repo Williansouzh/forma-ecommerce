@@ -37,14 +37,18 @@ interface ShopeePushBody {
 /**
  * Os `code` de push que tratamos como "algo mudou em um pedido".
  *
- * O mapeamento numérico dos códigos não pôde ser confirmado na documentação
- * oficial de onde este código foi escrito (o portal bloqueia acesso
- * automatizado). Por isso o desenho não DEPENDE dele: um código fora desta
- * lista é registrado e ignorado, e a varredura periódica importa o pedido de
- * qualquer jeito, alguns minutos depois.
+ * `3 = Order status update push`, confirmado na especificação de
+ * `v2.push.set_app_push_config` — a tabela completa dos códigos está em
+ * `docs/SHOPEE_API.md`.
  *
- * O custo de a lista estar incompleta é latência, não estoque errado. Ver
- * `docs/SHOPEE.md` para confirmar os códigos no console antes de produção.
+ * O desenho continua não DEPENDENDO da lista estar completa: um código fora
+ * dela é registrado e ignorado, e a varredura periódica importa o pedido
+ * alguns minutos depois. O custo de faltar um código é latência, não estoque
+ * errado.
+ *
+ * Dois valem tratar quando houver necessidade: `2` (desautorização da loja) e
+ * `12` (expiração da autorização) — hoje só descobrimos que o acesso caiu
+ * quando uma chamada falha.
  */
 const ORDER_PUSH_CODES = new Set([3]);
 
