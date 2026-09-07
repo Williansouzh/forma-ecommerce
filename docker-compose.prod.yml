@@ -1,0 +1,79 @@
+# Backend em produção: API, banco e o túnel que a expõe.
+#
+# A LOJA NÃO ESTÁ AQUI — ela é servida pela Cloudflare a partir do repositório.
+# Este arquivo sobe só o que precisa de um servidor de verdade.
+#
+# Nenhum serviço publica porta. A entrada é o `cloudflared`, que abre a conexão
+# DE DENTRO PARA FORA: o Security Group da instância pode recusar todo tráfego
+# de entrada, inclusive na 443, e a API continua acessível pelo domínio.
+#
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# As variáveis vêm de um `.env` ao lado deste arquivo — ver docs/DEPLOY_EC2.md.
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: forma-mongo
+    # O WiredTiger reserva metade da RAM acima de 1 GB, com piso de 256 MB.
+    # Numa t3.micro isso já é um quarto da máquina, e o mongod ainda quer
+    # memória fora do cache. Fixar em 256 MB deixa margem para a API e o SO —
+    # sem isso, quem morre no aperto costuma ser o banco, no meio de um pedido.
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
+    volumes:
+      - forma-mongo-data:/data/db
+    # Sem `ports`: o banco só existe dentro da rede do compose. O
+    # `backup-mongo.sh` usa `docker exec` e continua funcionando.
+    mem_limit: 450m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ping:1})"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api:
+    # Construída pelo CI e publicada no registry: `nest build` numa instância
+    # de 1 GB com vCPU burstável trava ou leva dez minutos. A instância só baixa.
+    image: ${API_IMAGE:?defina API_IMAGE no .env}
+    container_name: forma-api
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/forma
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL no .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
+      ADMIN_NAME: ${ADMIN_NAME:-Super Admin}
+      # Produtos e pedidos de demonstração não entram em produção. O usuário
+      # admin é criado de qualquer forma — `seedAdmin` roda fora desta chave.
+      SEED_DEMO: "false"
+      # Precisa ser a URL PÚBLICA real: ela vai nas back_urls do Mercado Pago e
+      # entra na base da assinatura do webhook da Shopee. Divergir do que está
+      # cadastrado nos dois faz toda notificação ser recusada.
+      PUBLIC_API_URL: ${PUBLIC_API_URL:?defina PUBLIC_API_URL no .env}
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:?defina PUBLIC_SITE_URL no .env}
+      # O painel fala com a API direto do navegador; sem a origem da loja aqui,
+      # o login falha no CORS.
+      CORS_ORIGIN: ${CORS_ORIGIN:?defina CORS_ORIGIN no .env}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    mem_limit: 320m
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: forma-tunnel
+    # `--no-autoupdate` porque quem decide quando trocar a versão é o deploy,
+    # não o processo: uma atualização automática no meio da madrugada derruba a
+    # API sem ninguém saber por quê.
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?defina CLOUDFLARE_TUNNEL_TOKEN no .env}
+    depends_on:
+      - api
+    mem_limit: 128m
+    restart: unless-stopped
+
+volumes:
+  forma-mongo-data:
