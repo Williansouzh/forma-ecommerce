@@ -4,6 +4,46 @@ import { IntegrationsService } from "../integrations/integrations.service";
 import { R2Client, type R2Credentials } from "./r2.client";
 import { detectImage, rejectionReason } from "./image-type";
 
+/**
+ * Diz por que uma URL não serve como base pública, ou `null` quando serve.
+ *
+ * O caso que motivou isto: o painel da Cloudflare mostra o **endpoint da API
+ * S3** em destaque, com botão de copiar, logo acima da URL de leitura. Colado
+ * aqui, ele deixa o upload FUNCIONAR e a exibição falhar — o objeto é gravado,
+ * a URL é montada, e o navegador leva 400 porque aquele endereço exige
+ * assinatura em toda requisição.
+ *
+ * Falha tardia, longe da causa, e sem nada dizendo o que houve. Recusar na
+ * entrada custa uma função e transforma isso numa mensagem.
+ */
+export function publicUrlProblem(base: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(base);
+  } catch {
+    return `"${base}" não é uma URL. Use o domínio de leitura do bucket, como https://pub-….r2.dev`;
+  }
+
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    return "O domínio público precisa ser http(s).";
+  }
+
+  if (url.hostname.endsWith("r2.cloudflarestorage.com")) {
+    return (
+      "Esse é o endpoint da API S3, que exige assinatura em toda requisição — " +
+      "o navegador não consegue ler imagem dele. Use o domínio personalizado " +
+      "do bucket, ou a Public Development URL (https://pub-….r2.dev), em " +
+      "R2 → o bucket → Settings."
+    );
+  }
+
+  if (url.hostname === "dash.cloudflare.com") {
+    return "Essa é a URL do painel da Cloudflare, não do bucket.";
+  }
+
+  return null;
+}
+
 /** Teto por arquivo. Uma foto de produto bem exportada não passa disso. */
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
@@ -22,6 +62,8 @@ export interface StorageStatus {
   bucket: string | null;
   accountId: string | null;
   publicBaseUrl: string | null;
+  /** Por que a base pública não serve, quando não serve. */
+  publicUrlProblem: string | null;
   hasAccessKeyId: boolean;
   hasSecretAccessKey: boolean;
   maxBytes: number;
@@ -83,6 +125,10 @@ export class StorageService {
           "sem domínio de leitura não aparece na loja.",
       );
     }
+
+    const problem = publicUrlProblem(base);
+    if (problem) throw new BadRequestException(problem);
+
     return base;
   }
 
@@ -178,10 +224,21 @@ export class StorageService {
     const publicBaseUrl =
       String(config.publicBaseUrl ?? "").trim().replace(/\/+$/, "") || null;
 
+    // Uma base pública inválida NÃO conta como configurado: o painel mostraria
+    // tudo verde e o upload falharia — ou pior, funcionaria e produziria uma
+    // imagem que ninguém consegue ver.
+    const problem = publicBaseUrl ? publicUrlProblem(publicBaseUrl) : null;
+
     return {
       configured: Boolean(
-        accountId && bucket && publicBaseUrl && secrets.accessKeyId && secrets.secretAccessKey,
+        accountId &&
+          bucket &&
+          publicBaseUrl &&
+          !problem &&
+          secrets.accessKeyId &&
+          secrets.secretAccessKey,
       ),
+      publicUrlProblem: problem,
       enabled,
       bucket,
       accountId,

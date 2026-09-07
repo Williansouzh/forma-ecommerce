@@ -794,7 +794,7 @@ function R2Credentials({
           Domínio público de leitura
           <input
             defaultValue={publicBaseUrl}
-            placeholder="https://img.seudominio.com"
+            placeholder="https://pub-….r2.dev ou https://img.seudominio.com"
             onBlur={(event) =>
               void save("r2", {
                 config: { publicBaseUrl: event.target.value.trim() },
@@ -859,6 +859,19 @@ function R2Credentials({
           {testing ? "Testando…" : "Testar conexão"}
         </button>
       </div>
+
+      {/^https?:\/\/[^/]*r2\.cloudflarestorage\.com/.test(publicBaseUrl) && (
+        <p
+          role="alert"
+          className="mt-4 rounded-md bg-error/10 px-3.5 py-3 text-[13px] text-error"
+        >
+          Esse é o <strong>endpoint da API S3</strong>, que exige assinatura em
+          toda requisição — o navegador não consegue ler imagem dele. A imagem
+          sobe e nunca aparece na loja. Use o domínio personalizado do bucket,
+          ou a <strong>Public Development URL</strong>{" "}
+          (<code>https://pub-….r2.dev</code>), em R2 → o bucket → Settings.
+        </p>
+      )}
 
       <div className="mt-4 bg-surface-muted px-3.5 py-3 text-[13px]">
         {publicBaseUrl ? (

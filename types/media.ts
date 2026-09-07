@@ -7,6 +7,8 @@ export interface MediaStatus {
   accountId: string | null;
   /** Domínio público de leitura. Sem ele, o objeto guardado não aparece. */
   publicBaseUrl: string | null;
+  /** Por que a URL pública não serve, quando não serve. `null` = está boa. */
+  publicUrlProblem: string | null;
   hasAccessKeyId: boolean;
   hasSecretAccessKey: boolean;
   maxBytes: number;
