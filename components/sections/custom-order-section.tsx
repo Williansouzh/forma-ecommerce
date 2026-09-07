@@ -43,7 +43,7 @@ export function CustomOrderSection() {
 
           <h2
             id="custom-titulo"
-            className="mt-[18px] font-display text-[clamp(30px,4.6vw,60px)] font-light leading-[1.02] tracking-[-0.025em]"
+            className="mt-[18px] font-display text-display-2"
           >
             Você imagina.
             <br />

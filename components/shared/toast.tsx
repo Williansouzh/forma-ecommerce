@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
+import { EASE_OUT } from "@/lib/animations";
 
 const icons = {
   success: CheckCircle2,
@@ -29,7 +30,7 @@ export function Toaster() {
               initial={{ opacity: 0, y: 24, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 0.3, ease: EASE_OUT }}
               onClick={() => dismissToast(toast.id)}
               className="pointer-events-auto mb-2 flex items-center gap-2.5 rounded-md bg-primary px-5 py-3 text-body-small text-background shadow-xl"
             >

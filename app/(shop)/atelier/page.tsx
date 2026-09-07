@@ -45,7 +45,7 @@ export default async function AtelierPage() {
         <p className="label text-tertiary">O ateliê</p>
 
         <div className="mt-[18px] flex flex-wrap items-end gap-x-[clamp(24px,5vw,70px)] gap-y-8">
-          <h1 className="min-w-0 flex-[1_1_min(100%,520px)] font-display text-[clamp(36px,6.6vw,92px)] font-light leading-[0.98] tracking-[-0.03em]">
+          <h1 className="min-w-0 flex-[1_1_min(100%,520px)] font-display text-display-1">
             Quatro máquinas,
             <br />
             <em className="italic text-accent">uma bancada.</em>
@@ -68,7 +68,7 @@ export default async function AtelierPage() {
                 alt={media.atelierBench.alt}
               />
             </div>
-            <div className="mt-3.5 flex justify-between text-[10.5px] font-semibold uppercase tracking-[0.16em] text-tertiary">
+            <div className="data mt-3.5 flex justify-between text-[13px] text-tertiary">
               <span>Bancada · em produção</span>
               <span className="text-clay">0,12 mm</span>
             </div>
@@ -85,11 +85,11 @@ export default async function AtelierPage() {
         <div className="flex flex-wrap items-baseline gap-4 border-b border-border-strong pb-5">
           <h2
             id="materiais-titulo"
-            className="font-display text-[clamp(26px,3.6vw,46px)] font-light tracking-[-0.02em]"
+            className="font-display text-display-2"
           >
             Materiais
           </h2>
-          <span className="text-caption uppercase text-quaternary">
+          <span className="text-caption uppercase text-tertiary">
             o que usamos e por quê
           </span>
         </div>

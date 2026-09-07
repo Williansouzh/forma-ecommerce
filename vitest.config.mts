@@ -17,6 +17,7 @@ export default defineConfig({
         "lib/cart.ts",
         "lib/product-availability.ts",
         "lib/catalog-order.ts",
+        "lib/catalog-filters.ts",
       ],
       thresholds: { lines: 90, functions: 100, branches: 85 },
     },

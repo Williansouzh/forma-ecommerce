@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="flex items-baseline gap-4 border-b border-border-strong pb-5">
             <h2
               id="relacionados-titulo"
-              className="font-display text-[clamp(24px,3vw,40px)] font-light tracking-[-0.02em]"
+              className="font-display text-display-2"
             >
               Combina com
             </h2>

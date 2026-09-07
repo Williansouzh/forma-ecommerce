@@ -8,7 +8,7 @@ export function AtelierNumbers() {
         <div key={item.label} className="flex-[1_1_160px]">
           <dt className="sr-only">{item.label}</dt>
           <dd>
-            <span className="block whitespace-nowrap font-display text-[clamp(34px,5vw,62px)] font-light leading-none tracking-[-0.03em] tabular-nums">
+            <span className="block whitespace-nowrap font-display text-display-2 tabular-nums">
               {item.value}
             </span>
             <span className="mt-2 block text-caption uppercase text-tertiary">

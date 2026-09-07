@@ -191,7 +191,7 @@ export default function CheckoutPage() {
         items={[{ label: "Coleção", href: "/colecoes" }, { label: "Checkout" }]}
       />
 
-      <h1 className="mb-[clamp(28px,5vh,54px)] mt-[18px] font-display text-[clamp(30px,5vw,60px)] font-light tracking-[-0.03em]">
+      <h1 className="mb-[clamp(28px,5vh,54px)] mt-[18px] font-display text-display-2">
         Fechar pedido
       </h1>
 

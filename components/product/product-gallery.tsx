@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
+import { EASE_OUT } from "@/lib/animations";
 
 /**
  * A imagem 01 é sempre a peça em uso — na mesa, na estante, ao lado de um
@@ -35,7 +36,7 @@ export function ProductGallery({ product }: { product: Product }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5, ease: EASE_OUT }}
             className="absolute inset-0"
           >
             <Image
@@ -84,7 +85,7 @@ export function ProductGallery({ product }: { product: Product }) {
         </div>
       )}
 
-      <p className="mt-4 text-[12px] uppercase tracking-[0.12em] text-quaternary">
+      <p className="label mt-4 text-tertiary">
         Fotos reais das peças que saem do ateliê
       </p>
     </div>

@@ -6,44 +6,17 @@ import { SlidersHorizontal, X } from "lucide-react";
 import type { Product } from "@/types/product";
 import { CATEGORIES, type CategoryColor } from "@/data/categories";
 import { ProductCard } from "@/components/product/product-card";
-import { inCatalogOrder } from "@/lib/catalog-order";
-
-type SortOption = "destaque" | "menor" | "maior" | "novo";
-type PriceOption = "todos" | "ate50" | "50a100" | "100a200" | "acima200";
-type DeadlineOption = "qualquer" | "ate3" | "ate5";
-
-const SORTS: { value: SortOption; label: string }[] = [
-  { value: "destaque", label: "Destaque" },
-  { value: "menor", label: "Menor preço" },
-  { value: "maior", label: "Maior preço" },
-  { value: "novo", label: "Novidades" },
-];
-
-/** Preços em centavos, como em todo o resto da loja. */
-const PRICES: { value: PriceOption; label: string; min: number; max: number }[] = [
-  { value: "todos", label: "Qualquer preço", min: 0, max: Infinity },
-  { value: "ate50", label: "Até R$ 50", min: 0, max: 5000 },
-  { value: "50a100", label: "R$ 50 a R$ 100", min: 5000, max: 10000 },
-  { value: "100a200", label: "R$ 100 a R$ 200", min: 10000, max: 20000 },
-  { value: "acima200", label: "Acima de R$ 200", min: 20000, max: Infinity },
-];
-
-/*
- * O filtro é de prazo, não de "pronta para enviar": aqui nada fica em estoque
- * parado, então uma opção dessas mentiria. Quem compra presente compra com
- * data — o prazo é o recorte que essa pessoa de fato usa.
- */
-const DEADLINES: { value: DeadlineOption; label: string; max: number }[] = [
-  { value: "qualquer", label: "Qualquer prazo", max: Infinity },
-  { value: "ate3", label: "Fica pronta em até 3 dias", max: 3 },
-  { value: "ate5", label: "Fica pronta em até 5 dias", max: 5 },
-];
-
-/** Data de criação em número, tolerante a string, Date e campo ausente. */
-function createdAtMs(product: Product): number {
-  const value = new Date(product.createdAt).getTime();
-  return Number.isNaN(value) ? 0 : value;
-}
+import {
+  DEADLINES,
+  DEFAULT_FILTERS,
+  PRICES,
+  SORTS,
+  activeFilterCount,
+  applyCatalogFilters,
+  type DeadlineOption,
+  type PriceOption,
+  type SortOption,
+} from "@/lib/catalog-filters";
 
 /** Um controle nativo — teclado, leitor de tela e roda do mouse já funcionam. */
 function Select<T extends string>({
@@ -94,9 +67,11 @@ export function CatalogView({
   /** A busca não mostra os chips: clicar num deles abandonaria o resultado. */
   showFilters?: boolean;
 }) {
-  const [sort, setSort] = useState<SortOption>("destaque");
-  const [price, setPrice] = useState<PriceOption>("todos");
-  const [deadline, setDeadline] = useState<DeadlineOption>("qualquer");
+  const [sort, setSort] = useState<SortOption>(DEFAULT_FILTERS.sort);
+  const [price, setPrice] = useState<PriceOption>(DEFAULT_FILTERS.price);
+  const [deadline, setDeadline] = useState<DeadlineOption>(
+    DEFAULT_FILTERS.deadline
+  );
   const [sheetOpen, setSheetOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -112,43 +87,16 @@ export function CatalogView({
     return () => document.removeEventListener("keydown", onKey);
   }, [sheetOpen]);
 
-  const items = useMemo(() => {
-    const range = PRICES.find((option) => option.value === price)!;
-    const limit = DEADLINES.find((option) => option.value === deadline)!;
+  const items = useMemo(
+    () => applyCatalogFilters(products, { price, deadline, sort }),
+    [products, price, deadline, sort]
+  );
 
-    const list = products.filter((product) => {
-      // Peça sob consulta (preço 0) não cabe em faixa de preço nenhuma.
-      if (price !== "todos") {
-        if (product.price === 0) return false;
-        if (product.price < range.min || product.price >= range.max) return false;
-      }
-      if (deadline !== "qualquer") {
-        if (typeof product.productionTime !== "number") return false;
-        if (product.productionTime > limit.max) return false;
-      }
-      return true;
-    });
-
-    switch (sort) {
-      case "menor":
-        return list.sort((a, b) => a.price - b.price);
-      case "maior":
-        return list.sort((a, b) => b.price - a.price);
-      case "novo":
-        // Era `list.reverse()`, que só coincide com "mais novo primeiro" se o
-        // catálogo estiver perfeitamente ordenado por data — o que ninguém
-        // garante depois de editar um produto pelo painel.
-        return list.sort((a, b) => createdAtMs(b) - createdAtMs(a));
-      default:
-        return inCatalogOrder(list);
-    }
-  }, [products, sort, price, deadline]);
-
-  const activeCount = (price !== "todos" ? 1 : 0) + (deadline !== "qualquer" ? 1 : 0);
+  const activeCount = activeFilterCount({ price, deadline, sort });
 
   const clear = () => {
-    setPrice("todos");
-    setDeadline("qualquer");
+    setPrice(DEFAULT_FILTERS.price);
+    setDeadline(DEFAULT_FILTERS.deadline);
   };
 
   const chips: {

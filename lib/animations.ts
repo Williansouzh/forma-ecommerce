@@ -2,7 +2,9 @@ import type { Variants, Transition } from "framer-motion";
 
 export type Ease = [number, number, number, number];
 
-export const EASE_OUT: Ease = [0.25, 0.1, 0.25, 1];
+// Curva única do sistema. Era [0.25, 0.1, 0.25, 1] — a do sistema anterior —
+// enquanto o CSS já tinha passado para esta.
+export const EASE_OUT: Ease = [0.2, 0.6, 0.3, 1];
 export const EASE_ENTER: Ease = [0, 0, 0.2, 1];
 export const EASE_EXIT: Ease = [0.4, 0, 1, 1];
 

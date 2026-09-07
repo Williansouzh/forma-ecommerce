@@ -30,7 +30,7 @@ export function Footer() {
     <footer className="ink gutter pb-[30px] pt-[clamp(46px,9vh,100px)]">
       <div className="mx-auto flex w-full max-w-[1360px] flex-wrap gap-[clamp(26px,5vw,80px)]">
         <div className="flex-[1_1_min(100%,320px)]">
-          <p className="font-display text-[clamp(28px,4vw,44px)] font-light tracking-[-0.02em]">
+          <p className="font-display text-[clamp(26px,3.2vw,36px)] font-semibold tracking-[-0.02em]">
             {SITE_NAME}
             <span className="text-clay">.</span>
           </p>
