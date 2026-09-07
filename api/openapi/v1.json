@@ -2727,6 +2727,76 @@
           }
         }
       },
+      "HomeImageDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "alt": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "url",
+          "alt"
+        ]
+      },
+      "LookbookImageDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "alt": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "room": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "place": {
+            "type": "string",
+            "maxLength": 60
+          }
+        },
+        "required": [
+          "url",
+          "alt",
+          "room",
+          "place"
+        ]
+      },
+      "HomeMediaDto": {
+        "type": "object",
+        "properties": {
+          "hero": {
+            "$ref": "#/components/schemas/HomeImageDto"
+          },
+          "lookbook": {
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookbookImageDto"
+            }
+          },
+          "atelierHero": {
+            "$ref": "#/components/schemas/HomeImageDto"
+          },
+          "atelierProcess": {
+            "$ref": "#/components/schemas/HomeImageDto"
+          },
+          "atelierBench": {
+            "$ref": "#/components/schemas/HomeImageDto"
+          }
+        }
+      },
       "UpdateSettingsDto": {
         "type": "object",
         "properties": {
@@ -2755,6 +2825,9 @@
           "atelierHours": {
             "type": "string",
             "minLength": 1
+          },
+          "homeMedia": {
+            "$ref": "#/components/schemas/HomeMediaDto"
           }
         }
       },

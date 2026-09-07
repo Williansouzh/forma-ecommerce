@@ -5,6 +5,8 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { AtelierVideo } from "@/components/shared/atelier-video";
 import { ATELIER_MEDIA } from "@/lib/atelier-media";
+import { DEFAULT_ATELIER_POSTERS, DEFAULT_HERO } from "@/lib/home-media";
+import type { HomeImage } from "@/types/settings";
 
 /**
  * A foto ocupa a tela inteira e o texto se apoia nela pela base — é a peça que
@@ -14,10 +16,15 @@ import { ATELIER_MEDIA } from "@/lib/atelier-media";
  * O `slowzoom` roda em 20s: quem olha por três segundos não percebe, quem
  * fica parado percebe. Zoom mais rápido viraria banner de campanha.
  */
-const HERO_IMAGE = {
-  src: "/images/products/vaso-canelado-01.jpg",
-  alt: "Vaso canelado verde impresso em 3D com flores, ao lado de porta-vela",
-};
+/**
+ * A foto vem de fora desde que o painel pode trocá-la. O padrão continua
+ * aqui como reserva: sem nada configurado, ou com a API fora, a vitrine é a
+ * mesma de sempre.
+ */
+interface HeroSectionProps {
+  image?: HomeImage;
+  videoPoster?: HomeImage;
+}
 
 /** Os quatro selos da régua inferior — onde fica, desde quando, para onde envia. */
 const CREDENTIALS = [
@@ -27,15 +34,17 @@ const CREDENTIALS = [
   { label: "Envio para todo o Brasil", accent: true },
 ];
 
-export function HeroSection() {
+export function HeroSection({ image, videoPoster }: HeroSectionProps = {}) {
+  const hero = image ?? DEFAULT_HERO;
+  const poster = videoPoster ?? DEFAULT_ATELIER_POSTERS.atelierHero;
   return (
     <section
       aria-label="Apresentação"
       className="ink relative flex min-h-[clamp(560px,88vh,900px)] items-end overflow-hidden"
     >
       <Image
-        src={HERO_IMAGE.src}
-        alt={HERO_IMAGE.alt}
+        src={hero.url}
+        alt={hero.alt}
         fill
         priority
         sizes="100vw"
@@ -111,7 +120,11 @@ export function HeroSection() {
           Ao vivo
         </div>
         <div className="relative mt-3 h-[118px] overflow-hidden bg-surface">
-          <AtelierVideo {...ATELIER_MEDIA.hero} />
+          <AtelierVideo
+            src={ATELIER_MEDIA.hero.src}
+            poster={poster.url}
+            alt={poster.alt}
+          />
         </div>
         <div className="mt-2.5 text-[10.5px] uppercase tracking-[0.12em] text-tertiary">
           Camada 47 · 0,12 mm

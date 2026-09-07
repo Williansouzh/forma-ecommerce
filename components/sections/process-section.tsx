@@ -1,5 +1,7 @@
 import { AtelierVideo } from "@/components/shared/atelier-video";
 import { ATELIER_MEDIA } from "@/lib/atelier-media";
+import { DEFAULT_ATELIER_POSTERS } from "@/lib/home-media";
+import type { HomeImage } from "@/types/settings";
 import { PROCESS_STAGES } from "@/lib/atelier-facts";
 import { ProcessStages } from "@/components/sections/process-stages";
 
@@ -11,7 +13,8 @@ import { ProcessStages } from "@/components/sections/process-stages";
  * do card de produto — sem ela, "pronto em 4 dias" parece arbitrário.
  */
 
-export function ProcessSection() {
+export function ProcessSection({ videoPoster }: { videoPoster?: HomeImage } = {}) {
+  const poster = videoPoster ?? DEFAULT_ATELIER_POSTERS.atelierProcess;
   return (
     <section
       id="processo"
@@ -43,7 +46,11 @@ export function ProcessSection() {
         <div className="mt-[clamp(40px,8vh,88px)] flex flex-wrap gap-[clamp(18px,3vw,40px)]">
           <div className="min-w-[240px] flex-[1_1_min(100%,300px)] border border-border-strong p-[22px]">
             <div className="relative h-[clamp(240px,40vh,380px)] overflow-hidden bg-surface">
-              <AtelierVideo {...ATELIER_MEDIA.process} />
+              <AtelierVideo
+                src={ATELIER_MEDIA.process.src}
+                poster={poster.url}
+                alt={poster.alt}
+              />
             </div>
             <div className="mt-3.5 flex justify-between text-[10.5px] font-semibold uppercase tracking-[0.16em] text-tertiary">
               <span>Nº 001 · em produção</span>

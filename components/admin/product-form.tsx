@@ -255,13 +255,23 @@ export function ProductForm({ product }: ProductFormProps) {
           A primeira imagem é a principal.{" "}
           {media?.configured
             ? `Envie um arquivo (até ${megabytes(media.maxBytes)}, JPEG/PNG/WebP/AVIF) ou cole um caminho de /public.`
-            : "Use caminhos de /public ou URLs completas."}
+            : "Envie um arquivo ou cole um caminho de /public."}
         </p>
 
+        {/*
+          O botão de envio aparece SEMPRE, mesmo sem R2 configurado.
+          Escondê-lo era pior do que mostrá-lo desligado: quem abria a tela não
+          descobria que o envio existe, e concluía que o sistema não sabe subir
+          imagem. Um controle desabilitado que diz o motivo ensina; um controle
+          ausente só confunde.
+        */}
         {media && !media.configured && (
-          <p className="mt-2 text-micro text-tertiary">
-            O envio de arquivos aparece aqui quando o bucket R2 estiver
-            configurado em Integrações.
+          <p className="mt-2.5 rounded-md bg-surface-muted px-3 py-2 text-micro text-secondary">
+            O envio de arquivos está desligado: falta configurar o bucket em{" "}
+            <a href="/admin/integracoes" className="underline hover:text-accent">
+              Integrações → Imagens
+            </a>
+            . Enquanto isso, cole o caminho da imagem no campo ao lado.
           </p>
         )}
 
@@ -274,32 +284,33 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="mt-4 space-y-3">
           {images.map((image, index) => (
             <div key={index} className="flex flex-col gap-2 sm:flex-row">
-              {media?.configured && (
-                <>
-                  <input
-                    ref={(element) => {
-                      fileInputs.current[index] = element;
-                    }}
-                    type="file"
-                    accept={media.acceptedTypes.join(",")}
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleUpload(index, file);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputs.current[index]?.click()}
-                    disabled={uploading !== null}
-                    aria-label={`Enviar arquivo para a imagem ${index + 1}`}
-                    className="inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border border-strong px-3 text-micro uppercase text-secondary transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
-                  >
-                    <Upload size={13} />
-                    {uploading === index ? "Enviando…" : "Enviar"}
-                  </button>
-                </>
-              )}
+              <input
+                ref={(element) => {
+                  fileInputs.current[index] = element;
+                }}
+                type="file"
+                accept={(media?.acceptedTypes ?? ["image/*"]).join(",")}
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleUpload(index, file);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputs.current[index]?.click()}
+                disabled={!media?.configured || uploading !== null}
+                title={
+                  media?.configured
+                    ? undefined
+                    : "Configure o bucket em Integrações → Imagens"
+                }
+                aria-label={`Enviar arquivo para a imagem ${index + 1}`}
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 self-end rounded-md border border-strong px-3 text-micro uppercase text-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Upload size={13} />
+                {uploading === index ? "Enviando…" : "Enviar"}
+              </button>
               <input
                 aria-label={`URL da imagem ${index + 1}`}
                 placeholder="/images/products/…"

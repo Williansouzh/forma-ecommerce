@@ -3,6 +3,39 @@ import { HydratedDocument } from "mongoose";
 
 export type SettingsDocument = HydratedDocument<Settings>;
 
+/** Uma imagem trocável da vitrine: o arquivo e o texto que o descreve. */
+export class HomeImageEmbed {
+  url!: string;
+  alt!: string;
+}
+
+/** Uma foto do lookbook, com o cômodo e o bairro que aparecem sobre ela. */
+export class LookbookImageEmbed {
+  url!: string;
+  alt!: string;
+  room!: string;
+  place!: string;
+}
+
+/**
+ * As imagens da página inicial que o ateliê troca sozinho.
+ *
+ * Todos os campos são opcionais e o padrão é AUSENTE, não uma URL: a loja tem
+ * os valores atuais embutidos como reserva, e slot vazio significa "usa o que
+ * já estava". Assim ligar este recurso não muda nada até alguém trocar uma
+ * foto, e apagar uma troca devolve a original em vez de deixar buraco.
+ */
+export class HomeMediaEmbed {
+  /** A foto de tela cheia do topo. */
+  hero?: HomeImageEmbed;
+  /** A tira de fotos "onde as peças moram". Até seis. */
+  lookbook?: LookbookImageEmbed[];
+  /** Pôsteres dos três slots de vídeo do ateliê. */
+  atelierHero?: HomeImageEmbed;
+  atelierProcess?: HomeImageEmbed;
+  atelierBench?: HomeImageEmbed;
+}
+
 /** Documento único: existe no máximo uma linha, com esta chave. */
 export const SETTINGS_KEY = "store";
 
@@ -34,6 +67,10 @@ export class Settings {
 
   @Prop({ required: true, trim: true, default: "Seg a sáb · 8h às 18h" })
   atelierHours: string;
+
+  /** Imagens trocáveis da vitrine. Ausente = a loja usa as embutidas. */
+  @Prop({ type: Object, default: {} })
+  homeMedia: HomeMediaEmbed;
 
   createdAt: Date;
   updatedAt: Date;

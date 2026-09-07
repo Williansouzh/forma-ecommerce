@@ -902,10 +902,27 @@ export interface components {
             /** @enum {string} */
             source: "shopee" | "site";
         };
+        HomeImageDto: {
+            alt: string;
+            url: string;
+        };
+        HomeMediaDto: {
+            atelierBench?: components["schemas"]["HomeImageDto"];
+            atelierHero?: components["schemas"]["HomeImageDto"];
+            atelierProcess?: components["schemas"]["HomeImageDto"];
+            hero?: components["schemas"]["HomeImageDto"];
+            lookbook?: components["schemas"]["LookbookImageDto"][];
+        };
         LoginDto: {
             /** Format: email */
             email: string;
             password: string;
+        };
+        LookbookImageDto: {
+            alt: string;
+            place: string;
+            room: string;
+            url: string;
         };
         Order: {
             /** @enum {string} */
@@ -1192,6 +1209,7 @@ export interface components {
             defaultProductionDays?: number;
             /** @description Em centavos. */
             freeShippingThreshold?: number;
+            homeMedia?: components["schemas"]["HomeMediaDto"];
             pixDiscountPercent?: number;
         };
         UpsertLinkDto: {

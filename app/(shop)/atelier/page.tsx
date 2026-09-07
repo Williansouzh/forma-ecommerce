@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { AtelierVideo } from "@/components/shared/atelier-video";
 import { ATELIER_MEDIA } from "@/lib/atelier-media";
+import { getStoreSettings } from "@/lib/settings";
+import { resolveHomeMedia } from "@/lib/home-media";
 import { ProcessStages } from "@/components/sections/process-stages";
 import { AtelierNumbers } from "@/components/sections/atelier-numbers";
 import { MATERIALS, PROCESS_STAGES } from "@/lib/atelier-facts";
@@ -29,7 +31,14 @@ const GALLERY = [
   },
 ];
 
-export default function AtelierPage() {
+/**
+ * Dinâmica desde que o pôster da bancada é trocável pelo painel: estática, a
+ * página serviria a imagem congelada no build.
+ */
+export const dynamic = "force-dynamic";
+
+export default async function AtelierPage() {
+  const media = resolveHomeMedia((await getStoreSettings()).homeMedia);
   return (
     <main className="pb-[clamp(60px,12vh,140px)]">
       <section className="shell pt-[clamp(34px,7vh,90px)]">
@@ -53,7 +62,11 @@ export default function AtelierPage() {
         <div className="flex flex-wrap gap-[clamp(18px,3vw,40px)]">
           <div className="min-w-[260px] flex-[1_1_min(100%,460px)] border border-border-strong p-5">
             <div className="relative h-[clamp(260px,44vh,440px)] overflow-hidden bg-surface-muted">
-              <AtelierVideo {...ATELIER_MEDIA.bench} />
+              <AtelierVideo
+                src={ATELIER_MEDIA.bench.src}
+                poster={media.atelierBench.url}
+                alt={media.atelierBench.alt}
+              />
             </div>
             <div className="mt-3.5 flex justify-between text-[10.5px] font-semibold uppercase tracking-[0.16em] text-tertiary">
               <span>Bancada · em produção</span>
