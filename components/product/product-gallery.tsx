@@ -22,7 +22,14 @@ export function ProductGallery({ product }: { product: Product }) {
   return (
     <div className="min-w-[280px] flex-[1_1_min(100%,560px)]">
       <div className="group relative aspect-[4/5] overflow-hidden bg-surface-muted">
-        <AnimatePresence mode="wait">
+        {/*
+          `initial={false}`: sem isso a foto principal do produto montava em
+          `opacity: 0` e só aparecia quando o framer-motion hidratasse e
+          rodasse a animação. A imagem que decide a compra não pode depender
+          de JavaScript para existir. A transição continua valendo na troca
+          entre miniaturas, que é onde ela serve para alguma coisa.
+        */}
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeIndex}
             initial={{ opacity: 0 }}

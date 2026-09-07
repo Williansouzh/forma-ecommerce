@@ -47,8 +47,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const category = getCategory(product.category);
   const related = await fetchRelatedProducts(product);
 
+  // `pb-32` no celular abre espaço para a barra fixa de compra não cobrir o
+  // fim da página; no desktop ela não existe.
   return (
-    <div className="shell pb-24 pt-[clamp(24px,5vh,56px)]">
+    <div className="shell pb-32 pt-[clamp(24px,5vh,56px)] sm:pb-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}

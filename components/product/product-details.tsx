@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Product, ProductVariant } from "@/types/product";
 import { useCartStore } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
@@ -24,6 +24,24 @@ export function ProductDetails({
     product.variants?.[0]
   );
   const [quantity, setQuantity] = useState(1);
+  /*
+   * A barra fixa de compra do celular só aparece depois que o botão de
+   * verdade sai da tela. Mostrá-la desde o começo cobriria a foto justamente
+   * enquanto a pessoa está decidindo, e duplicaria um botão já visível.
+   */
+  const buyRef = useRef<HTMLButtonElement>(null);
+  const [buyOffscreen, setBuyOffscreen] = useState(false);
+
+  useEffect(() => {
+    const node = buyRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setBuyOffscreen(!entry.isIntersecting),
+      { rootMargin: "0px 0px -72px 0px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useUIStore((state) => state.openCart);
   const pushToast = useUIStore((state) => state.pushToast);
@@ -96,17 +114,18 @@ export function ProductDetails({
     <div className="min-w-[280px] flex-[1_1_min(100%,380px)] self-start lg:sticky lg:top-[100px]">
       {categoryName && <span className="label text-tertiary">{categoryName}</span>}
 
-      <h1 className="mt-3.5 font-display text-[clamp(32px,4.4vw,56px)] font-light leading-[1.02] tracking-[-0.025em]">
+      <h1 className="mt-3.5 font-display text-[clamp(30px,4vw,48px)] font-bold leading-[1.05] tracking-[-0.025em]">
         {product.name}
       </h1>
 
       <div className="mt-[18px] flex flex-wrap items-baseline gap-3.5">
-        <span className="text-[26px] font-semibold tabular-nums">
+        <span className="data text-[26px] font-medium">
           {product.price === 0 ? "Sob consulta" : formatPrice(unitPrice)}
         </span>
         {installment > 0 && (
           <span className="text-[13.5px] text-tertiary">
-            ou 3× de {formatPrice(installment)} sem juros
+            ou 3× de <span className="data">{formatPrice(installment)}</span> sem
+            juros
           </span>
         )}
       </div>
@@ -180,10 +199,11 @@ export function ProductDetails({
         </div>
 
         <button
+          ref={buyRef}
           type="button"
           onClick={addToCart}
           disabled={soldOut}
-          className="min-h-[54px] flex-[1_1_200px] rounded-md bg-primary px-6 text-[14px] font-semibold tracking-[0.02em] text-background transition-colors duration-300 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-[54px] flex-[1_1_200px] rounded-md bg-primary px-6 text-[15px] font-semibold text-background transition-colors duration-200 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
         >
           {soldOut
             ? "Esgotado"
@@ -197,10 +217,33 @@ export function ProductDetails({
         href={WHATSAPP_URL}
         target="_blank"
         rel="noreferrer"
-        className="mt-3.5 inline-flex items-center gap-2 border-b border-accent/40 pb-0.5 text-[13.5px] font-semibold text-primary transition-colors hover:border-accent hover:text-accent"
+        className="mt-3.5 inline-flex items-center gap-2 border-b border-accent/40 pb-0.5 text-[13.5px] font-semibold text-primary transition-colors duration-200 hover:border-accent hover:text-accent"
       >
         Prefiro fechar no WhatsApp
       </a>
+
+      {/* Preço à esquerda, ação à direita: o par que a pessoa precisa ver
+          junto quando já rolou até a ficha técnica. Só no celular — no
+          desktop a coluna inteira é `sticky` e o botão nunca sai da tela. */}
+      {buyOffscreen && !soldOut && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border-subtle bg-surface p-3 shadow-lg sm:hidden">
+          <div className="min-w-0 flex-1">
+            <p className="data truncate text-[17px] font-medium">
+              {product.price === 0 ? "Sob consulta" : formatPrice(unitPrice)}
+            </p>
+            {variant && (
+              <p className="truncate text-[13px] text-tertiary">{variant.name}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={addToCart}
+            className="min-h-12 shrink-0 rounded-md bg-primary px-6 text-[15px] font-semibold text-background"
+          >
+            {unitPrice === 0 ? "Pedir orçamento" : "Adicionar"}
+          </button>
+        </div>
+      )}
 
       <dl className="mt-[34px] border-t border-border-strong pt-2">
         {specs.map(([term, value]) => (
@@ -208,10 +251,8 @@ export function ProductDetails({
             key={term}
             className="flex justify-between gap-[18px] border-b border-border-subtle py-[13px]"
           >
-            <dt className="text-body-small uppercase tracking-[0.1em] text-tertiary">
-              {term}
-            </dt>
-            <dd className="text-right text-[14.5px] tabular-nums">{value}</dd>
+            <dt className="label text-tertiary">{term}</dt>
+            <dd className="data text-right text-[14px]">{value}</dd>
           </div>
         ))}
       </dl>
