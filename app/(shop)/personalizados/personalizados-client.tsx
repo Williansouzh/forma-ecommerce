@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { useUIStore } from "@/stores/ui-store";
 import { submitCustomRequest } from "@/lib/api";
-import { staggerContainer, fadeUp, VIEWPORT_ONCE } from "@/lib/animations";
+import { staggerContainer, fadeUp } from "@/lib/animations";
 import type { CustomType } from "@/types";
 
 const typeOptions: { value: CustomType | ""; label: string }[] = [
@@ -109,7 +109,7 @@ export function PersonalizadosClient() {
           {["Ideia", "Modelo 3D", "Material", "Produção", "Entrega"].map(
             (step, index) => (
               <li key={step} className="flex flex-col gap-2">
-                <span className="font-display text-heading-2 text-quaternary tabular-nums">
+                <span className="data text-heading-2 text-tertiary">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="text-caption uppercase text-secondary">{step}</span>
@@ -258,13 +258,14 @@ export function PersonalizadosClient() {
             <ul className="mt-6 space-y-4">
               {gallery.map((src, index) => (
                 <li key={src}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={VIEWPORT_ONCE}
-                    transition={{ duration: 0.4, delay: index * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-                    className="group relative aspect-[16/10] overflow-hidden rounded-lg border border-border-subtle bg-surface-muted"
-                  >
+                  {/*
+                    Sem reveal por rolagem: estas são as encomendas já
+                    entregues, ou seja, a prova que convence quem está
+                    decidindo encomendar. Parada em `opacity: 0` à espera de um
+                    observer, ela some para quem tem JavaScript lento, para o
+                    print do link e para quem chega com a página já rolada.
+                  */}
+                  <div className="group relative aspect-[16/10] overflow-hidden rounded-lg border border-border-subtle bg-surface-muted">
                     <Image
                       src={src}
                       alt={`Trabalho personalizado ${index + 1}`}
@@ -272,7 +273,7 @@ export function PersonalizadosClient() {
                       sizes="(max-width: 1024px) 100vw, 420px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                  </motion.div>
+                  </div>
                 </li>
               ))}
             </ul>

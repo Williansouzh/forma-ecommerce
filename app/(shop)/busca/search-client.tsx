@@ -50,7 +50,7 @@ export function SearchPageClient() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Buscar peças, coleções…"
-            className="w-full bg-transparent font-display text-heading-2 tracking-tight outline-none placeholder:text-quaternary"
+            className="w-full bg-transparent font-display text-heading-2 tracking-tight outline-none placeholder:text-tertiary"
           />
         </div>
 

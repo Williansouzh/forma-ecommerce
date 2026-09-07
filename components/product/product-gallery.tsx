@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
+import { EASE_OUT } from "@/lib/animations";
 
 /**
  * A imagem 01 é sempre a peça em uso — na mesa, na estante, ao lado de um
@@ -22,13 +23,20 @@ export function ProductGallery({ product }: { product: Product }) {
   return (
     <div className="min-w-[280px] flex-[1_1_min(100%,560px)]">
       <div className="group relative aspect-[4/5] overflow-hidden bg-surface-muted">
-        <AnimatePresence mode="wait">
+        {/*
+          `initial={false}`: sem isso a foto principal do produto montava em
+          `opacity: 0` e só aparecia quando o framer-motion hidratasse e
+          rodasse a animação. A imagem que decide a compra não pode depender
+          de JavaScript para existir. A transição continua valendo na troca
+          entre miniaturas, que é onde ela serve para alguma coisa.
+        */}
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeIndex}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5, ease: EASE_OUT }}
             className="absolute inset-0"
           >
             <Image
@@ -38,7 +46,7 @@ export function ProductGallery({ product }: { product: Product }) {
               priority
               unoptimized={activeImage?.url.endsWith(".svg")}
               sizes="(max-width: 1024px) 100vw, 560px"
-              className="object-cover saturate-[0.94] transition-transform duration-[1200ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-[1.16]"
+              className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover:scale-[1.06]"
             />
           </motion.div>
         </AnimatePresence>
@@ -77,7 +85,7 @@ export function ProductGallery({ product }: { product: Product }) {
         </div>
       )}
 
-      <p className="mt-4 text-[12px] uppercase tracking-[0.12em] text-quaternary">
+      <p className="label mt-4 text-tertiary">
         Fotos reais das peças que saem do ateliê
       </p>
     </div>

@@ -9,6 +9,7 @@ import { useScroll } from "@/hooks/use-scroll";
 import { useCartStore, getCartTotals } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
+import { EASE_OUT } from "@/lib/animations";
 
 export function Header() {
   const scrolled = useScroll(50);
@@ -114,7 +115,7 @@ export function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.25, ease: EASE_OUT }}
             aria-label="Menu móvel"
             className="overflow-hidden border-t border-border-subtle bg-background lg:hidden"
           >

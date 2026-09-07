@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Header } from "@/components/layout/header";
+import { UtilityBar } from "@/components/layout/utility-bar";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/layout/cart-drawer";
 import { SearchOverlay } from "@/components/layout/search-overlay";
@@ -17,6 +18,7 @@ export default function ShopLayout({
       >
         Pular para conteúdo principal
       </a>
+      <UtilityBar />
       <Header />
       <ScrollProgress />
       <main id="conteudo" className="min-h-screen">

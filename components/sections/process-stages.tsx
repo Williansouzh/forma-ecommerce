@@ -15,10 +15,10 @@ export function ProcessStages({
           key={stage.title}
           className="flex items-baseline gap-5 border-t border-border-subtle py-[clamp(14px,2.4vw,22px)]"
         >
-          <span className="text-micro font-bold tabular-nums text-quaternary">
+          <span className="data text-[13px] text-tertiary">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="flex-1 font-display text-[clamp(22px,3vw,34px)] font-light leading-[1.1]">
+          <span className="flex-1 font-display text-heading-1">
             {stage.title}
           </span>
           <span className="whitespace-nowrap text-[12.5px] text-tertiary">

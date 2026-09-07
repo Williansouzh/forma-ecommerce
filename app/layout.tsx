@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Karla } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Karla } from "next/font/google";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -11,13 +11,22 @@ const karla = Karla({
   display: "swap",
 });
 
-// Fraunces: serifa variável com eixos SOFT e WONK — terminais arredondados
-// e itálico levemente torto. Calor artesanal que Cormorant não tem.
-const fraunces = Fraunces({
+// Bricolage Grotesque: grotesca variável, com caráter no g e no R, sem virar
+// fonte de aplicativo. Substitui Fraunces — uma serifa de peso 300 que, a
+// 104px e com ruído por cima, fechava a abertura do "e".
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  axes: ["SOFT", "WONK", "opsz"],
+});
+
+// IBM Plex Mono: preço, medida e prazo. Não é clichê técnico — é o que alinha
+// a coluna de preço na grade e segura "0,12 mm" sem parecer texto corrido.
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -44,8 +53,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#EFE9DE" },
-    { media: "(prefers-color-scheme: dark)", color: "#1B1A15" },
+    { media: "(prefers-color-scheme: light)", color: "#FBFBF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#131315" },
   ],
 };
 
@@ -65,7 +74,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${karla.variable} ${fraunces.variable}`}
+      className={`${karla.variable} ${bricolage.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
       <head>

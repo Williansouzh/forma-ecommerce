@@ -3,35 +3,27 @@ import { SectionHeading } from "@/components/sections/section-heading";
 import { DEFAULT_LOOKBOOK } from "@/lib/home-media";
 import type { LookbookImage } from "@/types/settings";
 
-/** As peças na casa de quem comprou, com o cômodo e o bairro. */
 /**
+ * As peças na casa de quem comprou, com o cômodo e o bairro — a prova social
+ * que a loja de fato tem.
+ *
  * As seis fotos vêm de fora desde que o painel pode trocá-las; os valores
- * antigos viraram o padrão em `lib/home-media.ts`. A tira é duplicada abaixo
- * para rolar sem emenda, então o tamanho seis não é decoração.
+ * antigos viraram o padrão em `lib/home-media.ts`.
  */
 
-function Figure({
-  photo,
-  hidden,
-}: {
-  photo: LookbookImage;
-  hidden?: boolean;
-}) {
+function Figure({ photo }: { photo: LookbookImage }) {
   return (
-    <figure
-      aria-hidden={hidden}
-      className="group/photo m-0 w-[min(78vw,420px)] shrink-0"
-    >
+    <figure className="group/photo m-0 w-[min(72vw,360px)] shrink-0">
       <div className="relative aspect-[4/5] overflow-hidden bg-surface-muted">
         <Image
           src={photo.url}
-          alt={hidden ? "" : photo.alt}
+          alt={photo.alt}
           fill
-          sizes="(max-width: 768px) 78vw, 420px"
-          className="object-cover saturate-[0.92] transition-transform duration-[900ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover/photo:scale-105"
+          sizes="(max-width: 768px) 72vw, 360px"
+          className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover/photo:scale-[1.03]"
         />
       </div>
-      <figcaption className="mt-3 flex justify-between gap-3 text-[11.5px] font-semibold uppercase tracking-[0.15em] text-tertiary">
+      <figcaption className="mt-3 flex justify-between gap-3 text-[13px] text-tertiary">
         <span>{photo.room}</span>
         <span>{photo.place}</span>
       </figcaption>
@@ -39,32 +31,31 @@ function Figure({
   );
 }
 
-/**
- * As peças fora do estúdio. A faixa rola sozinha e pausa no hover — quem quis
- * olhar uma foto não deveria correr atrás dela.
- */
 export function LookbookSection({ photos: configured }: { photos?: LookbookImage[] } = {}) {
   const photos = configured ?? DEFAULT_LOOKBOOK;
   return (
-    <section aria-labelledby="lookbook-titulo" className="pt-[clamp(64px,12vh,150px)]">
+    <section aria-labelledby="lookbook-titulo" className="section-rhythm">
       <div className="shell">
         <SectionHeading
-          number="05"
           id="lookbook-titulo"
-          title="Em casa"
-          note="Passe o mouse para pausar"
+          title="Na casa de quem comprou"
+          note="Arraste para o lado"
         />
       </div>
 
-      <div className="group mt-[34px] overflow-hidden">
-        <div className="flex w-max animate-marquee-slow gap-[clamp(14px,2vw,28px)] pl-[clamp(14px,2vw,28px)] group-hover:[animation-play-state:paused]">
-          {photos.map((photo) => (
-            <Figure key={photo.url} photo={photo} />
-          ))}
-          {photos.map((photo) => (
-            <Figure key={`${photo.url}-loop`} photo={photo} hidden />
-          ))}
-        </div>
+      {/*
+        A faixa rolava sozinha em laço infinito de 48s e pausava no hover — o
+        que no celular significava não pausar nunca. Agora quem rola é o
+        leitor, e a barra fica escondida.
+
+        Sem `scroll-snap`: com encaixe obrigatório o Chrome alinhava a primeira
+        foto ao início do scrollport e comia o recuo da esquerda, deixando a
+        foto colada na borda da janela.
+      */}
+      <div className="no-scrollbar mt-8 flex gap-[clamp(14px,2vw,24px)] overflow-x-auto px-[clamp(16px,4vw,64px)] pb-2">
+        {photos.map((photo) => (
+          <Figure key={photo.url} photo={photo} />
+        ))}
       </div>
     </section>
   );

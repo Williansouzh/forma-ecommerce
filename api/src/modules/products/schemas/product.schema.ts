@@ -1,14 +1,61 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
+/**
+ * Os slugs canônicos. `brinquedos` e `jogos` já existem aqui e no painel antes
+ * de terem produto: assim a primeira peça de uma família nova é cadastrada sem
+ * pedir deploy, e a vitrine passa a mostrar a prateleira sozinha.
+ */
 export const CATEGORY_SLUGS = [
   "decoracao",
-  "geek",
+  "colecionaveis",
+  "brinquedos",
+  "jogos",
   "presentes",
-  "utilidades",
   "personalizados",
 ] as const;
 export type CategorySlug = (typeof CATEGORY_SLUGS)[number];
+
+/**
+ * Os slugs aposentados e para onde cada um vai.
+ *
+ * `utilidades` virou parte de "Casa e decoração" — suporte de mesa e
+ * organizador são objeto de casa, e a família sozinha tinha uma peça.
+ * `geek` era um recorte de nicho que deixava de fora o pai comprando um dino
+ * articulado para o filho, que é exatamente a mesma peça.
+ */
+export const LEGACY_CATEGORY_MAP: Record<string, CategorySlug> = {
+  utilidades: "decoracao",
+  geek: "colecionaveis",
+};
+
+export const LEGACY_CATEGORY_SLUGS = Object.keys(LEGACY_CATEGORY_MAP);
+
+/**
+ * O enum do Mongoose aceita canônicos **e** aposentados; o DTO aceita só os
+ * canônicos. Ou seja: documento antigo continua carregando e salvando, e
+ * escrita nova não consegue reintroduzir um slug morto. É o que deixa a API
+ * subir antes de o script de migração rodar, em vez de exigir os dois no
+ * mesmo instante.
+ */
+export const ALL_CATEGORY_SLUGS = [
+  ...CATEGORY_SLUGS,
+  ...LEGACY_CATEGORY_SLUGS,
+] as const;
+
+/** Slug aposentado vira canônico; qualquer outro passa direto. */
+export function canonicalCategory(slug: string): string {
+  return LEGACY_CATEGORY_MAP[slug] ?? slug;
+}
+
+/** Um canônico mais os aposentados que caem nele — para filtrar no Mongo. */
+export function categoryAliases(slug: string): string[] {
+  const canonical = canonicalCategory(slug);
+  const legacy = LEGACY_CATEGORY_SLUGS.filter(
+    (old) => LEGACY_CATEGORY_MAP[old] === canonical,
+  );
+  return [canonical, ...legacy];
+}
 
 export type ProductDocument = HydratedDocument<Product>;
 
@@ -58,7 +105,7 @@ export class Product {
   @Prop({ min: 0 })
   originalPrice?: number;
 
-  @Prop({ required: true, enum: CATEGORY_SLUGS })
+  @Prop({ required: true, enum: ALL_CATEGORY_SLUGS })
   category: CategorySlug;
 
   @Prop({ type: [String], default: [] })

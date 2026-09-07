@@ -47,8 +47,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const category = getCategory(product.category);
   const related = await fetchRelatedProducts(product);
 
+  // `pb-32` no celular abre espaço para a barra fixa de compra não cobrir o
+  // fim da página; no desktop ela não existe.
   return (
-    <div className="shell pb-24 pt-[clamp(24px,5vh,56px)]">
+    <div className="shell pb-32 pt-[clamp(24px,5vh,56px)] sm:pb-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}
@@ -75,7 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="flex items-baseline gap-4 border-b border-border-strong pb-5">
             <h2
               id="relacionados-titulo"
-              className="font-display text-[clamp(24px,3vw,40px)] font-light tracking-[-0.02em]"
+              className="font-display text-display-2"
             >
               Combina com
             </h2>
@@ -98,7 +100,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         alt={photo.alt}
                         fill
                         sizes="(max-width: 640px) 100vw, 260px"
-                        className="object-cover saturate-[0.94] transition-transform duration-[800ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover:scale-105"
                       />
                     )}
                   </div>

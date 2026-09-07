@@ -113,7 +113,7 @@ export function SearchOverlay() {
                   onKeyDown={(event) => event.key === "Enter" && submit()}
                   placeholder="Buscar peças, coleções…"
                   aria-label="Buscar produtos"
-                  className="w-full bg-transparent font-display text-heading-2 tracking-tight outline-none placeholder:text-quaternary"
+                  className="w-full bg-transparent font-display text-heading-2 tracking-tight outline-none placeholder:text-tertiary"
                 />
               </div>
 

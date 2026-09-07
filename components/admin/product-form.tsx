@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { CATEGORIES } from "@/data/categories";
+import { CATEGORIES, canonicalCategory } from "@/data/categories";
 import {
   createProduct,
   getMediaStatus,
@@ -44,7 +44,15 @@ export function ProductForm({ product }: ProductFormProps) {
   const [originalPrice, setOriginalPrice] = useState(
     centsToInput(product?.originalPrice)
   );
-  const [category, setCategory] = useState(product?.category ?? CATEGORIES[0].slug);
+  /*
+   * Passa pelo mapa de legado: uma peça ainda gravada como `geek` abriria o
+   * formulário com "Casa e decoração" pré-selecionada — o primeiro item da
+   * lista —, e salvar reclassificaria a peça em silêncio. Aqui ela abre já em
+   * "Brinquedos e colecionáveis", que é para onde a migração a leva.
+   */
+  const [category, setCategory] = useState(
+    product?.category ? canonicalCategory(product.category) : CATEGORIES[0].slug
+  );
   const [badge, setBadge] = useState(product?.badge ?? "");
   const [tagsInput, setTagsInput] = useState((product?.tags ?? []).join(", "));
   const [images, setImages] = useState<ImageRow[]>(
@@ -213,6 +221,10 @@ export function ProductForm({ product }: ProductFormProps) {
                 <option key={item.slug} value={item.slug}>{item.name}</option>
               ))}
             </select>
+            <p className="mt-1.5 text-[13px] text-tertiary">
+              Uma categoria só aparece na loja depois que tem pelo menos uma
+              peça — cadastre aqui e ela entra na vitrine sozinha.
+            </p>
           </div>
           <div>
             <label htmlFor="badge" className="text-caption uppercase text-tertiary">Badge</label>

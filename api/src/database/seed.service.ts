@@ -77,7 +77,7 @@ const DEMO_PRODUCTS = [
     shortDescription:
       "Dragão de 42 cm com 38 juntas móveis, impresso em uma peça só.",
     price: 8900,
-    category: "geek",
+    category: "colecionaveis",
     tags: ["dragão", "articulado", "geek", "colecionável", "pla+ gradient"],
     images: [
       { url: "/images/products/dragao-01.jpg", alt: "Dragão Articulado inteiro sobre a mesa" },
@@ -127,7 +127,7 @@ const DEMO_PRODUCTS = [
     shortDescription:
       "Suporte de celular de perfil curvo com miolo em camadas coloridas.",
     price: 4500,
-    category: "utilidades",
+    category: "decoracao",
     tags: ["suporte", "onda", "utilidade", "mesa", "pla+ multicor"],
     images: [
       { url: "/images/products/suporte-01.jpg", alt: "Suporte Onda com celular apoiado" },
@@ -233,7 +233,7 @@ const DEMO_PRODUCTS = [
     shortDescription:
       "Seis dinossauros pequenos em cores pastel, com arco de exposição.",
     price: 7900,
-    category: "presentes",
+    category: "colecionaveis",
     tags: ["mini", "dinos", "presente", "lembrança", "pla+ fosco"],
     images: [
       { url: "/images/products/dino-01.jpg", alt: "Mini Dinos enfileirados no arco" },

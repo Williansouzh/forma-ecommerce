@@ -2,14 +2,12 @@ import Link from "next/link";
 import {
   ATELIER_CITY,
   ATELIER_HOURS,
-  FREE_SHIPPING_THRESHOLD,
   INSTAGRAM_HANDLE,
   INSTAGRAM_URL,
   SITE_NAME,
   WHATSAPP_NUMBER,
   WHATSAPP_URL,
 } from "@/lib/constants";
-import { formatPrice } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const LOJA_LINKS = [
@@ -32,7 +30,7 @@ export function Footer() {
     <footer className="ink gutter pb-[30px] pt-[clamp(46px,9vh,100px)]">
       <div className="mx-auto flex w-full max-w-[1360px] flex-wrap gap-[clamp(26px,5vw,80px)]">
         <div className="flex-[1_1_min(100%,320px)]">
-          <p className="font-display text-[clamp(28px,4vw,44px)] font-light tracking-[-0.02em]">
+          <p className="font-display text-[clamp(26px,3.2vw,36px)] font-semibold tracking-[-0.02em]">
             {SITE_NAME}
             <span className="text-clay">.</span>
           </p>
@@ -53,31 +51,26 @@ export function Footer() {
         </div>
 
         <nav aria-label="Loja" className="flex-[1_1_160px]">
-          <p className="label text-quaternary">Loja</p>
+          <p className="label text-tertiary">Loja</p>
           <ul className="mt-3.5 space-y-[9px]">
             {LOJA_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-body-small text-secondary transition-colors duration-300 hover:text-primary"
+                  className="text-body-small text-secondary transition-colors duration-200 hover:text-primary"
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href="/admin"
-                className="text-body-small text-quaternary transition-colors duration-300 hover:text-secondary"
-              >
-                Painel de gestão
-              </Link>
-            </li>
+            {/* O link para /admin saiu daqui: era o único item da coluna que
+                não é para o cliente, e anunciava a superfície administrativa
+                para todo visitante e todo crawler sem ganho nenhum. */}
           </ul>
         </nav>
 
         <div className="flex-[1_1_200px]">
-          <p className="label text-quaternary">Ateliê</p>
+          <p className="label text-tertiary">Ateliê</p>
           <ul className="mt-3.5 space-y-[9px] text-body-small text-secondary">
             <li>{ATELIER_HOURS}</li>
             <li>{ATELIER_CITY}</li>
@@ -86,7 +79,7 @@ export function Footer() {
                 href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="transition-colors duration-300 hover:text-primary"
+                className="transition-colors duration-200 hover:text-primary"
               >
                 {INSTAGRAM_HANDLE}
               </a>
@@ -95,16 +88,13 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-3.5 border-t border-border-subtle pt-[18px] text-[11.5px] uppercase tracking-[0.13em] text-quaternary">
+      <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-3.5 border-t border-border-subtle pt-[18px] text-[13px] text-tertiary">
         <span>
           © {year} {SITE_NAME}
         </span>
-        <div className="flex items-center gap-6">
-          {/* Formatado a partir da mesma constante que o carrinho usa, para o
-              rodapé não anunciar um limite que o checkout não pratica. */}
-          <span>Frete grátis acima de {formatPrice(FREE_SHIPPING_THRESHOLD)}</span>
-          <ThemeToggle />
-        </div>
+        {/* O frete grátis subiu para a barra de utilidade, no topo: aqui ele
+            tinha o mesmo tamanho e a mesma cor do aviso de copyright. */}
+        <ThemeToggle />
       </div>
     </footer>
   );

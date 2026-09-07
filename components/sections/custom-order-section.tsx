@@ -39,11 +39,11 @@ export function CustomOrderSection() {
     >
       <div className="flex flex-wrap gap-[clamp(28px,5vw,80px)] bg-surface-muted p-[clamp(28px,5vw,76px)]">
         <div className="min-w-[260px] flex-[1_1_min(100%,380px)]">
-          <span className="label text-tertiary">03 · Sob medida</span>
+          <span className="label text-tertiary">Sob medida</span>
 
           <h2
             id="custom-titulo"
-            className="mt-[18px] font-display text-[clamp(30px,4.6vw,60px)] font-light leading-[1.02] tracking-[-0.025em]"
+            className="mt-[18px] font-display text-display-2"
           >
             Você imagina.
             <br />

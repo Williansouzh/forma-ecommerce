@@ -2,83 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Bancada Colorida.
+ *
+ * A interface é acromática: branco de bancada, tinta quase preta, três degraus
+ * de cinza. A cor colorida da tela ou é foto de produto, ou é cor de filamento
+ * marcando uma categoria — nunca decoração. É o que permite um vaso branco e um
+ * dino magenta na mesma fileira sem que nenhum dos dois pareça deslocado.
+ *
+ * Todos os degraus de texto passam 4.5:1 sobre o fundo do próprio tema. O
+ * quarto degrau da paleta antiga (#8D8062, 3.22:1) deixou de existir: hoje
+ * `quaternary` é igual a `tertiary` e permanece só para não quebrar chamadas.
+ */
 :root {
-  /* Linho, papel, areia — fundo silencioso para o objeto colorido. */
-  --color-background: #EFE9DE;
-  --color-surface: #F9F6EF;
-  --color-surface-muted: #E3DACB;
+  --color-background: #FBFBF9;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #ECECE8;
 
-  /* Tinta quente com viés oliva. Nunca preto puro. */
-  --color-text-primary: #26241E;
-  --color-text-secondary: #565146;
-  --color-text-tertiary: #706756;
-  --color-text-quaternary: #8D8062;
+  --color-text-primary: #101012;   /* 18.5:1 */
+  --color-text-secondary: #55565B; /*  7.1:1 */
+  --color-text-tertiary: #6E7075;  /*  4.8:1 */
+  --color-text-quaternary: #6E7075;
 
-  /* Oliva é a cor estrutural; barro é o acento raro. */
-  --color-accent: #5C6A49;
-  --color-accent-light: #8B9770;
-  --color-accent-dark: #414D31;
-  --color-clay: #AE5E3D;
+  /* Laranja de bancada, escurecido até passar AA em texto normal. */
+  --color-accent: #C43C08;         /*  5.1:1 */
+  --color-accent-light: #FF5A1F;
+  --color-accent-dark: #932D05;
+  --color-clay: #C43C08;
 
-  --color-border: rgba(38, 36, 30, 0.08);
-  --color-border-strong: rgba(38, 36, 30, 0.16);
+  --color-border: rgba(16, 16, 18, 0.10);
+  --color-border-strong: rgba(16, 16, 18, 0.20);
 
-  --bg-rgb: 239 233 222;
-  --surface-rgb: 249 246 239;
-  --surface-muted-rgb: 227 218 203;
-  --text-primary-rgb: 38 36 30;
-  --text-secondary-rgb: 86 81 70;
-  --text-tertiary-rgb: 112 103 86;
-  --text-quaternary-rgb: 141 128 98;
-  --accent-rgb: 92 106 73;
-  --clay-rgb: 174 94 61;
+  --bg-rgb: 251 251 249;
+  --surface-rgb: 255 255 255;
+  --surface-muted-rgb: 236 236 232;
+  --text-primary-rgb: 16 16 18;
+  --text-secondary-rgb: 85 86 91;
+  --text-tertiary-rgb: 110 112 117;
+  --text-quaternary-rgb: 110 112 117;
+  --accent-rgb: 196 60 8;
+  --clay-rgb: 196 60 8;
 
-  /* Estados de formulário, reafinados para dentro da paleta. */
-  --success-rgb: 92 106 73;
-  --warning-rgb: 174 122 45;
-  --error-rgb: 154 58 42;
+  --success-rgb: 14 122 74;
+  --warning-rgb: 161 92 0;
+  --error-rgb: 196 42 23;
 
-  --grain-opacity: 0.28;
-  --grain-blend: multiply;
-
-  --ease-forma: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-forma: cubic-bezier(0.2, 0.6, 0.3, 1);
 }
 
 .dark {
-  /* Noite quente, não console. */
-  --color-background: #1B1A15;
-  --color-surface: #24221B;
-  --color-surface-muted: #2E2B22;
+  --color-background: #131315;
+  --color-surface: #1C1D20;
+  --color-surface-muted: #26272B;
 
-  --color-text-primary: #EDE6D7;
-  --color-text-secondary: #A79E8C;
-  --color-text-tertiary: #8C8271;
-  --color-text-quaternary: #72695B;
+  --color-text-primary: #F2F2F0;
+  --color-text-secondary: #A9ABAF;
+  --color-text-tertiary: #8B8E93;  /*  5.7:1 */
+  --color-text-quaternary: #8B8E93;
 
-  --color-accent: #9EAC7D;
-  --color-accent-light: #B9C49B;
-  --color-accent-dark: #7E8C60;
-  --color-clay: #D68A63;
+  --color-accent: #FF8A5C;
+  --color-accent-light: #FFA985;
+  --color-accent-dark: #E2652F;
+  --color-clay: #FF8A5C;
 
-  --color-border: rgba(237, 230, 215, 0.09);
-  --color-border-strong: rgba(237, 230, 215, 0.18);
+  --color-border: rgba(242, 242, 240, 0.12);
+  --color-border-strong: rgba(242, 242, 240, 0.24);
 
-  --bg-rgb: 27 26 21;
-  --surface-rgb: 36 34 27;
-  --surface-muted-rgb: 46 43 34;
-  --text-primary-rgb: 237 230 215;
-  --text-secondary-rgb: 167 158 140;
-  --text-tertiary-rgb: 140 130 113;
-  --text-quaternary-rgb: 114 105 91;
-  --accent-rgb: 158 172 125;
-  --clay-rgb: 214 138 99;
+  --bg-rgb: 19 19 21;
+  --surface-rgb: 28 29 32;
+  --surface-muted-rgb: 38 39 43;
+  --text-primary-rgb: 242 242 240;
+  --text-secondary-rgb: 169 171 175;
+  --text-tertiary-rgb: 139 142 147;
+  --text-quaternary-rgb: 139 142 147;
+  --accent-rgb: 255 138 92;
+  --clay-rgb: 255 138 92;
 
-  --success-rgb: 158 172 125;
-  --warning-rgb: 209 160 84;
-  --error-rgb: 201 108 90;
-
-  --grain-opacity: 0.20;
-  --grain-blend: overlay;
+  --success-rgb: 75 196 137;
+  --warning-rgb: 224 166 60;
+  --error-rgb: 255 122 102;
 }
 
 html {
@@ -89,31 +91,28 @@ body {
   background: var(--color-background);
   color: var(--color-text-primary);
   font-size: 17px;
-  line-height: 1.62;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Textura de verdade: ruído fractal, não gradiente radial. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: var(--grain-opacity);
-  mix-blend-mode: var(--grain-blend);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/*
+ * O grão fractal saiu. Ele era `position:fixed` com `z-index:9999` e
+ * `mix-blend-mode:multiply`, ou seja, ficava por cima de tudo — inclusive da
+ * foto do produto, do drawer do carrinho e dos toasts. Numa loja que vende
+ * objeto colorido, ruído em `multiply` sobre a foto altera a cor que o cliente
+ * pensa que está comprando. A bancada branca também não pede textura.
+ */
 
 ::selection {
   background-color: rgb(var(--accent-rgb));
   color: rgb(var(--bg-rgb));
 }
 
+/* 2px: 1px não alcança 3:1 contra vários fundos da loja. */
 *:focus-visible {
-  outline: 1px solid rgb(var(--accent-rgb));
-  outline-offset: 3px;
-  border-radius: 0;
+  outline: 2px solid rgb(var(--accent-rgb));
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar {
@@ -125,16 +124,15 @@ body::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-text-quaternary);
+  background: var(--color-text-tertiary);
   border: 3px solid var(--color-background);
+  border-radius: 6px;
 }
 
 @layer components {
   /*
    * A régua do handoff: 1360px de largura máxima e recuo de 4vw (16px no
-   * celular, 64px no teto). Não é 1280/64 — a diferença de 93px na coluna de
-   * conteúdo aparece em cada seção da loja e é o que deixava a página inteira
-   * mais estreita que o desenho.
+   * celular, 64px no teto).
    */
   .shell {
     @apply mx-auto w-full max-w-[1360px];
@@ -144,6 +142,14 @@ body::after {
   /* Só o recuo, para as seções que têm largura máxima própria. */
   .gutter {
     padding-inline: clamp(16px, 4vw, 64px);
+  }
+
+  /*
+   * Ritmo vertical entre seções: um valor só. Os `clamp()` avulsos que cada
+   * seção carregava somavam 450px de vazio entre o fim da home e o rodapé.
+   */
+  .section-rhythm {
+    margin-top: clamp(64px, 8vw, 96px);
   }
 
   .nav-link {
@@ -160,7 +166,7 @@ body::after {
     background: currentColor;
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition: transform 250ms var(--ease-forma);
   }
 
   .nav-link:hover::after,
@@ -176,75 +182,114 @@ body::after {
     display: none;
   }
 
-  /* Superfície de papel: chapada, sem gradiente. */
   .paper-surface {
     background: var(--color-surface);
   }
 
-  /* Sombra longa de luz lateral de janela — nunca glow. */
   .light-shadow {
-    box-shadow: 0 30px 60px -20px rgba(60, 45, 30, 0.22);
+    box-shadow: 0 16px 40px -16px rgba(16, 16, 18, 0.3);
   }
 
-  /* Régua fina de seção. */
   .rule {
     @apply border-t border-border-strong;
   }
 
-  /* Etiqueta escrita à mão: a sans do texto, não monoespaçada. */
   .label {
-    @apply text-[0.72rem] font-semibold uppercase tracking-[0.19em];
+    @apply text-[0.75rem] font-semibold uppercase tracking-[0.12em];
+  }
+
+  /* Preço, medida, prazo: a mono alinha as colunas e diz "especificação". */
+  .data {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
   }
 
   /*
-   * Seção sempre escura, independente do tema — hero, processo, CTA e rodapé.
-   * Em vez de espalhar #1B1A15 pelo JSX, redefinimos as variáveis dentro do
-   * bloco: `bg-surface`, `text-secondary` e `border-border-subtle` continuam
-   * valendo lá dentro, só que já lendo a paleta noturna.
+   * Faixa de rolagem horizontal com máscara nas bordas: diz que há mais
+   * conteúdo fora da tela sem precisar de seta.
+   */
+  .edge-fade {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 16px,
+      #000 calc(100% - 16px),
+      transparent 100%
+    );
+  }
+
+  /*
+   * Cor de filamento da categoria. O valor vem do dado (`data/categories.ts`)
+   * por variável inline; a classe só escolhe qual dos dois tons usar, porque
+   * `style` inline não sabe responder a tema.
+   */
+  .cat {
+    color: var(--cat-light);
+  }
+
+  .cat-bg {
+    background-color: var(--cat-light);
+  }
+
+  .cat-rule {
+    border-color: var(--cat-light);
+  }
+
+  .dark .cat,
+  .ink .cat {
+    color: var(--cat-dark);
+  }
+
+  .dark .cat-bg,
+  .ink .cat-bg {
+    background-color: var(--cat-dark);
+  }
+
+  .dark .cat-rule,
+  .ink .cat-rule {
+    border-color: var(--cat-dark);
+  }
+
+  /*
+   * Seção sempre escura, independente do tema — barra de utilidade, sob medida
+   * e rodapé. Em vez de espalhar hex literal pelo JSX, redefinimos as variáveis
+   * dentro do bloco.
    */
   .ink {
-    --color-background: #1B1A15;
-    --color-surface: #24221B;
-    --color-surface-muted: #2E2B22;
+    --color-background: #131315;
+    --color-surface: #1C1D20;
+    --color-surface-muted: #26272B;
 
-    /*
-     * Os degraus de texto no escuro são areia rebaixada — 72%, 55% e 42% de
-     * `#EDE6D7` sobre a tinta — e não os neutros do tema escuro, que puxam
-     * para o amarelo e deixam o texto sujo em cima de foto. Guardamos o
-     * resultado já mesclado porque os utilitários usam `rgb(... / <alpha>)`.
-     */
-    --color-text-primary: #EDE6D7;
-    --color-text-secondary: #B2ADA1;
-    --color-text-tertiary: #8F8A80;
-    --color-text-quaternary: #737066;
+    --color-text-primary: #F2F2F0;
+    --color-text-secondary: #A9ABAF;
+    --color-text-tertiary: #8B8E93;
+    --color-text-quaternary: #8B8E93;
 
-    --color-accent: #9EAC7D;
-    --color-clay: #D68A63;
+    --color-accent: #FF8A5C;
+    --color-clay: #FF8A5C;
 
-    --color-border: rgba(237, 230, 215, 0.14);
-    --color-border-strong: rgba(237, 230, 215, 0.18);
+    --color-border: rgba(242, 242, 240, 0.12);
+    --color-border-strong: rgba(242, 242, 240, 0.24);
 
-    --bg-rgb: 27 26 21;
-    --surface-rgb: 36 34 27;
-    --surface-muted-rgb: 46 43 34;
-    --text-primary-rgb: 237 230 215;
-    --text-secondary-rgb: 178 173 161;
-    --text-tertiary-rgb: 143 138 128;
-    --text-quaternary-rgb: 115 112 102;
-    --accent-rgb: 158 172 125;
-    --clay-rgb: 214 138 99;
+    --bg-rgb: 19 19 21;
+    --surface-rgb: 28 29 32;
+    --surface-muted-rgb: 38 39 43;
+    --text-primary-rgb: 242 242 240;
+    --text-secondary-rgb: 169 171 175;
+    --text-tertiary-rgb: 139 142 147;
+    --text-quaternary-rgb: 139 142 147;
+    --accent-rgb: 255 138 92;
+    --clay-rgb: 255 138 92;
 
     background: var(--color-background);
     color: var(--color-text-primary);
-  }
-
-  /*
-   * Contorno em vez de preenchimento: a segunda linha dos títulos grandes.
-   * Só funciona em corpo bem grande — abaixo de ~32px o traço come a letra.
-   */
-  .type-outline {
-    color: transparent;
-    -webkit-text-stroke: 1px rgb(var(--text-primary-rgb) / 0.62);
   }
 }
 

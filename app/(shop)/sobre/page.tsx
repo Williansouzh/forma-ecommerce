@@ -29,7 +29,7 @@ export default function SobrePage() {
     <main className="gutter mx-auto w-full max-w-[1100px] pb-[clamp(60px,12vh,140px)] pt-[clamp(40px,9vh,120px)]">
       <p className="label text-tertiary">Sobre o ateliê</p>
 
-      <h1 className="mt-5 font-display text-[clamp(32px,5.4vw,72px)] font-light leading-[1.04] tracking-[-0.03em] text-pretty">
+      <h1 className="mt-5 font-display text-display-1 text-pretty">
         Começou com uma impressora na sala e uma lista de espera de amigos.
       </h1>
 
@@ -60,7 +60,7 @@ export default function SobrePage() {
               alt={photo.alt}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover saturate-[0.94]"
+              className="object-cover"
             />
           </div>
         ))}

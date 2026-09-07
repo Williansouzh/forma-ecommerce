@@ -829,7 +829,7 @@ export interface components {
         CreateProductDto: {
             badge?: string;
             /** @enum {string} */
-            category: "decoracao" | "geek" | "presentes" | "utilidades" | "personalizados";
+            category: "decoracao" | "colecionaveis" | "brinquedos" | "jogos" | "presentes" | "personalizados";
             description: string;
             dimensions?: components["schemas"]["DimensionsDto"];
             images: components["schemas"]["ProductImageDto"][];
@@ -978,7 +978,7 @@ export interface components {
         Product: {
             badge?: string;
             /** @enum {string} */
-            category: "decoracao" | "geek" | "presentes" | "utilidades" | "personalizados";
+            category: "decoracao" | "colecionaveis" | "brinquedos" | "jogos" | "presentes" | "personalizados";
             /** Format: date-time */
             createdAt: string;
             description: string;
@@ -1184,7 +1184,7 @@ export interface components {
         UpdateProductDto: {
             badge?: string;
             /** @enum {string} */
-            category?: "decoracao" | "geek" | "presentes" | "utilidades" | "personalizados";
+            category?: "decoracao" | "colecionaveis" | "brinquedos" | "jogos" | "presentes" | "personalizados";
             description?: string;
             dimensions?: components["schemas"]["DimensionsDto"];
             images?: components["schemas"]["ProductImageDto"][];
