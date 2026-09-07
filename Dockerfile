@@ -11,6 +11,13 @@ RUN npm ci --no-audit --no-fund
 FROM base AS builder
 ARG NEXT_PUBLIC_API_URL=http://localhost:4000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Precisa ser ARG, e não variável de runtime: dela saem o `img-src` da CSP e o
+# `images.remotePatterns`, e os dois são resolvidos DURANTE o `next build`.
+# Definida só no ambiente do contêiner, não teria efeito nenhum — e o sintoma
+# seria a foto sumir da vitrine sem erro em lugar nenhum.
+# Vazio é válido: a loja segue servindo as imagens de /public.
+ARG NEXT_PUBLIC_IMAGE_BASE_URL=
+ENV NEXT_PUBLIC_IMAGE_BASE_URL=$NEXT_PUBLIC_IMAGE_BASE_URL
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

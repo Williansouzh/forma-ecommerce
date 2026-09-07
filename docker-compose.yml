@@ -37,6 +37,10 @@ services:
       context: .
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+        # Domínio de leitura do bucket das imagens. É ARG porque a CSP e o
+        # `remotePatterns` do Next são resolvidos no build — mudar só o
+        # ambiente e reiniciar não muda nada. Trocou o domínio, refaça o build.
+        NEXT_PUBLIC_IMAGE_BASE_URL: ${NEXT_PUBLIC_IMAGE_BASE_URL:-}
     image: forma-ecommerce
     container_name: forma-ecommerce
     environment:

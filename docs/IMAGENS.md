@@ -65,8 +65,14 @@ inexistente: 404 significa credencial boa, 403 significa recusada.
 ### 4. Build da loja
 
 ```bash
-NEXT_PUBLIC_IMAGE_BASE_URL=https://img.seudominio.com
+NEXT_PUBLIC_IMAGE_BASE_URL=https://img.seudominio.com docker compose build web
+docker compose up -d web
 ```
+
+> **`build`, não só `up`.** A variável é `ARG` do Dockerfile e chega pelo
+> `docker-compose.yml` como argumento de build. Defini-la só no ambiente do
+> contêiner não tem efeito nenhum — e o sintoma seria a foto sumir da vitrine
+> sem erro em lugar nenhum. Trocou o domínio? Refaça o build.
 
 **Tem de ser o mesmo valor do painel.** Dele saem duas coisas que só existem
 em tempo de build, e as duas falham em silêncio quando faltam:
