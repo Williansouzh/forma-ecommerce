@@ -221,7 +221,7 @@ export function ProductDrawer({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
-            className="relative flex h-full w-[min(100%,520px)] flex-col border-l border-border-strong bg-background"
+            className="relative flex h-full w-[min(100%,680px)] flex-col border-l border-border-strong bg-background"
           >
             <header className="flex items-center justify-between gap-3 border-b border-border-strong px-[22px] py-[18px]">
               <div className="min-w-0">

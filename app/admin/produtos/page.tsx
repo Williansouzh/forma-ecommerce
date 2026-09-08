@@ -129,7 +129,155 @@ export default function AdminProductsPage() {
         </p>
       )}
 
-      <div className="border border-border-subtle bg-surface">
+      {/*
+        Duas telas para o mesmo dado, não uma tabela com rolagem forçada. No
+        celular, a listagem principal do painel precisa caber sem exigir
+        arrastar os dedos para o lado só para ver o preço — por isso os
+        cartões abaixo (md:hidden) e a tabela (hidden md:block) mostram os
+        MESMOS campos e chamam os MESMOS handlers; só o arranjo muda.
+      */}
+      <div className="flex flex-col gap-2.5 md:hidden">
+        {loading ? (
+          <p className="px-4 py-16 text-center text-body-small text-tertiary">
+            Carregando produtos…
+          </p>
+        ) : rows.length === 0 ? (
+          <p className="px-4 py-16 text-center text-body-small text-tertiary">
+            {products.length === 0
+              ? "Nenhum produto cadastrado ainda. Toque em “Novo produto”."
+              : "Nenhuma peça com esses filtros."}
+          </p>
+        ) : (
+          rows.map((product) => (
+            <div
+              key={product.id}
+              className={cn(
+                "border border-border-subtle bg-surface p-3.5 transition-opacity",
+                busy === product.id && "opacity-60"
+              )}
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="relative size-12 shrink-0 overflow-hidden bg-surface-muted">
+                  {product.images[0]?.url && (
+                    <Image
+                      src={product.images[0].url}
+                      alt=""
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold">{product.name}</div>
+                  <div className="truncate text-[12.5px] text-quaternary">
+                    {CATEGORIES.find((item) => item.slug === product.category)
+                      ?.name ?? product.category}{" "}
+                    · /{product.slug}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openEdit(product)}
+                  className="shrink-0 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-accent transition-colors hover:text-clay"
+                >
+                  Editar
+                </button>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2.5">
+                <label className="text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">
+                  Preço
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-[13px] text-quaternary">R$</span>
+                    <input
+                      key={`price-m-${product.id}-${product.price}`}
+                      type="text"
+                      inputMode="decimal"
+                      aria-label={`Preço de ${product.name}`}
+                      defaultValue={centsToInput(product.price)}
+                      onBlur={(event) => {
+                        const cents = parsePriceToCents(event.target.value);
+                        if (cents === product.price) return;
+                        void commit(
+                          product,
+                          { price: cents },
+                          `${product.name}: preço atualizado`
+                        );
+                      }}
+                      className={cellInputClass}
+                    />
+                  </div>
+                </label>
+
+                <label className="text-[11px] font-semibold uppercase tracking-[0.1em] text-tertiary">
+                  Estoque
+                  <input
+                    key={`stock-m-${product.id}-${product.stock ?? ""}`}
+                    type="number"
+                    min={0}
+                    aria-label={`Estoque de ${product.name}`}
+                    defaultValue={product.stock ?? ""}
+                    onBlur={(event) => {
+                      const raw = event.target.value.trim();
+                      if (raw === "") {
+                        event.target.value = String(product.stock ?? "");
+                        return;
+                      }
+                      const stock = Number(raw);
+                      if (stock === product.stock) return;
+                      void commit(
+                        product,
+                        { stock },
+                        `${product.name}: estoque atualizado`
+                      );
+                    }}
+                    className={cn(cellInputClass, "mt-1")}
+                  />
+                </label>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2.5">
+                <span className="text-[13px] tabular-nums text-secondary">
+                  {product.productionTime != null
+                    ? `Pronto em ${product.productionTime} dias`
+                    : "Sem prazo definido"}
+                </span>
+                <button
+                  type="button"
+                  aria-pressed={product.isAvailable}
+                  onClick={() =>
+                    void commit(
+                      product,
+                      { isAvailable: !product.isAvailable },
+                      product.isAvailable
+                        ? `${product.name} saiu da loja`
+                        : `${product.name} publicado`
+                    )
+                  }
+                  className={cn(
+                    "inline-flex min-h-[34px] shrink-0 items-center gap-2 rounded-md border px-2.5 text-[12.5px] transition-colors hover:border-accent",
+                    product.isAvailable
+                      ? "border-primary bg-surface-muted"
+                      : "border-border-strong bg-transparent"
+                  )}
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      product.isAvailable ? "bg-accent" : "bg-clay"
+                    )}
+                  />
+                  {product.isAvailable ? "Publicado" : "Oculto"}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="hidden border border-border-subtle bg-surface md:block">
         <div className="overflow-x-auto">
           <div className="min-w-[720px]">
             <div className="flex gap-3 border-b border-border-strong px-4 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-tertiary">
