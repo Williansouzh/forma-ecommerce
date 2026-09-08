@@ -22,7 +22,7 @@ const chipClass = (active: boolean) =>
   );
 
 const cellInputClass =
-  "min-h-[38px] w-full rounded-md border border-strong bg-surface px-2.5 text-body-small tabular-nums outline-none transition-colors focus:border-accent";
+  "min-h-[38px] w-full rounded-md border border-strong bg-surface px-2.5 text-[16px] tabular-nums outline-none transition-colors focus:border-accent";
 
 export default function AdminProductsPage() {
   const { products, loading, error, refresh, patchProduct } = useAdminData();
@@ -116,7 +116,7 @@ export default function AdminProductsPage() {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Buscar produto…"
           aria-label="Buscar produto"
-          className="ml-auto min-h-[38px] max-w-[240px] rounded-md border border-strong bg-surface px-3 text-body-small outline-none transition-colors focus:border-accent"
+          className="ml-auto min-h-[38px] max-w-[240px] rounded-md border border-strong bg-surface px-3 text-[16px] outline-none transition-colors focus:border-accent"
         />
       </div>
 

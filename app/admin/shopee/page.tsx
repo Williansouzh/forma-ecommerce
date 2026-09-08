@@ -38,11 +38,9 @@ import type {
   ShopeeReconciliationReport,
   ShopeeSuggestion,
 } from "@/types/shopee";
+import { fieldClass, labelClass } from "@/components/admin/field";
+import { TableScroller } from "@/components/admin/table-scroller";
 
-const labelClass =
-  "block text-[12px] font-semibold uppercase tracking-[0.12em] text-tertiary";
-const fieldClass =
-  "mt-1.5 min-h-[42px] w-full rounded-md border border-strong bg-surface px-3 text-body-small font-normal normal-case tracking-normal outline-none transition-colors focus:border-accent";
 const sectionClass =
   "mt-5 border border-border-subtle bg-surface p-[18px] sm:p-6 lg:p-[30px]";
 const buttonClass =
@@ -623,7 +621,7 @@ function ReconciliationReport({
           Nenhuma divergência: a Shopee tem exatamente o que o sistema calculou.
         </p>
       ) : (
-        <div className="mt-4 overflow-x-auto">
+        <TableScroller className="mt-4">
           <table className="w-full min-w-[560px] text-left text-[13.5px]">
             <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
               <tr>
@@ -654,7 +652,7 @@ function ReconciliationReport({
               ))}
             </tbody>
           </table>
-        </div>
+        </TableScroller>
       )}
       <p className="mt-3 text-[12px] text-tertiary">
         Correlation ID: <code>{report.correlationId}</code>
@@ -726,7 +724,7 @@ function ProductsPanel({
             abaixo.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <TableScroller className="mt-5">
             <table className="w-full min-w-[840px] text-left text-[13.5px]">
               <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
                 <tr>
@@ -797,7 +795,7 @@ function ProductsPanel({
                             "Margem de segurança atualizada"
                           ).then(onReload);
                         }}
-                        className="min-h-[36px] w-[72px] rounded-md border border-strong bg-surface px-2 text-[13.5px] tabular-nums outline-none focus:border-accent"
+                        className="min-h-[38px] w-[84px] rounded-md border border-strong bg-surface px-2 text-[16px] tabular-nums outline-none focus:border-accent"
                       />
                     </td>
                     <td className="py-2.5 pr-3 tabular-nums">
@@ -904,7 +902,7 @@ function ProductsPanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroller>
         )}
       </section>
 
@@ -993,37 +991,42 @@ function UnlinkedListings({
   }
 
   return (
-    <div className="mt-4 overflow-x-auto">
-      <table className="w-full min-w-[520px] text-left text-[13.5px]">
-        <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
-          <tr>
-            <th className="pb-2 pr-3 font-semibold">Anúncio</th>
-            <th className="pb-2 pr-3 font-semibold">Nome na Shopee</th>
-            <th className="pb-2 pr-3 font-semibold">SKU</th>
-            <th className="pb-2 font-semibold">Estoque lá</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((listing) => (
-            <tr
-              key={`${listing.itemId}-${listing.modelId}`}
-              className="border-t border-border-subtle"
-            >
-              <td className="py-2 pr-3 tabular-nums">
-                {listing.itemId}/{listing.modelId}
-              </td>
-              <td className="py-2 pr-3">{listing.name}</td>
-              <td className="py-2 pr-3">{listing.sku || "—"}</td>
-              <td className="py-2 tabular-nums">{listing.stock ?? "—"}</td>
+    <>
+      <TableScroller className="mt-4">
+        <table className="w-full min-w-[520px] text-left text-[13.5px]">
+          <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
+            <tr>
+              <th className="pb-2 pr-3 font-semibold">Anúncio</th>
+              <th className="pb-2 pr-3 font-semibold">Nome na Shopee</th>
+              <th className="pb-2 pr-3 font-semibold">SKU</th>
+              <th className="pb-2 font-semibold">Estoque lá</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((listing) => (
+              <tr
+                key={`${listing.itemId}-${listing.modelId}`}
+                className="border-t border-border-subtle"
+              >
+                <td className="py-2 pr-3 tabular-nums">
+                  {listing.itemId}/{listing.modelId}
+                </td>
+                <td className="py-2 pr-3">{listing.name}</td>
+                <td className="py-2 pr-3">{listing.sku || "—"}</td>
+                <td className="py-2 tabular-nums">{listing.stock ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableScroller>
+      {/* A explicação fica FORA do scroller: dentro dele o parágrafo
+          esticava até os 520px da tabela e o esmaecido de borda comia
+          as pontas dele. */}
       <p className="mt-3 text-[13px] text-tertiary">
         Anúncio sem associação não recebe saldo, e um pedido dele entra no painel
         marcado — sem mexer em estoque nenhum.
       </p>
-    </div>
+    </>
   );
 }
 
@@ -1064,7 +1067,7 @@ function OrdersPanel({
             Nenhum pedido da Shopee importado ainda.
           </p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <TableScroller className="mt-5">
             <table className="w-full min-w-[640px] text-left text-[13.5px]">
               <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
                 <tr>
@@ -1096,7 +1099,7 @@ function OrdersPanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroller>
         )}
       </section>
 
@@ -1110,7 +1113,7 @@ function OrdersPanel({
         {events.length === 0 ? (
           <p className="mt-5 text-body-small text-tertiary">Nenhum evento ainda.</p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <TableScroller className="mt-5">
             <table className="w-full min-w-[680px] text-left text-[13.5px]">
               <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
                 <tr>
@@ -1147,7 +1150,7 @@ function OrdersPanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroller>
         )}
       </section>
     </>
@@ -1251,7 +1254,7 @@ function QueuePanel({
         {queue.length === 0 ? (
           <p className="mt-5 text-body-small text-tertiary">Fila vazia.</p>
         ) : (
-          <div className="mt-5 overflow-x-auto">
+          <TableScroller className="mt-5">
             <table className="w-full min-w-[780px] text-left text-[13.5px]">
               <thead className="text-[11.5px] uppercase tracking-[0.1em] text-tertiary">
                 <tr>
@@ -1310,7 +1313,7 @@ function QueuePanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroller>
         )}
       </section>
     </>

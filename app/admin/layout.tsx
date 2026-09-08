@@ -11,7 +11,7 @@ export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen bg-background text-primary">
+    <div className="min-h-dvh bg-background text-primary">
       <AdminShell>{children}</AdminShell>
     </div>
   );

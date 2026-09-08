@@ -20,7 +20,10 @@ export function KpiCard({ label, value, note, tone = "neutral" }: KpiCardProps) 
   return (
     <div className="border border-border-subtle bg-surface p-[18px]">
       <div className="text-caption uppercase text-tertiary">{label}</div>
-      <div className="mt-2.5 font-display text-[34px] font-light leading-none tracking-[-0.02em] tabular-nums">
+      {/* Fluido, não fixo: "A receber" é um preço, e `R$ 22.951,05` a 34px
+          mede ~245px — mais que os ~222px do cartão quando a grade abre duas
+          colunas por volta de 480px. */}
+      <div className="mt-2.5 break-words font-display text-[clamp(26px,5vw,34px)] font-light leading-none tracking-[-0.02em] tabular-nums">
         {value}
       </div>
       {note && (

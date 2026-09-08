@@ -17,11 +17,8 @@ import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
 import type { MediaStatus } from "@/types/media";
 import type { HomeImage, HomeMedia, LookbookImage } from "@/types/settings";
+import { fieldClass, labelClass } from "@/components/admin/field";
 
-const labelClass =
-  "block text-[12px] font-semibold uppercase tracking-[0.12em] text-tertiary";
-const fieldClass =
-  "mt-1.5 min-h-[42px] w-full rounded-md border border-strong bg-surface px-3 text-body-small font-normal normal-case tracking-normal outline-none transition-colors focus:border-accent";
 const sectionClass =
   "mt-5 border border-border-subtle bg-surface p-[18px] sm:p-6 lg:p-[30px]";
 

@@ -253,14 +253,14 @@ export function ProductForm({ product }: ProductFormProps) {
                 placeholder="/images/products/…"
                 value={image.url}
                 onChange={(e) => updateImage(index, { url: e.target.value })}
-                className={`${inputClass} mt-0 flex-1`}
+                className={`${inputClass} mt-0 min-w-0 flex-1`}
               />
               <input
                 aria-label={`Texto alternativo da imagem ${index + 1}`}
                 placeholder="Descrição da imagem"
                 value={image.alt}
                 onChange={(e) => updateImage(index, { alt: e.target.value })}
-                className={`${inputClass} mt-0 flex-1`}
+                className={`${inputClass} mt-0 min-w-0 flex-1`}
               />
               <button
                 type="button"

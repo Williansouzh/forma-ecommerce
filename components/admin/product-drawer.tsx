@@ -24,6 +24,7 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types/product";
+import { fieldClass, labelClass } from "@/components/admin/field";
 
 const MAX_IMAGES = 6;
 
@@ -70,10 +71,6 @@ function toDraft(product?: Product): DraftState {
   };
 }
 
-const labelClass =
-  "block text-[12px] font-semibold uppercase tracking-[0.12em] text-tertiary";
-const fieldClass =
-  "mt-1.5 min-h-[42px] w-full rounded-md border border-strong bg-surface px-3 text-body-small font-normal normal-case tracking-normal outline-none transition-colors focus:border-accent";
 
 interface ProductDrawerProps {
   /** `null` fecha; `undefined` como produto abre em modo "Nova peça". */
@@ -111,11 +108,17 @@ export function ProductDrawer({
 
   useEffect(() => {
     if (!open) return;
+    // Mesmo padrão da gaveta do menu e do overlay de busca: com o drawer
+    // aberto, a listagem de trás não rola junto.
+    document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
   }, [open, onClose]);
 
   const set = <K extends keyof DraftState>(key: K, value: DraftState[K]) =>
@@ -221,7 +224,11 @@ export function ProductDrawer({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
-            className="relative flex h-full w-[min(100%,680px)] flex-col border-l border-border-strong bg-background"
+            /* `h-dvh` e não `h-full`: com a barra de endereço do celular na
+               tela, `100%` do contêiner fixo passava do que dá para ver e o
+               rodapé com "Salvar peça" ficava embaixo dela. O drawer do
+               carrinho da loja já usava `dvh`; só este tinha ficado para trás. */
+            className="relative flex h-dvh w-[min(100%,680px)] flex-col border-l border-border-strong bg-background"
           >
             <header className="flex items-center justify-between gap-3 border-b border-border-strong px-[22px] py-[18px]">
               <div className="min-w-0">
@@ -244,7 +251,7 @@ export function ProductDrawer({
 
             <div className="flex-1 overflow-y-auto p-[22px]">
               <div className="flex gap-3">
-                <div className="relative h-[120px] w-24 shrink-0 overflow-hidden bg-surface-muted">
+                <div className="relative h-[100px] w-20 shrink-0 overflow-hidden bg-surface-muted sm:h-[120px] sm:w-24">
                   {cover && (
                     <Image
                       src={cover}
@@ -274,71 +281,101 @@ export function ProductDrawer({
                 </div>
               </div>
 
+              {/*
+                No celular cada foto é um bloco em coluna; a partir de `sm` a
+                linha horizontal volta inteira.
+
+                Os quatro controles numa linha só não cabiam: enviar (98px) e
+                lixeira (42px) não encolhem, então os dois campos dividiam os
+                142px restantes de uma gaveta de 306px — 47px de área de texto
+                cada, ou cerca de cinco caracteres. Conferir ou colar um
+                caminho de imagem pelo celular era impossível, que é
+                justamente a tarefa desta tela.
+
+                A página cheia (`product-form.tsx`) já resolvia assim; era só
+                a gaveta que tinha ficado para trás.
+              */}
               {draft.images.length > 0 && (
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-3 sm:space-y-2">
                   {draft.images.map((image, index) => (
-                    <div key={index} className="flex gap-2">
-                      <ImageUploadButton
-                        media={media}
-                        size="compact"
-                        disabled={saving}
-                        label={`Enviar arquivo para a foto ${index + 1}`}
-                        onError={setError}
-                        onUploaded={(url) => {
-                          setError(null);
-                          set(
-                            "images",
-                            draft.images.map((row, i) =>
-                              i === index ? { ...row, url } : row
+                    <div
+                      key={index}
+                      className="rounded-md border border-border-subtle p-2.5 sm:border-0 sm:p-0"
+                    >
+                      <div className="label mb-2 text-tertiary sm:hidden">
+                        Foto {index + 1}
+                      </div>
+
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        {/* `sm:contents` dissolve este agrupamento na largura
+                            maior: o enviar e a lixeira viram itens diretos da
+                            linha, e a lixeira vai para o fim por `order-last`. */}
+                        <div className="flex gap-2 sm:contents">
+                          <ImageUploadButton
+                            media={media}
+                            size="compact"
+                            disabled={saving}
+                            label={`Enviar arquivo para a foto ${index + 1}`}
+                            className="flex-1 justify-center sm:flex-none sm:justify-start"
+                            onError={setError}
+                            onUploaded={(url) => {
+                              setError(null);
+                              set(
+                                "images",
+                                draft.images.map((row, i) =>
+                                  i === index ? { ...row, url } : row
+                                )
+                              );
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              set(
+                                "images",
+                                draft.images.filter((_, i) => i !== index)
+                              )
+                            }
+                            aria-label={`Remover foto ${index + 1}`}
+                            className="flex size-[42px] shrink-0 items-center justify-center rounded-md border border-strong text-secondary transition-colors hover:border-error hover:text-error sm:order-last"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+
+                        <input
+                          aria-label={`URL da foto ${index + 1}`}
+                          placeholder="/images/products/…"
+                          value={image.url}
+                          onChange={(event) =>
+                            set(
+                              "images",
+                              draft.images.map((row, i) =>
+                                i === index
+                                  ? { ...row, url: event.target.value }
+                                  : row
+                              )
                             )
-                          );
-                        }}
-                      />
-                      <input
-                        aria-label={`URL da foto ${index + 1}`}
-                        placeholder="/images/products/…"
-                        value={image.url}
-                        onChange={(event) =>
-                          set(
-                            "images",
-                            draft.images.map((row, i) =>
-                              i === index
-                                ? { ...row, url: event.target.value }
-                                : row
+                          }
+                          className={cn(fieldClass, "mt-0 min-w-0 sm:flex-1")}
+                        />
+                        <input
+                          aria-label={`Descrição da foto ${index + 1}`}
+                          placeholder="Texto alternativo"
+                          value={image.alt}
+                          onChange={(event) =>
+                            set(
+                              "images",
+                              draft.images.map((row, i) =>
+                                i === index
+                                  ? { ...row, alt: event.target.value }
+                                  : row
+                              )
                             )
-                          )
-                        }
-                        className={cn(fieldClass, "mt-0 flex-1")}
-                      />
-                      <input
-                        aria-label={`Descrição da foto ${index + 1}`}
-                        placeholder="Texto alternativo"
-                        value={image.alt}
-                        onChange={(event) =>
-                          set(
-                            "images",
-                            draft.images.map((row, i) =>
-                              i === index
-                                ? { ...row, alt: event.target.value }
-                                : row
-                            )
-                          )
-                        }
-                        className={cn(fieldClass, "mt-0 flex-1")}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          set(
-                            "images",
-                            draft.images.filter((_, i) => i !== index)
-                          )
-                        }
-                        aria-label={`Remover foto ${index + 1}`}
-                        className="flex size-[42px] shrink-0 items-center justify-center rounded-md border border-strong text-secondary transition-colors hover:border-error hover:text-error"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                          }
+                          className={cn(fieldClass, "mt-0 min-w-0 sm:flex-1")}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -551,7 +588,9 @@ export function ProductDrawer({
               )}
             </div>
 
-            <footer className="flex gap-2.5 border-t border-border-strong bg-surface px-[22px] py-4">
+            {/* O recuo inferior acompanha a barra de gestos do iPhone: sem
+                ele, "Salvar peça" ficava metade embaixo dela. */}
+            <footer className="flex shrink-0 gap-2.5 border-t border-border-strong bg-surface px-[22px] pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
               <button
                 type="button"
                 onClick={save}
@@ -563,7 +602,7 @@ export function ProductDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-[50px] rounded-md border border-border-strong px-[18px] font-medium transition-colors hover:border-primary"
+                className="min-h-[50px] shrink-0 rounded-md border border-border-strong px-[18px] font-medium transition-colors hover:border-primary"
               >
                 Cancelar
               </button>
