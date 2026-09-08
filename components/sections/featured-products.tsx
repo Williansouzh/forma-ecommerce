@@ -40,7 +40,15 @@ export async function FeaturedProducts() {
         }}
       />
 
-      <div className="mt-8 grid grid-cols-2 gap-x-[clamp(16px,3vw,40px)] gap-y-10 md:grid-cols-12">
+      {/*
+        Uma coluna no celular.
+
+        A variante `editorial` usa `text-heading-1` — 22px no celular — e uma
+        descrição curta. Em duas colunas de 156px isso virava três palavras por
+        linha, com o nome ocupando quatro linhas. O desencontro 7+5 só existe a
+        partir de `md`; abaixo disso a grade não estava ganhando nada em troca.
+      */}
+      <div className="mt-8 grid grid-cols-1 gap-x-[clamp(16px,3vw,40px)] gap-y-10 sm:grid-cols-2 md:grid-cols-12">
         {featured.map((product, index) => (
           <div key={product.id} className={SLOTS[index % SLOTS.length]}>
             <ProductCard product={product} variant="editorial" />

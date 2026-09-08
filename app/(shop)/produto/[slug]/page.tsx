@@ -99,14 +99,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         src={photo.url}
                         alt={photo.alt}
                         fill
-                        sizes="(max-width: 640px) 100vw, 260px"
+                        sizes="(max-width: 470px) 100vw, (max-width: 1024px) 50vw, 260px"
                         className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover:scale-105"
                       />
                     )}
                   </div>
-                  <div className="mt-3 flex justify-between gap-2.5">
-                    <span className="font-display text-[17px]">{item.name}</span>
-                    <span className="text-[14px] font-semibold tabular-nums">
+                  <div className="mt-3 flex min-w-0 flex-col gap-y-0.5 sm:flex-row sm:justify-between sm:gap-x-2.5">
+                    <span className="min-w-0 break-words font-display text-[17px]">
+                      {item.name}
+                    </span>
+                    <span className="shrink-0 whitespace-nowrap text-[14px] font-semibold tabular-nums">
                       {formatPrice(item.price)}
                     </span>
                   </div>

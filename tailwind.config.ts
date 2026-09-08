@@ -106,6 +106,10 @@ const config: Config = {
         xl: "0 16px 40px -16px rgba(16,16,18,0.30)",
       },
       spacing: {
+        // `h-13` era usado em quatro botões de "finalizar compra" e não existia
+        // na escala: as classes saíam do build em silêncio e a altura vinha só
+        // do `py-3.5`. 52px também é o piso de alvo de toque com folga.
+        13: "3.25rem",
         120: "30rem",
       },
       keyframes: {

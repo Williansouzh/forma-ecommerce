@@ -28,7 +28,7 @@ function CategoryBlock({ category }: { category: Category }) {
           "--cat-dark": category.color.dark,
         } as React.CSSProperties
       }
-      className="group flex flex-col"
+      className="group flex min-w-0 flex-col"
     >
       <span aria-hidden className="cat-bg h-[3px] w-full" />
 
@@ -42,12 +42,19 @@ function CategoryBlock({ category }: { category: Category }) {
         />
       </div>
 
-      {/* `min-h` alinha a contagem entre nomes de uma e de duas linhas. */}
-      <div className="mt-3 flex min-h-12 items-baseline justify-between gap-3">
-        <h3 className="font-display text-heading-3 transition-colors duration-200 group-hover:text-accent">
+      {/*
+        Mesma correção do card de produto: no celular o nome fica em cima e a
+        contagem embaixo.
+
+        "Brinquedos e colecionáveis" mede ~130px só na maior palavra; somada à
+        contagem em `whitespace-nowrap` e ao vão, a linha pedia 189px numa
+        coluna de 156px — e o excedente ia escrito por cima do bloco vizinho.
+      */}
+      <div className="mt-3 flex min-w-0 flex-col gap-y-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-3">
+        <h3 className="min-w-0 break-words font-display text-heading-3 transition-colors duration-200 group-hover:text-accent">
           {category.name}
         </h3>
-        <span className="data whitespace-nowrap text-[13px] text-tertiary">
+        <span className="data shrink-0 whitespace-nowrap text-[13px] text-tertiary">
           {/* Sob medida não tem catálogo fechado: contar peças ali mentiria. */}
           {isCustom
             ? "sob encomenda"
