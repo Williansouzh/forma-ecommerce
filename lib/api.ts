@@ -89,18 +89,24 @@ export async function fetchProducts(
   if (filters.featured) params.set("featured", "1");
   if (filters.limit) params.set("limit", String(filters.limit));
   const query = params.toString();
-  // Com a API fora, seguimos só com o catálogo local: a mesclagem e os filtros
-  // abaixo já sabem lidar com uma lista remota vazia.
+  // O catálogo local só entra quando a API FALHA DE VERDADE — rede fora,
+  // servidor fora do ar. Não é complemento permanente: com a API respondendo,
+  // o que ela devolve é o catálogo inteiro, mesmo que seja um produto só ou
+  // nenhum. A versão anterior misturava PRODUCTS sempre que um slug de
+  // demonstração não existisse no banco real, e um produto de demonstração
+  // só saía de circulação no dia em que alguém criasse, no painel, um produto
+  // de verdade com o MESMO slug — na prática, nunca. A loja em produção
+  // seguiu mostrando nove peças de mentira ao lado da única peça real.
   let rows: ApiProduct[] = [];
+  let apiRespondeu = false;
   try {
     rows = await request<ApiProduct[]>(`/products${query ? `?${query}` : ""}`);
+    apiRespondeu = true;
   } catch {
     rows = [];
   }
   const mapped = rows.map(mapProduct);
-  const existingSlugs = new Set(mapped.map((product) => product.slug));
-  const localOnly = PRODUCTS.filter((product) => !existingSlugs.has(product.slug));
-  let result = [...mapped, ...localOnly];
+  let result = apiRespondeu ? mapped : [...mapped, ...PRODUCTS];
 
   if (filters.category) {
     result = result.filter((product) => product.category === filters.category);
