@@ -16,7 +16,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminDataProvider>
-      <div className="flex min-h-screen flex-wrap items-stretch">
+      <div className="flex min-h-dvh flex-wrap items-stretch">
         <AdminNav />
         <main className="min-w-0 flex-1 basis-[520px] px-4 pb-20 pt-5 sm:px-8 md:px-11 md:pt-10">
           {children}

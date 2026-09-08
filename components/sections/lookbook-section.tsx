@@ -23,9 +23,11 @@ function Figure({ photo }: { photo: LookbookImage }) {
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.2,0.6,0.3,1)] group-hover/photo:scale-[1.03]"
         />
       </div>
+      {/* Cômodo e bairro vêm do painel, sem limite de tamanho: sem `min-w-0`
+          um texto longo empurrava o outro para fora da foto. */}
       <figcaption className="mt-3 flex justify-between gap-3 text-[13px] text-tertiary">
-        <span>{photo.room}</span>
-        <span>{photo.place}</span>
+        <span className="min-w-0 truncate">{photo.room}</span>
+        <span className="min-w-0 shrink-0 truncate">{photo.place}</span>
       </figcaption>
     </figure>
   );

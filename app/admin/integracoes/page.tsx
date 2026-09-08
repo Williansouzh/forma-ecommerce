@@ -10,11 +10,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
 import type { Integration, IntegrationKey } from "@/types/integration";
+import { fieldClass, labelClass } from "@/components/admin/field";
 
-const labelClass =
-  "block text-[12px] font-semibold uppercase tracking-[0.12em] text-tertiary";
-const fieldClass =
-  "mt-1.5 min-h-[42px] w-full rounded-md border border-strong bg-surface px-3 text-body-small font-normal normal-case tracking-normal outline-none transition-colors focus:border-accent";
 
 function Tag({ on, small }: { on: boolean; small?: boolean }) {
   return (

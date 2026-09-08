@@ -72,11 +72,31 @@ export default function CheckoutPage() {
             </a>
           )}
 
-          <ol className="mt-12 flex items-start justify-between gap-2 text-left" aria-label="Acompanhamento do pedido">
+          {/*
+            Duas colunas no celular. Em fileira de quatro, cada etapa ficava
+            com ~66px e "Pagamento aprovado" — 12px em caixa alta com 0,14em
+            de entreletra — pede mais que isso só na primeira palavra.
+
+            Os fios entre as bolinhas só existem a partir de `sm`, onde a
+            fileira é de fato uma linha. Eles nunca chegaram a aparecer: os
+            `first:hidden`/`last:hidden` valiam sobre a posição do fio dentro
+            do próprio item — e ali ele é sempre o primeiro e sempre o último
+            —, então os dois sumiam em todas as etapas. Agora quem decide é o
+            índice, que é o que a regra queria dizer.
+          */}
+          <ol
+            className="mt-12 grid grid-cols-2 gap-x-4 gap-y-7 text-left sm:flex sm:items-start sm:justify-between sm:gap-2"
+            aria-label="Acompanhamento do pedido"
+          >
             {pipeline.map((stage, index) => (
-              <li key={stage} className="flex flex-1 flex-col items-center gap-2 text-center">
-                <span className="flex items-center w-full">
-                  <span className="h-px flex-1 bg-border-subtle first:hidden" />
+              <li
+                key={stage}
+                className="flex flex-col items-center gap-2 text-center sm:flex-1"
+              >
+                <span className="flex w-full items-center justify-center">
+                  {index > 0 && (
+                    <span className="hidden h-px flex-1 bg-border-subtle sm:block" />
+                  )}
                   <span
                     className={
                       index === 0
@@ -86,7 +106,9 @@ export default function CheckoutPage() {
                   >
                     {index + 1}
                   </span>
-                  <span className="h-px flex-1 bg-border-subtle last:hidden" />
+                  {index < pipeline.length - 1 && (
+                    <span className="hidden h-px flex-1 bg-border-subtle sm:block" />
+                  )}
                 </span>
                 <span className="text-micro uppercase leading-tight text-secondary">
                   {stage}
@@ -195,7 +217,17 @@ export default function CheckoutPage() {
         Fechar pedido
       </h1>
 
+      {/*
+        O resumo vem primeiro no DOM porque é o que precisa aparecer primeiro
+        no celular — recolhido, com a contagem e o total. No desktop ele volta
+        para a direita por `lg:order-last`, dentro do próprio componente.
+      */}
       <div className="flex flex-wrap items-start gap-[clamp(28px,5vw,70px)]">
+        <OrderSummary
+          items={items}
+          totals={totals}
+          pixDiscount={payment === "pix" ? PIX_DISCOUNT : 0}
+        />
         <CheckoutForm
           items={items}
           paymentMethod={payment}
@@ -204,11 +236,6 @@ export default function CheckoutPage() {
           total={payableTotal(totals, payment === "pix" ? PIX_DISCOUNT : 0)}
           submitting={submitting}
           submitError={submitError}
-        />
-        <OrderSummary
-          items={items}
-          totals={totals}
-          pixDiscount={payment === "pix" ? PIX_DISCOUNT : 0}
         />
       </div>
     </div>

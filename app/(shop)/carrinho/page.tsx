@@ -111,7 +111,7 @@ export default function CartPage() {
                         {formatPrice(item.price)} / unidade
                       </p>
                     </div>
-                    <div className="flex items-center justify-between gap-6 sm:justify-end">
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 sm:flex-nowrap sm:justify-end sm:gap-x-6">
                       <div className="inline-flex h-11 items-center border border-primary">
                         <button
                           type="button"
@@ -145,7 +145,10 @@ export default function CartPage() {
                           +
                         </button>
                       </div>
-                      <p className="w-24 text-right font-medium tabular-nums">
+                      {/* `w-24` eram 96px fixos para um número que, em peça de
+                          cinco dígitos, mede 122px — e transbordava a coluna
+                          entre 640 e 768px, onde a linha fica mais apertada. */}
+                      <p className="ml-auto shrink-0 whitespace-nowrap text-right font-medium tabular-nums sm:ml-0 sm:min-w-24">
                         {formatPrice(item.price * item.quantity)}
                       </p>
                       <button
@@ -223,7 +226,7 @@ export default function CartPage() {
               <h2 id="rec-titulo" className="font-display text-heading-2 tracking-tight">
                 Combina com o seu pedido
               </h2>
-              <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-6">
                 {suggestions.map((product) => (
                   <ProductCard key={product.id} product={product} variant="grid" />
                 ))}

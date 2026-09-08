@@ -172,12 +172,12 @@ export default function AdminOrdersPage() {
 
       <div className="hidden border border-border-subtle bg-surface md:block">
         <div className="overflow-x-auto">
-          <div className="min-w-[760px]">
+          <div className="min-w-[790px]">
             <div className="flex gap-3 border-b border-border-strong px-4 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-tertiary">
               <span className="w-[104px] shrink-0">Pedido</span>
               <span className="flex-1">Cliente</span>
               <span className="w-[110px] shrink-0">Total</span>
-              <span className="w-[170px] shrink-0">Status</span>
+              <span className="w-[200px] shrink-0">Status</span>
               <span className="w-[92px] shrink-0 text-right">Contato</span>
             </div>
 
@@ -218,7 +218,7 @@ export default function AdminOrdersPage() {
                     {formatPrice(order.total)}
                   </div>
 
-                  <div className="w-[170px] shrink-0">
+                  <div className="w-[200px] shrink-0">
                     <StatusSelect
                       value={order.status}
                       label={`Status do pedido ${order.code}`}

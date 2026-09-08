@@ -44,7 +44,13 @@ function Select<T extends string>({
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
         aria-label={label}
-        className={`min-h-11 cursor-pointer rounded-md border border-border-strong bg-transparent px-3 text-[14px] text-primary ${
+        /*
+         * 16px é piso, não estética: o Safari do iPhone dá zoom automático em
+         * qualquer campo de formulário abaixo disso — e não desfaz o zoom ao
+         * sair do campo. Um toque no seletor de preço deixava a loja inteira
+         * ampliada, com rolagem horizontal, até a pessoa recarregar.
+         */
+        className={`min-h-11 cursor-pointer rounded-md border border-border-strong bg-transparent px-3 text-[16px] text-primary ${
           block ? "mt-2 w-full" : ""
         }`}
       >
@@ -91,11 +97,17 @@ export function CatalogView({
   useEffect(() => {
     if (!sheetOpen) return;
     sheetRef.current?.focus();
+    // Sem a trava, arrastar o dedo por cima da gaveta rolava a grade atrás
+    // dela — e dava para "perder" a gaveta sem nunca tê-la fechado.
+    document.body.style.overflow = "hidden";
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSheetOpen(false);
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
+    };
   }, [sheetOpen]);
 
   const items = useMemo(
@@ -174,7 +186,7 @@ export function CatalogView({
         entre 1024 e 1280px.
       */}
       {showFilters && (
-        <div className="edge-fade no-scrollbar -mx-4 mt-6 overflow-x-auto px-4">
+        <div className="edge-fade no-scrollbar bleed mt-6 overflow-x-auto">
           <div className="flex w-max items-center gap-2.5">
             {chips.map((chip) => {
               const active = chip.slug === activeSlug;
@@ -213,20 +225,28 @@ export function CatalogView({
         </div>
       )}
 
-      <div className="mb-[clamp(28px,4vw,44px)] mt-4 flex items-center justify-between gap-4">
-        <span className="text-body-small text-tertiary" aria-live="polite">
-          <span className="data">{items.length}</span>
-          {items.length === 1 ? " resultado" : " resultados"}
+      {/*
+        A contagem e o botão são dois blocos irmãos, não um dentro do outro.
+        "Limpar filtros" morava dentro do `<span aria-live>`: além de inflar a
+        largura mínima do lado esquerdo e empurrar o botão de filtros, fazia o
+        leitor de tela reler o botão a cada mudança de resultado.
+      */}
+      <div className="mb-[clamp(28px,4vw,44px)] mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3">
+          <span className="text-body-small text-tertiary" aria-live="polite">
+            <span className="data">{items.length}</span>
+            {items.length === 1 ? " resultado" : " resultados"}
+          </span>
           {activeCount > 0 && (
             <button
               type="button"
               onClick={clear}
-              className="nav-link ml-3 font-medium text-primary"
+              className="nav-link inline-flex min-h-11 items-center text-body-small font-medium text-primary"
             >
               Limpar filtros
             </button>
           )}
-        </span>
+        </div>
 
         {/* No celular os três seletores lado a lado não cabem: viram uma
             gaveta, com a contagem de filtros ativos no próprio botão. */}
@@ -262,7 +282,10 @@ export function CatalogView({
             aria-modal="true"
             aria-label="Filtrar e ordenar"
             tabIndex={-1}
-            className="absolute inset-x-0 bottom-0 animate-slide-up rounded-t-lg bg-surface p-5 shadow-lg"
+            /* `dvh` e não `vh`: com a barra de endereço do celular na tela,
+               `85vh` já passava do que dá para ver. O recuo inferior respeita a
+               barra de gestos do iPhone. */
+            className="absolute inset-x-0 bottom-0 max-h-[85dvh] animate-slide-up overflow-y-auto rounded-t-lg bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-lg"
           >
             <div className="flex items-center justify-between">
               <h2 className="font-display text-heading-3">Filtrar e ordenar</h2>

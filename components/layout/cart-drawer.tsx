@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ShoppingBag, Trash2, X } from "lucide-react";
@@ -29,6 +30,16 @@ export function CartDrawer() {
     100
   );
   const missingForFreeShipping = FREE_SHIPPING_THRESHOLD - totals.subtotal;
+
+  // Sem a trava, arrastar o dedo por cima do carrinho rolava a página atrás
+  // dele. O menu móvel e o overlay de busca já faziam isto; o carrinho, não.
+  useEffect(() => {
+    if (!cartOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [cartOpen]);
 
   const goToCheckout = () => {
     closeCart();
@@ -166,7 +177,11 @@ export function CartDrawer() {
                                 removeItem(item.productId, item.variantId)
                               }
                               aria-label={`Remover ${item.name}`}
-                              className="shrink-0 text-tertiary transition-colors hover:text-error"
+                              /* Era um ícone de 16px sem padding nenhum: um
+                                 alvo de 16×16 no dedo, ao lado do link do
+                                 produto. As margens negativas devolvem o
+                                 alinhamento óptico que os 44px tirariam. */
+                              className="-my-2.5 -mr-2.5 flex size-11 shrink-0 items-center justify-center text-tertiary transition-colors hover:text-error"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -188,11 +203,11 @@ export function CartDrawer() {
                                   )
                                 }
                                 aria-label="Diminuir quantidade"
-                                className="flex size-8 items-center justify-center text-secondary hover:text-primary"
+                                className="flex size-10 items-center justify-center text-secondary hover:text-primary"
                               >
                                 −
                               </button>
-                              <span className="w-7 text-center text-micro tabular-nums">
+                              <span className="w-8 text-center text-body-small tabular-nums">
                                 {item.quantity}
                               </span>
                               <button
@@ -205,7 +220,7 @@ export function CartDrawer() {
                                   )
                                 }
                                 aria-label="Aumentar quantidade"
-                                className="flex size-8 items-center justify-center text-secondary hover:text-primary"
+                                className="flex size-10 items-center justify-center text-secondary hover:text-primary"
                               >
                                 +
                               </button>
@@ -220,7 +235,7 @@ export function CartDrawer() {
                   </AnimatePresence>
                 </ul>
 
-                <div className="space-y-2 border-t border-primary px-6 py-5">
+                <div className="shrink-0 space-y-2 border-t border-primary px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5">
                   <div className="flex justify-between text-body-small text-secondary">
                     <span>Subtotal</span>
                     <span className="tabular-nums">{formatPrice(totals.subtotal)}</span>

@@ -48,6 +48,14 @@
   --error-rgb: 196 42 23;
 
   --ease-forma: cubic-bezier(0.2, 0.6, 0.3, 1);
+
+  /*
+   * O recuo lateral da loja, num lugar só. Antes o valor estava escrito duas
+   * vezes em `globals.css` e uma terceira, aproximado para `16px` fixo, na
+   * faixa de chips do catálogo — que por isso desalinhava 25px do resto da
+   * página a 1024px e 48px a partir de 1600px.
+   */
+  --gutter: clamp(16px, 4vw, 64px);
 }
 
 .dark {
@@ -85,6 +93,16 @@
 
 html {
   scroll-behavior: smooth;
+  /*
+   * Rede de segurança, não conserto: as causas de estouro horizontal foram
+   * corrigidas nos componentes (nome+preço do card, nome+contagem da
+   * categoria). Isto existe para que o próximo estouro vire um recorte
+   * discreto em vez de uma barra de rolagem lateral na loja inteira.
+   *
+   * `clip` e não `hidden`: `hidden` cria contexto de rolagem e quebraria o
+   * `sticky` do cabeçalho e das colunas de resumo.
+   */
+  overflow-x: clip;
 }
 
 body {
@@ -115,18 +133,29 @@ body {
   border-radius: 2px;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
+/*
+ * A barra de rolagem desenhada vale só para a página, e só onde existe mouse.
+ *
+ * Sem os dois limites, o seletor pegava TODO elemento rolável — inclusive o
+ * corpo da gaveta de produto do painel, onde 10px de barra eram 10px a menos
+ * para os campos de imagem numa tela de 316px. Pior: declarar
+ * `::-webkit-scrollbar` transforma a barra flutuante do celular em barra
+ * clássica, que ocupa espaço de layout em todo scroller da interface.
+ */
+@media (pointer: fine) {
+  html::-webkit-scrollbar {
+    width: 10px;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--color-background);
-}
+  html::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-text-tertiary);
-  border: 3px solid var(--color-background);
-  border-radius: 6px;
+  html::-webkit-scrollbar-thumb {
+    background: var(--color-text-tertiary);
+    border: 3px solid var(--color-background);
+    border-radius: 6px;
+  }
 }
 
 @layer components {
@@ -136,12 +165,22 @@ body {
    */
   .shell {
     @apply mx-auto w-full max-w-[1360px];
-    padding-inline: clamp(16px, 4vw, 64px);
+    padding-inline: var(--gutter);
   }
 
   /* Só o recuo, para as seções que têm largura máxima própria. */
   .gutter {
-    padding-inline: clamp(16px, 4vw, 64px);
+    padding-inline: var(--gutter);
+  }
+
+  /*
+   * Faixa que sangra até a borda da janela de dentro de um `.shell`, e devolve
+   * o recuo por padding — o que mantém o conteúdo alinhado com o resto da
+   * página e ainda deixa rolar de borda a borda.
+   */
+  .bleed {
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
   }
 
   /*
@@ -178,6 +217,19 @@ body {
     scrollbar-width: none;
   }
 
+  /*
+   * Trava de rolagem do fundo enquanto a gaveta do painel está aberta.
+   *
+   * O limite de largura mora aqui, e não em JavaScript, justamente para que
+   * redimensionar a janela até o desktop — onde a gaveta deixa de existir e
+   * vira sidebar fixa — destrave a página sozinho.
+   */
+  @media (max-width: 1023px) {
+    body[data-nav-open="true"] {
+      overflow: hidden;
+    }
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -212,15 +264,34 @@ body {
     -webkit-mask-image: linear-gradient(
       to right,
       transparent 0,
-      #000 16px,
-      #000 calc(100% - 16px),
+      #000 var(--gutter),
+      #000 calc(100% - var(--gutter)),
       transparent 100%
     );
     mask-image: linear-gradient(
       to right,
       transparent 0,
-      #000 16px,
-      #000 calc(100% - 16px),
+      #000 var(--gutter),
+      #000 calc(100% - var(--gutter)),
+      transparent 100%
+    );
+  }
+
+  /* A mesma ideia com recuo fixo, para as tabelas do painel — que vivem
+     dentro do recuo do cartão, não no gutter da loja. */
+  .edge-fade-sm {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 18px,
+      #000 calc(100% - 18px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 18px,
+      #000 calc(100% - 18px),
       transparent 100%
     );
   }

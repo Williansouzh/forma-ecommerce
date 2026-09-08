@@ -226,7 +226,7 @@ export function ProductDetails({
           junto quando já rolou até a ficha técnica. Só no celular — no
           desktop a coluna inteira é `sticky` e o botão nunca sai da tela. */}
       {buyOffscreen && !soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border-subtle bg-surface p-3 shadow-lg sm:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border-subtle bg-surface p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg sm:hidden">
           <div className="min-w-0 flex-1">
             <p className="data truncate text-[17px] font-medium">
               {product.price === 0 ? "Sob consulta" : formatPrice(unitPrice)}

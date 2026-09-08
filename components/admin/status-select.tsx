@@ -25,7 +25,7 @@ export function StatusSelect({
       aria-label={label}
       onChange={(event) => onChange(event.target.value as OrderStatus)}
       className={cn(
-        "min-h-[38px] w-full rounded-md border border-strong bg-surface px-2.5 text-[13.5px] outline-none transition-colors focus:border-accent disabled:opacity-50"
+        "min-h-[38px] w-full rounded-md border border-strong bg-surface px-2.5 text-[16px] outline-none transition-colors focus:border-accent disabled:opacity-50"
       )}
     >
       {ORDER_STATUS_OPTIONS.map((status) => (

@@ -9,7 +9,6 @@ import { clearToken } from "@/lib/admin-api";
 import { isPending } from "@/lib/order-status";
 import { cn } from "@/lib/utils";
 import { useAdminData } from "./admin-data";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 /**
  * A sidebar é sempre escura, independente do tema da loja — por isso os
@@ -29,7 +28,6 @@ export function AdminNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { products, orders } = useAdminData();
-  const isCompact = useMediaQuery("(max-width: 899px)");
   const [open, setOpen] = useState(false);
 
   // Trocar de página fecha a gaveta sozinha — sem isso, um link levaria para
@@ -40,14 +38,15 @@ export function AdminNav() {
 
   // Mesmo padrão do overlay de busca da loja: com a gaveta aberta, a página
   // de trás não rola junto — senão dá para "perder" o menu arrastando o dedo
-  // por cima dele.
+  // por cima dele. Quem decide se a trava vale é a media query do CSS
+  // (`body[data-nav-open]` em `globals.css`), não este componente.
   useEffect(() => {
-    if (!isCompact) return;
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    document.body.dataset.navOpen = "true";
     return () => {
-      document.body.style.overflow = "";
+      delete document.body.dataset.navOpen;
     };
-  }, [isCompact, open]);
+  }, [open]);
 
   // Mesmo atalho do ProductDrawer: Esc fecha, sem precisar mirar no X.
   useEffect(() => {
@@ -152,99 +151,108 @@ export function AdminNav() {
     </Link>
   );
 
-  if (isCompact) {
-    return (
-      <>
-        {/*
-          A barra ocupa espaço de verdade no layout (o `main` do AdminShell
-          continua fluindo normalmente logo abaixo dela). A gaveta que abre a
-          partir do menu é `fixed`, por cima de tudo — não empurra nada.
-        */}
-        <div
-          style={{ background: INK }}
-          className="flex w-full shrink-0 items-center justify-between px-4 py-3"
-        >
-          {brand}
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Abrir menu do painel"
-            aria-expanded={open}
-            style={{ color: SAND }}
-            className="flex size-11 items-center justify-center rounded-md transition-colors hover:bg-[rgba(237,230,215,0.1)]"
-          >
-            <Menu size={22} />
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {open && (
-            <div className="fixed inset-0 z-[100] flex">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setOpen(false)}
-                className="absolute inset-0 bg-[rgba(27,26,21,0.55)]"
-                aria-hidden
-              />
-              <motion.aside
-                role="dialog"
-                aria-modal="true"
-                aria-label="Menu do painel"
-                initial={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ background: INK, color: "rgba(237, 230, 215, 0.72)" }}
-                className="relative flex h-full w-[min(82%,300px)] flex-col overflow-y-auto px-4 py-[18px]"
-              >
-                <div className="flex items-center justify-between px-1.5">
-                  {brand}
-                  <button
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    aria-label="Fechar menu"
-                    style={{ color: "rgba(237, 230, 215, 0.6)" }}
-                    className="flex size-11 shrink-0 items-center justify-center transition-colors hover:!text-[#D68A63]"
-                  >
-                    <X size={22} />
-                  </button>
-                </div>
-                <div
-                  style={{ color: "rgba(237, 230, 215, 0.4)" }}
-                  className="px-3 text-micro uppercase"
-                >
-                  Painel de gestão
-                </div>
-
-                {navLinks}
-                {footerLinks}
-              </motion.aside>
-            </div>
-          )}
-        </AnimatePresence>
-      </>
-    );
-  }
-
+  /*
+   * As duas formas convivem no DOM, e quem escolhe entre elas é o CSS.
+   *
+   * Antes a escolha era um `useMediaQuery`, que começa em `false` e só resolve
+   * depois de montar: no celular o primeiro quadro desenhava a sidebar escura
+   * de 244px e só então trocava pela barra do topo — um salto de layout em
+   * toda navegação do painel, do lado errado da hidratação.
+   *
+   * O limite subiu de 899px para `lg` (1024px): é onde a sidebar de 244px
+   * deixa de comer a largura de que as tabelas precisam, e é o mesmo ponto em
+   * que a loja troca o menu móvel pela navegação de desktop.
+   */
   return (
-    <aside
-      style={{ background: INK, color: "rgba(237, 230, 215, 0.72)" }}
-      className="flex w-[244px] shrink-0 flex-col items-stretch gap-2 px-4 py-[22px]"
-    >
-      <div className="px-1.5">
+    <>
+      {/*
+        Celular e tablet retrato: barra fina no topo, que ocupa espaço de
+        verdade no layout (o `main` do AdminShell flui logo abaixo dela). A
+        gaveta que abre a partir do menu é `fixed`, por cima de tudo.
+      */}
+      <div
+        style={{ background: INK }}
+        className="flex w-full shrink-0 items-center justify-between px-4 py-3 lg:hidden"
+      >
         {brand}
-        <div
-          style={{ color: "rgba(237, 230, 215, 0.4)" }}
-          className="mt-1 whitespace-nowrap text-micro uppercase"
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Abrir menu do painel"
+          aria-expanded={open}
+          style={{ color: SAND }}
+          className="flex size-11 items-center justify-center rounded-md transition-colors hover:bg-[rgba(237,230,215,0.1)]"
         >
-          Painel de gestão
-        </div>
+          <Menu size={22} />
+        </button>
       </div>
-      {navLinks}
-      {footerLinks}
-    </aside>
+
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-[100] flex lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setOpen(false)}
+              className="absolute inset-0 bg-[rgba(27,26,21,0.55)]"
+              aria-hidden
+            />
+            <motion.aside
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu do painel"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{ background: INK, color: "rgba(237, 230, 215, 0.72)" }}
+              className="relative flex h-dvh w-[min(82%,300px)] flex-col overflow-y-auto px-4 pb-[max(1.125rem,env(safe-area-inset-bottom))] pt-[18px]"
+            >
+              <div className="flex items-center justify-between px-1.5">
+                {brand}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Fechar menu"
+                  style={{ color: "rgba(237, 230, 215, 0.6)" }}
+                  className="flex size-11 shrink-0 items-center justify-center transition-colors hover:!text-[#D68A63]"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+              <div
+                style={{ color: "rgba(237, 230, 215, 0.4)" }}
+                className="px-3 text-micro uppercase"
+              >
+                Painel de gestão
+              </div>
+
+              {navLinks}
+              {footerLinks}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop: a coluna escura fixa à esquerda. */}
+      <aside
+        style={{ background: INK, color: "rgba(237, 230, 215, 0.72)" }}
+        className="hidden w-[244px] shrink-0 flex-col items-stretch gap-2 px-4 py-[22px] lg:flex"
+      >
+        <div className="px-1.5">
+          {brand}
+          <div
+            style={{ color: "rgba(237, 230, 215, 0.4)" }}
+            className="mt-1 whitespace-nowrap text-micro uppercase"
+          >
+            Painel de gestão
+          </div>
+        </div>
+        {navLinks}
+        {footerLinks}
+      </aside>
+    </>
   );
 }
