@@ -114,7 +114,63 @@ export default function AdminOrdersPage() {
         </p>
       )}
 
-      <div className="border border-border-subtle bg-surface">
+      {/* Cartões no celular, tabela em telas maiores — mesmos dados, mesmos handlers. */}
+      <div className="flex flex-col gap-2.5 md:hidden">
+        {loading ? (
+          <p className="px-4 py-16 text-center text-body-small text-tertiary">
+            Carregando pedidos…
+          </p>
+        ) : rows.length === 0 ? (
+          <p className="px-4 py-16 text-center text-body-small text-tertiary">
+            {orders?.length
+              ? "Nenhum pedido nesse estágio."
+              : "Nenhum pedido ainda. Eles aparecem aqui assim que a loja fechar a primeira venda."}
+          </p>
+        ) : (
+          rows.map((order) => (
+            <div
+              key={order.id}
+              className={cn(
+                "border border-border-subtle bg-surface p-3.5 transition-opacity",
+                busy === order.id && "opacity-60"
+              )}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="font-semibold tabular-nums">{order.code}</span>
+                <span className="tabular-nums">{formatPrice(order.total)}</span>
+              </div>
+
+              <div className="mt-1.5 truncate font-semibold">
+                {order.customer.firstName} {order.customer.lastName}
+              </div>
+              <div className="truncate text-[13px] text-tertiary">
+                {summarizeItems(order)} · {PAYMENT_LABELS[order.paymentMethod]}
+              </div>
+
+              <div className="mt-3 flex items-center gap-2.5">
+                <div className="min-w-0 flex-1">
+                  <StatusSelect
+                    value={order.status}
+                    label={`Status do pedido ${order.code}`}
+                    disabled={busy === order.id}
+                    onChange={(status) => void changeStatus(order, status)}
+                  />
+                </div>
+                <a
+                  href={whatsappLink(order.customer.phone, order.code)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-accent transition-colors hover:text-clay"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="hidden border border-border-subtle bg-surface md:block">
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
             <div className="flex gap-3 border-b border-border-strong px-4 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-tertiary">
