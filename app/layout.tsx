@@ -56,6 +56,16 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#FBFBF9" },
     { media: "(prefers-color-scheme: dark)", color: "#131315" },
   ],
+  /*
+   * Com o padrão do Chrome no Android (`resizes-visual`), abrir o teclado não
+   * encolhe o viewport de layout: uma gaveta em `100dvh` continua com a altura
+   * inteira e o rodapé — "Salvar peça" no painel, "Adicionar à sacola" na
+   * página do produto — fica atrás do teclado, fora de alcance.
+   *
+   * `resizes-content` faz o teclado encolher o layout, então o rodapé sobe
+   * junto e os campos do formulário continuam roláveis.
+   */
+  interactiveWidget: "resizes-content",
 };
 
 const themeScript = `

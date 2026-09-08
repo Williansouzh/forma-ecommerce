@@ -21,7 +21,7 @@ export default function ShopLayout({
       <UtilityBar />
       <Header />
       <ScrollProgress />
-      <main id="conteudo" className="min-h-screen">
+      <main id="conteudo" className="min-h-dvh">
         <Suspense fallback={null}>{children}</Suspense>
       </main>
       <Footer />
