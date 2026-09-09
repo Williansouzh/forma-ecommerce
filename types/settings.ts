@@ -33,5 +33,18 @@ export interface StoreSettings {
   atelierName: string;
   atelierCity: string;
   atelierHours: string;
+  /**
+   * Só dígitos, com DDI. Vazio esconde os botões de WhatsApp em vez de
+   * apontá-los para lugar nenhum.
+   */
+  whatsappNumber: string;
+  /**
+   * A chave Pix da loja e o que o BR Code diz sobre o recebedor. Vazio
+   * significa "ainda não configurei", e a tela de confirmação do pedido
+   * responde a isso mandando combinar o pagamento por outro caminho.
+   */
+  pixKey: string;
+  pixReceiverName: string;
+  pixCity: string;
   homeMedia?: HomeMedia;
 }

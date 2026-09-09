@@ -15,6 +15,7 @@ import {
   type CheckoutData,
 } from "@/components/checkout/checkout-form";
 import { OrderSummary } from "@/components/checkout/order-summary";
+import { PixPayment, type PixCharge } from "@/components/checkout/pix-payment";
 import { PIX_DISCOUNT } from "@/lib/constants";
 import { payableTotal } from "@/lib/cart";
 
@@ -38,6 +39,10 @@ export default function CheckoutPage() {
     method: PaymentMethod;
     data: CheckoutData;
     paymentUrl: string | null;
+    /** Cobrança Pix da loja, quando o Mercado Pago não está no caminho. */
+    pix: PixCharge | null;
+    total: number;
+    whatsappNumber: string;
   } | null>(null);
 
   if (order) {
@@ -70,6 +75,24 @@ export default function CheckoutPage() {
             >
               Pagar agora
             </a>
+          )}
+
+          {/* Sem link do Mercado Pago, o Pix da loja É o pagamento. Antes
+              desta tela existir, quem chegava aqui sem o gateway configurado
+              via o número do pedido e nenhuma forma de pagar. */}
+          {!order.paymentUrl && order.pix && (
+            <PixPayment
+              charge={order.pix}
+              total={order.total}
+              orderCode={order.id}
+              whatsappNumber={order.whatsappNumber}
+            />
+          )}
+
+          {!order.paymentUrl && !order.pix && (
+            <p className="mt-8 rounded-md bg-surface-muted px-5 py-4 text-body-small text-secondary">
+              O ateliê vai entrar em contato para combinar o pagamento.
+            </p>
           )}
 
           {/*
@@ -184,6 +207,9 @@ export default function CheckoutPage() {
       const body = (await response.json()) as {
         code?: string;
         paymentUrl?: string | null;
+        pix?: PixCharge | null;
+        whatsappNumber?: string;
+        totals?: { total?: number };
         error?: string;
       };
       if (!response.ok) throw new Error(body.error ?? "Falha ao enviar o pedido");
@@ -193,6 +219,11 @@ export default function CheckoutPage() {
         method,
         data,
         paymentUrl: body.paymentUrl ?? null,
+        pix: body.pix ?? null,
+        // O total vem do servidor: é ele que manda no preço, e é esse número
+        // que está dentro do código Pix.
+        total: body.totals?.total ?? payableTotal(totals, method === "pix" ? PIX_DISCOUNT : 0),
+        whatsappNumber: body.whatsappNumber ?? "",
       });
       clear();
       try {
