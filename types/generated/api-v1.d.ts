@@ -947,6 +947,17 @@ export interface components {
             /** @description Preferência do Mercado Pago, quando o pagamento online está ligado. */
             paymentPreferenceId?: string;
             paymentUrl?: string;
+            /**
+             * @description A cobrança Pix direta, quando o Mercado Pago não está no caminho.
+             *
+             *     Fica GRAVADA no pedido, e não é recalculada a cada visita, por dois
+             *     motivos: o txid precisa ser o mesmo que o cliente já copiou, e a chave da
+             *     loja pode mudar depois — quem pagou tem direito de rever exatamente o que
+             *     pagou.
+             */
+            pixCode?: string;
+            pixKey?: string;
+            pixReceiverName?: string;
             shipping: number;
             shippingAddress?: components["schemas"]["AddressEmbed"];
             /** @enum {string} */
@@ -1213,7 +1224,13 @@ export interface components {
             /** @description Em centavos. */
             freeShippingThreshold?: number;
             homeMedia?: components["schemas"]["HomeMediaDto"];
+            pixCity?: string;
             pixDiscountPercent?: number;
+            /** @description O limite de 77 é do padrão BR Code, não nosso. */
+            pixKey?: string;
+            /** @description 25 e 15 são os tamanhos que o payload do BACEN reserva. */
+            pixReceiverName?: string;
+            whatsappNumber?: string;
         };
         UpsertLinkDto: {
             autoSync?: boolean;
@@ -1674,7 +1691,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, unknown>;
+                };
             };
         };
     };
