@@ -5,6 +5,7 @@ import {
   UpdateCustomRequestStatusDto,
 } from "./dto/custom-request.dto";
 import { Public, Roles } from "../../common/decorators/auth.decorators";
+import { queryText } from "../../common/query-text";
 
 @Controller("custom-requests")
 export class CustomRequestsController {
@@ -12,8 +13,8 @@ export class CustomRequestsController {
 
   @Roles("superadmin")
   @Get()
-  findAll(@Query("status") status?: string) {
-    return this.service.findAll(status);
+  findAll(@Query("status") status?: unknown) {
+    return this.service.findAll(queryText(status));
   }
 
   /** O formulário da loja envia sem sessão. */

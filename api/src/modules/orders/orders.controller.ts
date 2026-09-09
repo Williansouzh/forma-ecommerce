@@ -3,6 +3,7 @@ import { OrdersService } from "./orders.service";
 import { CreateOrderDto, UpdateOrderStatusDto } from "./dto/order.dto";
 import { WhatsappService } from "../notifications/whatsapp.service";
 import { Public, Roles } from "../../common/decorators/auth.decorators";
+import { queryLimit, queryText } from "../../common/query-text";
 
 @Controller("orders")
 export class OrdersController {
@@ -14,12 +15,14 @@ export class OrdersController {
   @Roles("superadmin")
   @Get()
   findAll(
-    @Query("status") status?: string,
-    @Query("limit") limit?: string,
+    @Query("status") status?: unknown,
+    @Query("limit") limit?: unknown,
   ) {
+    // `queryText`: o parser do Express monta objeto a partir de
+    // `?status[$ne]=x`, e esse valor ia direto para o filtro do Mongo.
     return this.ordersService.findAll({
-      status,
-      limit: limit ? Number(limit) : undefined,
+      status: queryText(status),
+      limit: queryLimit(limit),
     });
   }
 
