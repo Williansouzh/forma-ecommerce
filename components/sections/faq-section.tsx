@@ -4,9 +4,9 @@ import {
   FREE_SHIPPING_THRESHOLD,
   PIX_DISCOUNT,
   SHIPPING_COST,
-  WHATSAPP_URL,
 } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
+import { getWhatsappUrl } from "@/lib/settings";
 
 /**
  * As cinco objeções que faltavam na home. Prazo, material, cor, troca e frete
@@ -43,21 +43,24 @@ const FAQ = [
   },
 ];
 
-export function FaqSection() {
+export async function FaqSection() {
+  const whatsappUrl = await getWhatsappUrl();
   return (
     <section aria-labelledby="faq-titulo" className="section-rhythm shell">
       <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-strong pb-5">
         <h2 id="faq-titulo" className="font-display text-display-2">
           Antes de pedir
         </h2>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="nav-link text-body-small font-medium text-primary"
-        >
-          Falar no WhatsApp
-        </a>
+        {whatsappUrl && (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="nav-link text-body-small font-medium text-primary"
+          >
+            Falar no WhatsApp
+          </a>
+        )}
       </div>
 
       <div className="mt-2 max-w-[72ch]">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { WHATSAPP_URL } from "@/lib/constants";
+import { getWhatsappUrl } from "@/lib/settings";
 
 /**
  * Os cinco passos da encomenda, do lado do convite.
@@ -31,7 +31,8 @@ const STEPS = [
   },
 ];
 
-export function CustomOrderSection() {
+export async function CustomOrderSection() {
+  const whatsappUrl = await getWhatsappUrl();
   return (
     <section
       aria-labelledby="custom-titulo"
@@ -63,14 +64,16 @@ export function CustomOrderSection() {
             >
               Solicitar orçamento
             </Link>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex min-h-[52px] items-center rounded-md border border-border-strong px-[22px] text-[14px] font-medium text-primary transition-colors duration-300 hover:border-accent hover:text-accent"
-            >
-              Falar no WhatsApp
-            </a>
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-[52px] items-center rounded-md border border-border-strong px-[22px] text-[14px] font-medium text-primary transition-colors duration-300 hover:border-accent hover:text-accent"
+              >
+                Falar no WhatsApp
+              </a>
+            )}
           </div>
         </div>
 

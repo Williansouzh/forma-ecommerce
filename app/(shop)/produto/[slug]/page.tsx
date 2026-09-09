@@ -9,6 +9,7 @@ import { ProductDetails } from "@/components/product/product-details";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { formatPrice } from "@/lib/utils";
 import { productJsonLd } from "@/lib/schema-org";
+import { getWhatsappUrl } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound();
 
   const category = getCategory(product.category);
-  const related = await fetchRelatedProducts(product);
+  const [related, whatsappUrl] = await Promise.all([
+    fetchRelatedProducts(product),
+    getWhatsappUrl(`Olá! Tenho interesse na peça "${product.name}".`),
+  ]);
 
   // `pb-32` no celular abre espaço para a barra fixa de compra não cobrir o
   // fim da página; no desktop ela não existe.
@@ -66,7 +70,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <div className="mt-[clamp(24px,4vh,44px)] flex flex-wrap gap-[clamp(28px,5vw,76px)]">
         <ProductGallery product={product} />
-        <ProductDetails product={product} categoryName={category?.name} />
+        <ProductDetails
+          product={product}
+          categoryName={category?.name}
+          whatsappUrl={whatsappUrl}
+        />
       </div>
 
       {related.length > 0 && (
