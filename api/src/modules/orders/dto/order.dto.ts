@@ -14,12 +14,20 @@ import {
 import { Type } from "class-transformer";
 import { ORDER_STATUSES, PAYMENT_METHODS } from "../schemas/order.schema";
 
+/**
+ * Do cliente vêm O QUE e QUANTO. QUANTO CUSTA sai do catálogo.
+ *
+ * `name`, `variantName` e `price` continuam aceitos porque a loja já os envia
+ * e `forbidNonWhitelisted` recusaria a requisição inteira se sumissem daqui —
+ * mas são IGNORADOS: `priceOrder` reescreve os três a partir do produto
+ * gravado. Não apague sem tirar também do corpo que a loja monta.
+ */
 export class OrderItemDto {
   @IsString() @MinLength(1)
   productId!: string;
 
-  @IsString() @MinLength(1)
-  name!: string;
+  @IsOptional() @IsString()
+  name?: string;
 
   @IsOptional() @IsString()
   variantId?: string;
@@ -30,8 +38,9 @@ export class OrderItemDto {
   @IsInt() @Min(1)
   quantity!: number;
 
-  @IsInt() @Min(0)
-  price!: number;
+  /** Ignorado. O preço vem do catálogo — ver `pricing.ts`. */
+  @IsOptional() @IsInt() @Min(0)
+  price?: number;
 }
 
 export class CustomerDto {
@@ -79,8 +88,14 @@ export class CreateOrderDto {
   @IsEnum(PAYMENT_METHODS)
   paymentMethod!: (typeof PAYMENT_METHODS)[number];
 
-  @IsInt() @Min(0)
-  subtotal!: number;
+  /*
+   * Os quatro valores abaixo são informativos e ficam apenas para que a loja
+   * possa continuar mandando o que desenhou na tela. O servidor recalcula
+   * todos a partir do catálogo e das configurações; divergência entre o que
+   * chegou e o que foi calculado vira aviso no log, não erro para o cliente.
+   */
+  @IsOptional() @IsInt() @Min(0)
+  subtotal?: number;
 
   @IsOptional() @IsInt() @Min(0)
   shipping?: number;
@@ -88,8 +103,8 @@ export class CreateOrderDto {
   @IsOptional() @IsInt() @Min(0)
   discount?: number;
 
-  @IsInt() @Min(0)
-  total!: number;
+  @IsOptional() @IsInt() @Min(0)
+  total?: number;
 }
 
 export class UpdateOrderStatusDto {

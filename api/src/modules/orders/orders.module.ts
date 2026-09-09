@@ -6,6 +6,8 @@ import { Order, OrderSchema } from "./schemas/order.schema";
 import { NotificationsModule } from "../notifications/notifications.module";
 import { InventoryModule } from "../inventory/inventory.module";
 import { ShopeeModule } from "../shopee/shopee.module";
+import { ProductsModule } from "../products/products.module";
+import { SettingsModule } from "../settings/settings.module";
 
 @Module({
   imports: [
@@ -13,6 +15,10 @@ import { ShopeeModule } from "../shopee/shopee.module";
     NotificationsModule,
     InventoryModule,
     ShopeeModule,
+    // O preço do pedido sai do catálogo e das configurações da loja, não
+    // do corpo da requisição — ver `pricing.ts`.
+    ProductsModule,
+    SettingsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

@@ -6,6 +6,9 @@ import { Order, OrderDocument, OrderStatus } from "./schemas/order.schema";
 import { CreateOrderDto } from "./dto/order.dto";
 import { InventoryService } from "../inventory/inventory.service";
 import { ShopeeInventoryService } from "../shopee/shopee-inventory.service";
+import { ProductsService } from "../products/products.service";
+import { SettingsService } from "../settings/settings.service";
+import { priceOrder, type CatalogEntry } from "./pricing";
 
 export interface OrderQuery {
   status?: string;
@@ -54,6 +57,8 @@ export class OrdersService {
     private readonly orderModel: Model<OrderDocument>,
     private readonly inventory: InventoryService,
     private readonly shopeeStock: ShopeeInventoryService,
+    private readonly products: ProductsService,
+    private readonly settings: SettingsService,
   ) {}
 
   async findAll(query: OrderQuery): Promise<Order[]> {
@@ -81,10 +86,36 @@ export class OrdersService {
    */
   async create(dto: CreateOrderDto): Promise<Order> {
     const correlationId = randomUUID();
+
+    /*
+     * O preço sai do catálogo, não do corpo da requisição.
+     *
+     * Esta rota é pública — o checkout da loja não tem sessão de admin — e
+     * antes gravava `price`, `subtotal` e `total` exatamente como chegaram.
+     * A preferência do Mercado Pago é montada a partir do que foi gravado,
+     * então mandar `price: 1` cobrava um centavo de verdade por uma peça de
+     * R$ 129,00, com o webhook confirmando um pagamento legitimamente
+     * aprovado e o estoque baixando em seguida.
+     */
+    const catalog = await this.catalogFor(dto.items.map((item) => item.productId));
+    const rules = await this.settings.get();
+    const priced = priceOrder(dto.items, catalog, dto.paymentMethod, {
+      freeShippingThreshold: rules.freeShippingThreshold,
+      pixDiscountPercent: rules.pixDiscountPercent,
+    });
+
+    // Divergência não derruba o pedido — o cliente pode estar com o carrinho
+    // velho, e recalcular já resolve. Mas fica registrado: em volume, é o
+    // sinal de que alguém está mexendo no corpo da requisição.
+    if (typeof dto.total === "number" && dto.total !== priced.total) {
+      this.logger.warn(
+        `Total recalculado: cliente informou ${dto.total}, catálogo diz ${priced.total}.`,
+      );
+    }
+
     const created = await this.orderModel.create({
       ...dto,
-      shipping: dto.shipping ?? 0,
-      discount: dto.discount ?? 0,
+      ...priced,
       status: "pending",
       code: await this.nextCode(),
     });
@@ -92,6 +123,16 @@ export class OrdersService {
     const order = mapId(created.toObject() as unknown as RawOrder);
     await this.reserveItems(order, correlationId);
     return order;
+  }
+
+  /**
+   * As peças do pedido, indexadas por id. Uma consulta só: pedido com cinco
+   * itens não pode virar cinco idas ao banco no meio do checkout.
+   */
+  private async catalogFor(ids: string[]): Promise<Map<string, CatalogEntry>> {
+    const unique = [...new Set(ids)];
+    const rows = await this.products.findManyByIds(unique);
+    return new Map(rows.map((row) => [row.id, row]));
   }
 
   async findByCode(code: string): Promise<Order | null> {

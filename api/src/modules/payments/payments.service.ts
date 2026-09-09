@@ -19,6 +19,8 @@ export interface WebhookResult {
 interface MercadoPagoPayment {
   status?: string;
   external_reference?: string;
+  /** Em reais, como o Mercado Pago fala. O domínio guarda centavos. */
+  transaction_amount?: number;
 }
 
 @Injectable()
@@ -206,6 +208,35 @@ export class PaymentsService {
     const code = payment.external_reference;
     if (!code) {
       return { handled: false, reason: "pagamento sem external_reference" };
+    }
+
+    /*
+     * Segunda barreira do preço: o valor aprovado tem de bater com o total do
+     * pedido.
+     *
+     * A primeira é `priceOrder`, que grava o preço do catálogo em vez do que
+     * o cliente mandou. Esta existe porque a preferência do Mercado Pago é um
+     * documento que sai da nossa mão — quem paga vê o link, e um dia pode
+     * haver outro caminho até um pagamento aprovado com valor menor. Duas
+     * barreiras em pontos diferentes, para que uma falha não vire prejuízo.
+     *
+     * Um centavo de folga cobre o arredondamento entre reais e centavos.
+     */
+    const pending = await this.orders.findByCode(code);
+    if (!pending) {
+      return { handled: false, reason: `nenhum pedido com código ${code}` };
+    }
+    if (typeof payment.transaction_amount === "number") {
+      const paidCents = Math.round(payment.transaction_amount * 100);
+      if (Math.abs(paidCents - pending.total) > 1) {
+        this.logger.error(
+          `${code}: pagamento aprovado de ${paidCents} centavos para um pedido de ${pending.total}. Não marcado como pago.`,
+        );
+        return {
+          handled: false,
+          reason: `valor pago (${paidCents}) diverge do total do pedido (${pending.total})`,
+        };
+      }
     }
 
     const order = await this.orders.markPaidByCode(code);

@@ -17,6 +17,8 @@ export interface ProductQuery {
   featured?: string;
   sort?: string;
   limit?: number;
+  /** Só o painel. Ver o comentário do filtro em `findAll`. */
+  includeUnpublished?: boolean;
 }
 
 type RawProduct = Omit<Product, "id"> & { _id?: Types.ObjectId | string };
@@ -40,6 +42,22 @@ export class ProductsService {
 
   async findAll(query: ProductQuery): Promise<Product[]> {
     const filter: Record<string, unknown> = {};
+
+    /*
+     * Peça despublicada não sai daqui sem sessão de admin.
+     *
+     * O painel sempre prometeu que "peças despublicadas somem da loja", mas
+     * quem cumpria isso era só a interface — a rota devolvia tudo, então
+     * rascunho, preço e nome de um lançamento ficavam legíveis para qualquer
+     * um que chamasse a API direto. Como o painel lê ESTA MESMA rota, o corte
+     * depende de quem pergunta, não da rota.
+     *
+     * `$ne: false` e não `true`: peça antiga, gravada antes do campo existir,
+     * não tem `isAvailable` e não pode sumir da loja por causa disso.
+     */
+    if (!query.includeUnpublished) {
+      filter.isAvailable = { $ne: false };
+    }
     // `$in` com os apelidos em vez de igualdade: enquanto o script de
     // migração não rodou, a coleção "Casa e decoração" precisa devolver
     // também as peças que ainda estão gravadas como `utilidades`.
@@ -89,6 +107,26 @@ export class ProductsService {
       .findOne({ slug })
       .lean<RawProduct | null>();
     return row ? mapId(row) : null;
+  }
+
+  /**
+   * As peças de um pedido, numa consulta só — é o que o cálculo de preço do
+   * checkout usa para não confiar no valor que o cliente mandou.
+   *
+   * Id inválido é descartado em vez de estourar: `Types.ObjectId` recusa
+   * string qualquer, e um `productId` inventado no corpo da requisição não
+   * pode virar 500. Quem trata a ausência é `priceOrder`, que responde 400
+   * dizendo qual peça não existe.
+   */
+  async findManyByIds(ids: string[]): Promise<(Product & { id: string })[]> {
+    const valid = ids.filter((id) => Types.ObjectId.isValid(id));
+    if (valid.length === 0) return [];
+    const rows = await this.productModel
+      .find({ _id: { $in: valid.map((id) => new Types.ObjectId(id)) } })
+      .lean<RawProduct[]>();
+    // `mapId` já devolve `id` em tempo de execução; o tipo `Product` do
+    // schema declara só `_id`, então o retorno anota o que de fato existe.
+    return rows.map(mapId) as (Product & { id: string })[];
   }
 
   async findRelated(
