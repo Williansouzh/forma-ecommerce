@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import {
   ATELIER_CITY,
   ATELIER_HOURS,
@@ -63,9 +64,6 @@ export function Footer() {
                 </Link>
               </li>
             ))}
-            {/* O link para /admin saiu daqui: era o único item da coluna que
-                não é para o cliente, e anunciava a superfície administrativa
-                para todo visitante e todo crawler sem ganho nenhum. */}
           </ul>
         </nav>
 
@@ -88,13 +86,33 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-3.5 border-t border-border-subtle pt-[18px] text-[13px] text-tertiary">
+      <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-x-5 gap-y-3 border-t border-border-subtle pt-[18px] text-[13px] text-tertiary">
         <span>
           © {year} {SITE_NAME}
         </span>
         {/* O frete grátis subiu para a barra de utilidade, no topo: aqui ele
             tinha o mesmo tamanho e a mesma cor do aviso de copyright. */}
-        <ThemeToggle />
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <ThemeToggle />
+          {/*
+            A entrada do painel fica na faixa de utilidade, junto do tema — e
+            não na coluna "Loja", que é a lista do que o cliente veio fazer
+            aqui. Não é link de loja; é a porta de serviço.
+
+            `nofollow` e `/admin` no `robots.ts`: o link existe para quem
+            administra a loja, não para o índice do Google. Isso não esconde
+            nada de quem procura — a rota é adivinhável e a segurança dela
+            está no login, não no sigilo do endereço.
+          */}
+          <Link
+            href="/admin"
+            rel="nofollow"
+            className="nav-link inline-flex min-h-11 items-center gap-1.5 text-body-small text-tertiary transition-colors duration-200 hover:text-primary"
+          >
+            <Lock size={13} strokeWidth={1.75} aria-hidden />
+            Painel
+          </Link>
+        </div>
       </div>
     </footer>
   );
