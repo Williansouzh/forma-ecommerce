@@ -15,6 +15,16 @@ services:
     image: forma-api
     container_name: forma-api
     environment:
+      # Este compose é a pilha de DESENVOLVIMENTO — porta local, dados de
+      # demonstração (`SEED_DEMO`) e as credenciais documentadas logo abaixo.
+      # Sem dizer isso, a imagem herdaria o `NODE_ENV=production` do
+      # Dockerfile e a API se recusaria a iniciar com a senha padrão, que é
+      # exatamente o que ela deve fazer num servidor de verdade
+      # (`exigeSegredoProprio`, em `api/src/config/configuration.ts`).
+      #
+      # Quem sobe em produção usa o `docker-compose.prod.yml`, que exige
+      # JWT_SECRET e ADMIN_PASSWORD com `:?` e não passa por aqui.
+      NODE_ENV: development
       MONGODB_URI: mongodb://mongo:27017/forma
       JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@forma.estudio}

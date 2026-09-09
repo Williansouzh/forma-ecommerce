@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   ADMIN_SESSION_COOKIE,
   adminApiUrl,
+  sessionCookieOptions,
 } from "@/lib/admin-session";
 
 /**
@@ -70,10 +71,7 @@ async function proxy(
   // fique num laço de 401 com um cookie que já não vale nada.
   if (upstream.status === 401) {
     response.cookies.set(ADMIN_SESSION_COOKIE, "", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
+      ...sessionCookieOptions(request),
       maxAge: 0,
     });
   }
