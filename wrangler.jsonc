@@ -1,0 +1,31 @@
+{
+  // O que faltava para o `wrangler versions upload` ter o que enviar.
+  //
+  // `main` e `assets` apontam para o que o adaptador da OpenNext escreve —
+  // ver `open-next.config.ts`. Os dois caminhos só existem depois de
+  // `npm run cf:build`; rodar `next build` sozinho não os cria, e é por isso
+  // que o deploy falhava mesmo com o build verde.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "forma-ecommerce",
+  "main": ".open-next/worker.js",
+
+  // A data trava o conjunto de comportamentos da plataforma: subir esse
+  // número é uma decisão, não uma consequência de reimplantar num dia
+  // qualquer.
+  "compatibility_date": "2026-09-09",
+
+  // `nodejs_compat` é requisito do adaptador — o servidor do Next usa APIs de
+  // Node (Buffer, streams, async_hooks) que o Worker só expõe com esta flag.
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    // O Worker precisa continuar recebendo as rotas dinâmicas: sem isto, um
+    // pedido para `/checkout` bateria no servidor de arquivos e voltaria 404.
+    "binding": "ASSETS"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}
