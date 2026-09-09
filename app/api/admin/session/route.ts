@@ -3,6 +3,7 @@ import {
   ADMIN_SESSION_COOKIE,
   SESSION_MAX_AGE_SECONDS,
   adminApiUrl,
+  sessionCookieOptions,
 } from "@/lib/admin-session";
 
 /**
@@ -63,23 +64,17 @@ export async function POST(request: NextRequest) {
   // Só o usuário volta para o navegador. O token fica no cookie.
   const ok = NextResponse.json({ user: payload.user });
   ok.cookies.set(ADMIN_SESSION_COOKIE, payload.accessToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
+    ...sessionCookieOptions(request),
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
   return ok;
 }
 
 /** Sair: o cookie morre aqui, então o navegador não tem como "esquecer" só pela metade. */
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   const response = NextResponse.json({ ended: true });
   response.cookies.set(ADMIN_SESSION_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
+    ...sessionCookieOptions(request),
     maxAge: 0,
   });
   return response;

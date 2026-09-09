@@ -11,6 +11,36 @@ export const ADMIN_SESSION_COOKIE = "forma_admin_session";
 export const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 
 /**
+ * As opções do cookie de sessão, iguais em quem grava e em quem apaga.
+ *
+ * `secure` segue o PROTOCOLO DA REQUISIÇÃO, não o `NODE_ENV`.
+ *
+ * Amarrado ao ambiente, ele quebrava toda pilha de produção servida sem TLS —
+ * inclusive o `docker-compose.yml` daqui, que roda a imagem de produção em
+ * `http://localhost:3222`. O sintoma não dizia nada: o login respondia 200 e
+ * gravava o cookie, o navegador se recusava a devolvê-lo por ser `Secure` numa
+ * conexão simples, e todas as telas seguintes davam 401 de "sessão expirada".
+ *
+ * `x-forwarded-proto` é o que o Caddy manda na frente da loja em produção,
+ * onde o cookie continua `Secure` como tem de ser.
+ */
+export function sessionCookieOptions(request: {
+  nextUrl: { protocol: string };
+  headers: { get(name: string): string | null };
+}) {
+  const https =
+    request.nextUrl.protocol === "https:" ||
+    request.headers.get("x-forwarded-proto") === "https";
+
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: https,
+    path: "/",
+  };
+}
+
+/**
  * A base da API vista pelo SERVIDOR da loja.
  *
  * `API_URL` existe para quando a loja alcança a API por um endereço interno
