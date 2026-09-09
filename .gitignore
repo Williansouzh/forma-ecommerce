@@ -19,3 +19,8 @@ next-env.d.ts
 # segredos das integrações. Nunca versionar.
 /backups/
 coverage/
+
+# Saída do adaptador da Cloudflare e segredos da prévia local.
+.open-next/
+.wrangler/
+.dev.vars

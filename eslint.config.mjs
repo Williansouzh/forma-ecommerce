@@ -32,6 +32,11 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      // Saída do adaptador da Cloudflare: código gerado, com o estilo de quem
+      // o gerou. Sem isto o lint reprova o build por `require()` e variáveis
+      // de catch não usadas em arquivo que ninguém escreveu.
+      ".open-next/**",
+      ".wrangler/**",
       "coverage/**",
       "node_modules/**",
       "playwright-report/**",
