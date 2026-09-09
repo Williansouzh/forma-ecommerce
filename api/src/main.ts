@@ -28,6 +28,18 @@ async function bootstrap() {
   const config = app.get(ConfigService<ApiConfig>);
 
   app.setGlobalPrefix("api/v1");
+
+  /*
+   * Um salto de confiança: a API fica atrás do Caddy (ver `Caddyfile`), então
+   * sem isto todo request chega com o IP do proxy.
+   *
+   * Isso importa desde que o login passou a ter limite por IP: com todo mundo
+   * compartilhando o IP do Caddy, cinco tentativas erradas de qualquer pessoa
+   * trancariam o painel para TODOS. `1` confia só no salto mais próximo — não
+   * na cadeia inteira de `X-Forwarded-For`, que o cliente pode inventar.
+   */
+  app.set("trust proxy", 1);
+
   app.use(helmet());
   app.enableCors({
     origin: config.get<string>("corsOrigin")?.split(","),
