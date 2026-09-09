@@ -9,6 +9,20 @@
   "name": "forma-ecommerce",
   "main": ".open-next/worker.js",
 
+  // O wrangler gera o Worker antes de enviar.
+  //
+  // Sem isto, o deploy depende de o comando de build configurado no painel da
+  // Cloudflare ser `opennextjs-cloudflare build` — e o painel é a única parte
+  // desta configuração que não mora no repositório. Duas tentativas de deploy
+  // falharam por isso, com `.open-next/worker.js` inexistente porque quem
+  // rodou foi `next build`.
+  //
+  // Com o comando aqui, o repositório é autossuficiente: qualquer build
+  // command lá produz o mesmo resultado.
+  "build": {
+    "command": "npm run cf:build"
+  },
+
   // A data trava o conjunto de comportamentos da plataforma: subir esse
   // número é uma decisão, não uma consequência de reimplantar num dia
   // qualquer.
