@@ -78,9 +78,29 @@ const _confere: true[] = [
 ];
 void _confere;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-const BASE = `${API_URL}/api/v1`;
-const TOKEN_KEY = "forma-admin-token";
+/*
+ * O painel fala com a própria loja, não com a API.
+ *
+ * `/api/admin/*` é um repasse no servidor do Next (ver
+ * `app/api/admin/[...path]/route.ts`) que anexa o `Authorization` a partir de
+ * um cookie `httpOnly`. Antes o token vinha do `localStorage` e ia daqui
+ * mesmo — o que significava que qualquer XSS na loja lia uma sessão de
+ * superadmin com 12 horas de validade.
+ *
+ * Efeito colateral bem-vindo: a origem passa a ser a mesma, então o painel
+ * deixa de depender de `connect-src` apontando para o domínio da API.
+ */
+const BASE = "/api/admin";
+
+/**
+ * A criação e a destruição da sessão, que não passam pelo repasse.
+ *
+ * `/api/admin/session` é uma rota estática e vence o `[...path]` na
+ * resolução do Next — ou seja, o repasse nunca vê este caminho. A API também
+ * não tem rota chamada `session`, então não há nada inalcançável por causa
+ * disto.
+ */
+const SESSION = "/api/admin/session";
 
 export interface AdminSession {
   accessToken: string;
@@ -98,35 +118,40 @@ export type ProductInput = Partial<
   images?: ProductImageInput[];
 };
 
-export function getToken(): string | null {
+/**
+ * Encerra a sessão apagando o cookie no servidor.
+ *
+ * Não há mais `getToken`: o cookie é `httpOnly` e, por desenho, o JavaScript
+ * não consegue lê-lo. Quem descobre que a sessão caiu é a resposta 401 —
+ * `authFetch` a transforma em `SessaoExpirada`, e o painel redireciona.
+ */
+export async function logout(): Promise<void> {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    await fetch(SESSION, { method: "DELETE" });
   } catch {
-    return null;
+    // Sem rede não dá para apagar o cookie; o redirecionamento para o login
+    // acontece do mesmo jeito, e o cookie expira sozinho em 12h.
   }
 }
 
-export function saveToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+/** O 401 do painel, para quem chama saber distinguir de um erro qualquer. */
+export class SessaoExpirada extends Error {
+  constructor() {
+    super("Sessão expirada. Faça login novamente.");
+    this.name = "SessaoExpirada";
+  }
 }
 
 async function authFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = getToken();
   const response = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init.headers,
     },
   });
   if (response.status === 401) {
-    clearToken();
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new SessaoExpirada();
   }
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as
@@ -140,8 +165,15 @@ async function authFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function login(email: string, password: string): Promise<AdminSession> {
-  const response = await fetch(`${BASE}/auth/login`, {
+/**
+ * Entra no painel. O token não volta para cá: fica no cookie `httpOnly` que
+ * a rota de sessão grava.
+ */
+export async function login(
+  email: string,
+  password: string,
+): Promise<AdminSession["user"]> {
+  const response = await fetch(SESSION, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -152,9 +184,8 @@ export async function login(email: string, password: string): Promise<AdminSessi
       | null;
     throw new Error(body?.message ?? "Credenciais inválidas");
   }
-  const session = (await response.json()) as AdminSession;
-  saveToken(session.accessToken);
-  return session;
+  const { user } = (await response.json()) as { user: AdminSession["user"] };
+  return user;
 }
 
 export async function listProducts(): Promise<Product[]> {
@@ -187,14 +218,10 @@ export async function deleteProduct(id: string): Promise<void> {
  * painel mostrar o estado de espera em vez de zeros que pareceriam reais.
  */
 export async function listOrders(): Promise<Order[] | null> {
-  const token = getToken();
-  const response = await fetch(`${BASE}/orders?limit=200`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const response = await fetch(`${BASE}/orders?limit=200`);
   if (response.status === 404) return null;
   if (response.status === 401) {
-    clearToken();
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new SessaoExpirada();
   }
   if (!response.ok) throw new Error(`Erro ${response.status}`);
   return response.json() as Promise<Order[]>;
@@ -281,19 +308,14 @@ export async function testR2(): Promise<{ ok: boolean; message: string }> {
  * bytes, do lado do servidor.
  */
 export async function uploadProductImage(file: File): Promise<UploadedImage> {
-  const token = getToken();
   const response = await fetch(`${BASE}/media/products`, {
     method: "POST",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: { "Content-Type": file.type || "application/octet-stream" },
     body: file,
   });
 
   if (response.status === 401) {
-    clearToken();
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new SessaoExpirada();
   }
   // 413 vem do Express, ANTES do controller, e não traz corpo JSON — sem este
   // caso a pessoa veria "Erro 413" e nenhuma pista do que fazer.
@@ -469,14 +491,10 @@ export async function getShopeeMetrics(): Promise<ShopeeMetrics> {
 
 /** Devolve `null` num 404, como os pedidos: API velha não derruba o painel. */
 export async function listCustomRequests(): Promise<CustomRequest[] | null> {
-  const token = getToken();
-  const response = await fetch(`${BASE}/custom-requests`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const response = await fetch(`${BASE}/custom-requests`);
   if (response.status === 404) return null;
   if (response.status === 401) {
-    clearToken();
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new SessaoExpirada();
   }
   if (!response.ok) throw new Error(`Erro ${response.status}`);
   return response.json() as Promise<CustomRequest[]>;

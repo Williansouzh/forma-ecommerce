@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { clearToken } from "@/lib/admin-api";
+import { logout as endSession } from "@/lib/admin-api";
 import { isPending } from "@/lib/order-status";
 import { cn } from "@/lib/utils";
 import { useAdminData } from "./admin-data";
@@ -70,8 +70,10 @@ export function AdminNav() {
     { href: "/admin/configuracoes", name: "Configurações" },
   ];
 
-  const logout = () => {
-    clearToken();
+  const logout = async () => {
+    // O cookie é `httpOnly`: quem o apaga é o servidor, então sair virou uma
+    // chamada. O desvio acontece de qualquer jeito.
+    await endSession();
     router.replace("/admin/login");
   };
 
@@ -131,7 +133,7 @@ export function AdminNav() {
       </Link>
       <button
         type="button"
-        onClick={logout}
+        onClick={() => void logout()}
         style={{ color: "rgba(237, 230, 215, 0.4)" }}
         className="flex min-h-[40px] items-center gap-2 whitespace-nowrap px-3 text-left text-[13px] transition-colors hover:!text-[#D68A63]"
       >

@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getToken } from "@/lib/admin-api";
 import { ProductForm } from "@/components/admin/product-form";
 
+/*
+ * Sem checagem de sessão aqui: o token virou cookie `httpOnly` e o JavaScript
+ * não tem como olhá-lo. Quem desvia para o login é o `AdminDataProvider`, que
+ * envolve esta tela e já trata o 401 — uma checagem só, no lugar de três
+ * cópias que podiam divergir.
+ */
 export default function NewProductPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!getToken()) router.replace("/admin/login");
-  }, [router]);
-
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10 md:px-10">
       <Link

@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getToken,
+  SessaoExpirada,
   listCustomRequests,
   listOrders,
   listProducts,
@@ -51,10 +51,6 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!getToken()) {
-      router.replace("/admin/login");
-      return;
-    }
     try {
       const [rows, orderRows, requestRows] = await Promise.all([
         listProducts(),
@@ -68,12 +64,13 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       setCustomRequests(requestRows);
       setError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Falha ao carregar";
-      if (message.includes("Sessão expirada")) {
+      // O tipo substitui a comparação por texto que existia aqui: a mensagem
+      // podia mudar e o desvio para o login sumiria em silêncio.
+      if (err instanceof SessaoExpirada) {
         router.replace("/admin/login");
         return;
       }
-      setError(message);
+      setError(err instanceof Error ? err.message : "Falha ao carregar");
     } finally {
       setLoading(false);
     }

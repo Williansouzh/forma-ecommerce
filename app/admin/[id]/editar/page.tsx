@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getToken, listProducts } from "@/lib/admin-api";
+import { SessaoExpirada, listProducts } from "@/lib/admin-api";
 import { ProductForm } from "@/components/admin/product-form";
 import type { Product } from "@/types/product";
 
@@ -15,16 +15,17 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!getToken()) {
-      router.replace("/admin/login");
-      return;
-    }
     listProducts()
       .then((rows) => {
         const found = rows.find((item) => item.id === params.id) ?? null;
         setProduct(found);
       })
-      .catch(() => setProduct(null))
+      .catch((err) => {
+        // Sessão morta é desvio para o login; qualquer outra falha deixa a
+        // tela no estado de "peça não encontrada", como já fazia.
+        if (err instanceof SessaoExpirada) router.replace("/admin/login");
+        else setProduct(null);
+      })
       .finally(() => setLoading(false));
   }, [router, params.id]);
 
