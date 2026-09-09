@@ -4,6 +4,8 @@ import type { IntegrationsService } from "../integrations/integrations.service";
 import type { OrdersService } from "../orders/orders.service";
 import type { WhatsappService } from "../notifications/whatsapp.service";
 import type { ConfigService } from "@nestjs/config";
+import type { SettingsService } from "../settings/settings.service";
+import { PixService } from "./pix.service";
 import type { ApiConfig } from "../../config/configuration";
 
 /**
@@ -33,6 +35,9 @@ function makeService({ secret }: { secret?: string } = { secret: SECRET }) {
     {} as OrdersService,
     {} as WhatsappService,
     { get: jest.fn() } as unknown as ConfigService<ApiConfig>,
+    // Nenhum caso desta suíte chega ao Pix; são dependências do construtor.
+    {} as SettingsService,
+    new PixService(),
   );
 }
 

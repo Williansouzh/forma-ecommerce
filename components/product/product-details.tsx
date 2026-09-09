@@ -5,7 +5,7 @@ import type { Product, ProductVariant } from "@/types/product";
 import { useCartStore } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
 import { formatPrice } from "@/lib/utils";
-import { WHATSAPP_URL } from "@/lib/constants";
+
 
 /**
  * A coluna que decide a compra. A ordem é a do handoff e não é arbitrária:
@@ -16,9 +16,12 @@ import { WHATSAPP_URL } from "@/lib/constants";
 export function ProductDetails({
   product,
   categoryName,
+  whatsappUrl,
 }: {
   product: Product;
   categoryName?: string;
+  /** Vem da página (servidor), que lê o número no painel. `null` esconde. */
+  whatsappUrl?: string | null;
 }) {
   const [variant, setVariant] = useState<ProductVariant | undefined>(
     product.variants?.[0]
@@ -213,14 +216,16 @@ export function ProductDetails({
         </button>
       </div>
 
-      <a
-        href={WHATSAPP_URL}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-3.5 inline-flex items-center gap-2 border-b border-accent/40 pb-0.5 text-[13.5px] font-semibold text-primary transition-colors duration-200 hover:border-accent hover:text-accent"
-      >
-        Prefiro fechar no WhatsApp
-      </a>
+      {whatsappUrl && (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3.5 inline-flex items-center gap-2 border-b border-accent/40 pb-0.5 text-[13.5px] font-semibold text-primary transition-colors duration-200 hover:border-accent hover:text-accent"
+        >
+          Prefiro fechar no WhatsApp
+        </a>
+      )}
 
       {/* Preço à esquerda, ação à direita: o par que a pessoa precisa ver
           junto quando já rolou até a ficha técnica. Só no celular — no

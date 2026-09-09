@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
@@ -110,6 +111,31 @@ export class UpdateSettingsDto {
 
   @IsOptional() @IsString() @MinLength(1)
   atelierHours?: string;
+
+  /*
+   * Contato e Pix aceitam string VAZIA — vazio é o estado "ainda não
+   * configurei", e é ele que faz a loja esconder o botão de WhatsApp e o
+   * bloco de Pix em vez de mostrar um link quebrado. Por isso `@MinLength(1)`
+   * não aparece aqui, ao contrário dos campos do ateliê.
+   */
+
+  /** Só dígitos, com DDI. Ex.: 5583988717642. */
+  @IsOptional() @IsString() @MaxLength(20)
+  @Matches(/^[0-9]*$/, {
+    message: "O WhatsApp deve ter só dígitos, com DDI (ex.: 5583988717642).",
+  })
+  whatsappNumber?: string;
+
+  /** O limite de 77 é do padrão BR Code, não nosso. */
+  @IsOptional() @IsString() @MaxLength(77)
+  pixKey?: string;
+
+  /** 25 e 15 são os tamanhos que o payload do BACEN reserva. */
+  @IsOptional() @IsString() @MaxLength(25)
+  pixReceiverName?: string;
+
+  @IsOptional() @IsString() @MaxLength(15)
+  pixCity?: string;
 
   @IsOptional() @ValidateNested() @Type(() => HomeMediaDto)
   homeMedia?: HomeMediaDto;

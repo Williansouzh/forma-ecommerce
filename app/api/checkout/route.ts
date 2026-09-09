@@ -97,8 +97,13 @@ export async function POST(request: NextRequest) {
 
   const created = (await response.json()) as { id: string; code: string };
 
-  // Com o Mercado Pago ligado, o pedido já sai com link de pagamento. Sem ele,
-  // o pedido existe do mesmo jeito e o acerto é combinado por fora.
+  /*
+   * Como pagar. Com o Mercado Pago ligado, sai um link; sem ele, a API emite
+   * a cobrança Pix da própria loja e devolve o "copia e cola".
+   *
+   * Antes este bloco só buscava `paymentUrl`, e sem Mercado Pago o cliente
+   * terminava o checkout numa tela que dizia o número do pedido e mais nada.
+   */
   const payment = await fetch(
     `${API_URL}/api/v1/payments/mercadopago/preference`,
     {
@@ -108,7 +113,16 @@ export async function POST(request: NextRequest) {
       cache: "no-store",
     }
   )
-    .then((res) => (res.ok ? (res.json() as Promise<{ paymentUrl?: string }>) : null))
+    .then((res) =>
+      res.ok
+        ? (res.json() as Promise<{
+            paymentUrl?: string | null;
+            pixCode?: string | null;
+            pixKey?: string | null;
+            pixReceiverName?: string | null;
+          }>)
+        : null
+    )
     .catch(() => null);
 
   return NextResponse.json(
@@ -118,6 +132,17 @@ export async function POST(request: NextRequest) {
       code: created.code,
       status: "pending",
       paymentUrl: payment?.paymentUrl ?? null,
+      pix: payment?.pixCode
+        ? {
+            code: payment.pixCode,
+            key: payment.pixKey ?? null,
+            receiverName: payment.pixReceiverName ?? null,
+          }
+        : null,
+      // O número vai junto porque a tela de confirmação é componente de
+      // cliente: sem isto ela precisaria de uma segunda ida ao servidor só
+      // para saber para onde mandar o comprovante.
+      whatsappNumber: settings.whatsappNumber ?? "",
       totals: { ...totals, discount, total: totals.total - discount },
     },
     { status: 201 }

@@ -68,6 +68,33 @@ export class Settings {
   @Prop({ required: true, trim: true, default: "Seg a sáb · 8h às 18h" })
   atelierHours: string;
 
+  /**
+   * O WhatsApp que a loja atende, só dígitos e com DDI (5583988717642).
+   *
+   * Estava escrito à mão em `lib/constants.ts`, na loja — o que significava
+   * pedir deploy para trocar de número. Vazio faz os botões de WhatsApp
+   * sumirem em vez de levarem a lugar nenhum.
+   */
+  @Prop({ required: true, trim: true, default: "" })
+  whatsappNumber: string;
+
+  /**
+   * A chave Pix da loja, e o que o BR Code precisa dizer sobre o recebedor.
+   *
+   * É o caminho de pagamento quando o Mercado Pago não está configurado —
+   * sem ela, o cliente fecha o pedido e não tem como pagar. `pixCity` e
+   * `pixReceiverName` não são enfeite: o padrão do BACEN os exige dentro do
+   * payload, e o app do banco os mostra na hora de confirmar.
+   */
+  @Prop({ required: true, trim: true, default: "" })
+  pixKey: string;
+
+  @Prop({ required: true, trim: true, default: "" })
+  pixReceiverName: string;
+
+  @Prop({ required: true, trim: true, default: "" })
+  pixCity: string;
+
   /** Imagens trocáveis da vitrine. Ausente = a loja usa as embutidas. */
   @Prop({ type: Object, default: {} })
   homeMedia: HomeMediaEmbed;

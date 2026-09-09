@@ -6,9 +6,8 @@ import {
   INSTAGRAM_HANDLE,
   INSTAGRAM_URL,
   SITE_NAME,
-  WHATSAPP_NUMBER,
-  WHATSAPP_URL,
 } from "@/lib/constants";
+import { getStoreSettings, whatsappUrlFor } from "@/lib/settings";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const LOJA_LINKS = [
@@ -24,8 +23,11 @@ const LOJA_LINKS = [
  * um bloco só, e a transição some. Três colunas: quem somos, para onde ir,
  * onde ficamos.
  */
-export function Footer() {
+export async function Footer() {
   const year = new Date().getFullYear();
+  // O número vem do painel; sem número, a linha do WhatsApp some.
+  const settings = await getStoreSettings();
+  const whatsappUrl = whatsappUrlFor(settings.whatsappNumber);
 
   return (
     <footer className="ink gutter pb-[30px] pt-[clamp(46px,9vh,100px)]">
@@ -41,14 +43,16 @@ export function Footer() {
             Transformando ideias em coisas que dá pra segurar.
           </p>
 
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="nav-link mt-4 inline-block text-body-small font-semibold text-clay"
-          >
-            wa.me/{WHATSAPP_NUMBER}
-          </a>
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="nav-link mt-4 inline-block text-body-small font-semibold text-clay"
+            >
+              wa.me/{settings.whatsappNumber}
+            </a>
+          )}
         </div>
 
         <nav aria-label="Loja" className="flex-[1_1_160px]">

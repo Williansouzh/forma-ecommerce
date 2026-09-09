@@ -1366,7 +1366,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         },
         "summary": "Chamado pelo servidor da loja logo depois de criar o pedido. Público\nporque o checkout não tem sessão de admin; só age sobre pedido existente\ne ainda pendente, e repetir devolve a mesma preferência.",
@@ -2202,6 +2209,16 @@
           "paymentUrl": {
             "type": "string"
           },
+          "pixCode": {
+            "type": "string",
+            "description": "A cobrança Pix direta, quando o Mercado Pago não está no caminho.\n\nFica GRAVADA no pedido, e não é recalculada a cada visita, por dois\nmotivos: o txid precisa ser o mesmo que o cliente já copiou, e a chave da\nloja pode mudar depois — quem pagou tem direito de rever exatamente o que\npagou."
+          },
+          "pixKey": {
+            "type": "string"
+          },
+          "pixReceiverName": {
+            "type": "string"
+          },
           "channel": {
             "enum": [
               "shopee",
@@ -2826,6 +2843,25 @@
           "atelierHours": {
             "type": "string",
             "minLength": 1
+          },
+          "whatsappNumber": {
+            "type": "string",
+            "maxLength": 20,
+            "pattern": "^[0-9]*$"
+          },
+          "pixKey": {
+            "type": "string",
+            "description": "O limite de 77 é do padrão BR Code, não nosso.",
+            "maxLength": 77
+          },
+          "pixReceiverName": {
+            "type": "string",
+            "description": "25 e 15 são os tamanhos que o payload do BACEN reserva.",
+            "maxLength": 25
+          },
+          "pixCity": {
+            "type": "string",
+            "maxLength": 15
           },
           "homeMedia": {
             "$ref": "#/components/schemas/HomeMediaDto"

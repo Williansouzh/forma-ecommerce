@@ -162,6 +162,27 @@ export class OrdersService {
     return order;
   }
 
+  /**
+   * Grava a cobrança Pix direta no pedido.
+   *
+   * Só preenche quando ainda não há — a guarda `pixCode: null` faz duas
+   * chamadas simultâneas (clique duplo em "finalizar") não trocarem o código
+   * que o cliente pode já ter copiado.
+   */
+  async attachPixCharge(
+    code: string,
+    charge: { pixCode: string; pixKey: string; pixReceiverName: string },
+  ): Promise<Order | null> {
+    const updated = await this.orderModel
+      .findOneAndUpdate(
+        { code, $or: [{ pixCode: { $exists: false } }, { pixCode: "" }, { pixCode: null }] },
+        { $set: charge },
+        { new: true },
+      )
+      .lean<RawOrder | null>();
+    return updated ? mapId(updated) : null;
+  }
+
   async attachPayment(
     code: string,
     preferenceId: string,

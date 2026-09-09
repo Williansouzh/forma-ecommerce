@@ -4,6 +4,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { IntegrationsService } from "../integrations/integrations.service";
 import { OrdersService } from "../orders/orders.service";
 import { WhatsappService } from "../notifications/whatsapp.service";
+import { SettingsService } from "../settings/settings.service";
+import { PixService } from "./pix.service";
 import type { ApiConfig } from "../../config/configuration";
 
 export interface WebhookHeaders {
@@ -16,12 +18,39 @@ export interface WebhookResult {
   reason: string;
 }
 
+/**
+ * Como o cliente paga este pedido.
+ *
+ * Ou existe um link do Mercado Pago, ou existe uma cobrança Pix direta — e o
+ * `reason` explica o caso em que não existe nenhum dos dois, que é o que a
+ * loja mostra em vez de deixar a tela muda.
+ */
+export interface PaymentInstruction {
+  preferenceId: string | null;
+  paymentUrl: string | null;
+  /** BR Code "copia e cola", com o valor embutido. */
+  pixCode: string | null;
+  pixKey: string | null;
+  pixReceiverName: string | null;
+  reason: string;
+}
+
 interface MercadoPagoPayment {
   status?: string;
   external_reference?: string;
   /** Em reais, como o Mercado Pago fala. O domínio guarda centavos. */
   transaction_amount?: number;
 }
+
+/** A instrução vazia; cada retorno sobrescreve só o que preenche. */
+const VAZIO: PaymentInstruction = {
+  preferenceId: null,
+  paymentUrl: null,
+  pixCode: null,
+  pixKey: null,
+  pixReceiverName: null,
+  reason: "",
+};
 
 @Injectable()
 export class PaymentsService {
@@ -32,6 +61,8 @@ export class PaymentsService {
     private readonly orders: OrdersService,
     private readonly whatsapp: WhatsappService,
     private readonly config: ConfigService<ApiConfig>,
+    private readonly settings: SettingsService,
+    private readonly pix: PixService,
   ) {}
 
   /**
@@ -40,39 +71,50 @@ export class PaymentsService {
    * Chamar duas vezes devolve a mesma preferência: notificação repetida e
    * clique duplo não podem virar duas cobranças.
    */
-  async createPreferenceForOrder(code: string): Promise<{
-    preferenceId: string | null;
-    paymentUrl: string | null;
-    reason: string;
-  }> {
+  async createPreferenceForOrder(code: string): Promise<PaymentInstruction> {
     const order = await this.orders.findByCode(code);
     if (!order) throw new NotFoundException("Pedido não encontrado");
 
     if (order.paymentUrl && order.paymentPreferenceId) {
       return {
+        ...VAZIO,
         preferenceId: order.paymentPreferenceId,
         paymentUrl: order.paymentUrl,
         reason: "preferência já existia",
+      };
+    }
+    // Cobrança Pix já emitida volta idêntica: o cliente pode ter copiado o
+    // código, e gerar outro txid faria o comprovante não bater com o pedido.
+    if (order.pixCode) {
+      return {
+        ...VAZIO,
+        pixCode: order.pixCode,
+        pixKey: order.pixKey ?? null,
+        pixReceiverName: order.pixReceiverName ?? null,
+        reason: "cobrança Pix já existia",
       };
     }
     if (order.status !== "pending") {
       throw new BadRequestException("O pedido não está aguardando pagamento");
     }
 
-    if (!(await this.integrations.isEnabled("mercadopago"))) {
-      return {
-        preferenceId: null,
-        paymentUrl: null,
-        reason: "Mercado Pago desligado",
-      };
-    }
-    const token = (await this.integrations.secretsFor("mercadopago")).accessToken;
+    const token = (await this.integrations.isEnabled("mercadopago"))
+      ? (await this.integrations.secretsFor("mercadopago")).accessToken
+      : null;
+
+    /*
+     * Sem Mercado Pago no caminho, o Pix direto é o pagamento — não um plano
+     * B. Antes esta função devolvia `paymentUrl: null` e a loja mostrava um
+     * pedido sem nenhuma forma de pagar: o cliente fechava a compra e ficava
+     * esperando alguém procurá-lo.
+     */
     if (!token) {
-      return {
-        preferenceId: null,
-        paymentUrl: null,
-        reason: "sem access token gravado",
-      };
+      return this.pixDireto(
+        order,
+        (await this.integrations.isEnabled("mercadopago"))
+          ? "Mercado Pago sem access token gravado"
+          : "Mercado Pago desligado",
+      );
     }
 
     const apiUrl = this.config.get<string>("publicApiUrl");
@@ -116,11 +158,10 @@ export class PaymentsService {
     if (!response?.ok) {
       const status = response?.status ?? "sem resposta";
       this.logger.warn(`Mercado Pago recusou a preferência: ${status}`);
-      return {
-        preferenceId: null,
-        paymentUrl: null,
-        reason: `criação da preferência falhou (${status})`,
-      };
+      return this.pixDireto(
+        order,
+        `Mercado Pago indisponível (${status})`,
+      );
     }
 
     const created = (await response.json()) as {
@@ -130,19 +171,66 @@ export class PaymentsService {
     };
     const url = created.init_point ?? created.sandbox_init_point ?? null;
     if (!created.id || !url) {
-      return {
-        preferenceId: null,
-        paymentUrl: null,
-        reason: "resposta do Mercado Pago sem init_point",
-      };
+      return this.pixDireto(order, "Mercado Pago respondeu sem link de pagamento");
     }
 
     await this.orders.attachPayment(order.code, created.id, url);
     return {
+      ...VAZIO,
       preferenceId: created.id,
       paymentUrl: url,
       reason: "preferência criada",
     };
+  }
+
+  /**
+   * A cobrança Pix da própria loja, gravada no pedido.
+   *
+   * Sem chave configurada não há o que emitir, e o `reason` diz isso em vez de
+   * inventar um código que o banco recusaria. É o estado de uma loja recém
+   * instalada — e é por isso que o painel avisa que a chave está faltando.
+   */
+  private async pixDireto(
+    order: { code: string; total: number },
+    motivo: string,
+  ): Promise<PaymentInstruction> {
+    const loja = await this.settings.get();
+    const chave = loja.pixKey?.trim();
+    if (!chave) {
+      return { ...VAZIO, reason: `${motivo}; loja sem chave Pix configurada` };
+    }
+
+    try {
+      const carga = this.pix.buildCharge({
+        amount: order.total,
+        txid: order.code,
+        key: chave,
+        // O nome do ateliê serve de favorecido enquanto ninguém escrever um
+        // diferente — é o que a loja já mostra em todo lugar.
+        receiverName: loja.pixReceiverName?.trim() || loja.atelierName,
+        city: loja.pixCity?.trim() || loja.atelierCity,
+      });
+
+      await this.orders.attachPixCharge(order.code, {
+        pixCode: carga.brcode,
+        pixKey: carga.key,
+        pixReceiverName: carga.receiverName,
+      });
+
+      return {
+        ...VAZIO,
+        pixCode: carga.brcode,
+        pixKey: carga.key,
+        pixReceiverName: carga.receiverName,
+        reason: `${motivo}; cobrança Pix emitida pela loja`,
+      };
+    } catch (error) {
+      // Chave ou cidade inválidas não podem derrubar o checkout: o pedido já
+      // existe, e a loja combina o pagamento por fora.
+      const detalhe = error instanceof Error ? error.message : "erro";
+      this.logger.warn(`Não foi possível emitir o Pix de ${order.code}: ${detalhe}`);
+      return { ...VAZIO, reason: `${motivo}; dados de Pix inválidos (${detalhe})` };
+    }
   }
 
   /**

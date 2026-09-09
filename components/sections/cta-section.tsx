@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { fetchProducts } from "@/lib/api";
 import { getFeaturedProducts } from "@/data/products";
 import { ProductCard } from "@/components/product/product-card";
-import { WHATSAPP_URL } from "@/lib/constants";
+import { getWhatsappUrl } from "@/lib/settings";
 
 /**
  * O fecho da página.
@@ -24,6 +24,7 @@ function newestFirst(a: { createdAt: string | Date }, b: { createdAt: string | D
 
 export async function CTASection() {
   const all = await fetchProducts();
+  const whatsappUrl = await getWhatsappUrl();
   const source = all.length > 0 ? all : getFeaturedProducts();
   const latest = [...source].sort(newestFirst).slice(0, 4);
 
@@ -61,20 +62,22 @@ export async function CTASection() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="group inline-flex min-h-12 items-center gap-2.5 rounded-md bg-primary px-6 text-[15px] font-semibold text-background transition-colors duration-200 hover:bg-accent"
-          >
-            Mandar minha ideia
-            <ArrowRight
-              size={17}
-              strokeWidth={1.75}
-              aria-hidden
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            />
-          </a>
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex min-h-12 items-center gap-2.5 rounded-md bg-primary px-6 text-[15px] font-semibold text-background transition-colors duration-200 hover:bg-accent"
+            >
+              Mandar minha ideia
+              <ArrowRight
+                size={17}
+                strokeWidth={1.75}
+                aria-hidden
+                className="transition-transform duration-200 group-hover:translate-x-1"
+              />
+            </a>
+          )}
           <Link
             href="/personalizados"
             className="inline-flex min-h-12 items-center rounded-md border border-border-strong px-6 text-[15px] font-medium text-primary transition-colors duration-200 hover:border-primary"

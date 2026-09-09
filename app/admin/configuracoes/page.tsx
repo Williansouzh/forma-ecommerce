@@ -16,6 +16,10 @@ interface Draft {
   atelierName: string;
   atelierCity: string;
   atelierHours: string;
+  whatsappNumber: string;
+  pixKey: string;
+  pixReceiverName: string;
+  pixCity: string;
 }
 
 function toDraft(settings: StoreSettings): Draft {
@@ -26,7 +30,16 @@ function toDraft(settings: StoreSettings): Draft {
     atelierName: settings.atelierName,
     atelierCity: settings.atelierCity,
     atelierHours: settings.atelierHours,
+    whatsappNumber: settings.whatsappNumber ?? "",
+    pixKey: settings.pixKey ?? "",
+    pixReceiverName: settings.pixReceiverName ?? "",
+    pixCity: settings.pixCity ?? "",
   };
+}
+
+/** O painel aceita o número como a pessoa digita; a API quer só dígitos. */
+function apenasDigitos(value: string): string {
+  return value.replace(/\D/g, "");
 }
 
 export default function AdminSettingsPage() {
@@ -59,6 +72,10 @@ export default function AdminSettingsPage() {
         atelierName: draft.atelierName.trim(),
         atelierCity: draft.atelierCity.trim(),
         atelierHours: draft.atelierHours.trim(),
+        whatsappNumber: apenasDigitos(draft.whatsappNumber),
+        pixKey: draft.pixKey.trim(),
+        pixReceiverName: draft.pixReceiverName.trim(),
+        pixCity: draft.pixCity.trim(),
       });
       setDraft(toDraft(saved));
       pushToast("Configurações salvas");
@@ -171,6 +188,82 @@ export default function AdminSettingsPage() {
                   className={fieldClass}
                 />
               </label>
+            </section>
+
+            <section className="min-w-0 flex-1 basis-[min(100%,340px)] border border-border-subtle bg-surface p-[22px]">
+              <h2 className="mb-1.5 font-display text-[21px]">
+                Contato e pagamento
+              </h2>
+              <p className="mb-[18px] text-[13px] text-tertiary">
+                O WhatsApp aparece nos botões da loja. A chave Pix é o que o
+                cliente vê ao fechar o pedido quando o Mercado Pago não está
+                ligado — sem ela, ele termina a compra sem forma de pagar.
+              </p>
+
+              <label className={labelClass}>
+                WhatsApp (com DDI)
+                <input
+                  inputMode="tel"
+                  placeholder="5583988717642"
+                  value={draft.whatsappNumber}
+                  onChange={(event) =>
+                    set("whatsappNumber", event.target.value)
+                  }
+                  className={cn(fieldClass, "tabular-nums")}
+                />
+              </label>
+              <p className="mt-1.5 text-[12.5px] text-tertiary">
+                Só números. Vazio esconde os botões de WhatsApp da loja.
+              </p>
+
+              <label className={cn(labelClass, "mt-4")}>
+                Chave Pix
+                <input
+                  placeholder="CPF, CNPJ, e-mail, telefone ou aleatória"
+                  value={draft.pixKey}
+                  onChange={(event) => set("pixKey", event.target.value)}
+                  maxLength={77}
+                  className={fieldClass}
+                />
+              </label>
+
+              {!draft.pixKey.trim() && (
+                <p
+                  role="status"
+                  className="mt-2 rounded-md bg-warning/10 px-3 py-2 text-[12.5px] text-warning"
+                >
+                  Sem chave Pix, quem fechar um pedido sem o Mercado Pago fica
+                  sem forma de pagar.
+                </p>
+              )}
+
+              <label className={cn(labelClass, "mt-4")}>
+                Favorecido
+                <input
+                  placeholder={draft.atelierName}
+                  value={draft.pixReceiverName}
+                  onChange={(event) =>
+                    set("pixReceiverName", event.target.value)
+                  }
+                  maxLength={25}
+                  className={fieldClass}
+                />
+              </label>
+
+              <label className={cn(labelClass, "mt-4")}>
+                Cidade do favorecido
+                <input
+                  placeholder={draft.atelierCity}
+                  value={draft.pixCity}
+                  onChange={(event) => set("pixCity", event.target.value)}
+                  maxLength={15}
+                  className={fieldClass}
+                />
+              </label>
+              <p className="mt-1.5 text-[12.5px] text-tertiary">
+                Favorecido e cidade vão dentro do código Pix e aparecem no app
+                do banco. Em branco, valem o nome e a cidade do ateliê.
+              </p>
             </section>
           </div>
 

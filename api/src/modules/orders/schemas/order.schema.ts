@@ -129,6 +129,23 @@ export class Order {
   @Prop({ trim: true })
   paymentUrl?: string;
 
+  /**
+   * A cobrança Pix direta, quando o Mercado Pago não está no caminho.
+   *
+   * Fica GRAVADA no pedido, e não é recalculada a cada visita, por dois
+   * motivos: o txid precisa ser o mesmo que o cliente já copiou, e a chave da
+   * loja pode mudar depois — quem pagou tem direito de rever exatamente o que
+   * pagou.
+   */
+  @Prop({ trim: true })
+  pixCode?: string;
+
+  @Prop({ trim: true })
+  pixKey?: string;
+
+  @Prop({ trim: true })
+  pixReceiverName?: string;
+
   @Prop({ required: true, enum: ORDER_CHANNELS, default: "site" })
   channel: OrderChannel;
 
