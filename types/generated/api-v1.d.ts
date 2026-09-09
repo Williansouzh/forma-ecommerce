@@ -13,6 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Autentica no painel. Limitado a cinco tentativas por minuto, por IP. */
         post: operations["Auth_login"];
         delete?: never;
         options?: never;
@@ -336,6 +337,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Lista o catálogo. Sem sessão, devolve apenas as peças publicadas. */
         get: operations["Products_findAll"];
         put?: never;
         post: operations["Products_create"];
@@ -819,8 +821,8 @@ export interface components {
             paymentMethod: "pix" | "credit_card" | "boleto";
             shipping?: number;
             shippingAddress?: components["schemas"]["AddressDto"];
-            subtotal: number;
-            total: number;
+            subtotal?: number;
+            total?: number;
         };
         CreatePreferenceDto: {
             /** @description Código do pedido: C3D-4821. */
@@ -955,8 +957,9 @@ export interface components {
             updatedAt: string;
         };
         OrderItemDto: {
-            name: string;
-            price: number;
+            name?: string;
+            /** @description Ignorado. O preço vem do catálogo — ver `pricing.ts`. */
+            price?: number;
             productId: string;
             quantity: number;
             variantId?: string;

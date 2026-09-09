@@ -34,6 +34,7 @@
             "description": ""
           }
         },
+        "summary": "Autentica no painel. Limitado a cinco tentativas por minuto, por IP.",
         "tags": [
           "Auth"
         ]
@@ -120,6 +121,7 @@
             }
           }
         },
+        "summary": "Lista o catálogo. Sem sessão, devolve apenas as peças publicadas.",
         "tags": [
           "Products"
         ]
@@ -2251,8 +2253,7 @@
             "minLength": 1
           },
           "name": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
           },
           "variantId": {
             "type": "string"
@@ -2266,14 +2267,13 @@
           },
           "price": {
             "type": "number",
+            "description": "Ignorado. O preço vem do catálogo — ver `pricing.ts`.",
             "minimum": 0
           }
         },
         "required": [
           "productId",
-          "name",
-          "quantity",
-          "price"
+          "quantity"
         ]
       },
       "CustomerDto": {
@@ -2389,9 +2389,7 @@
         "required": [
           "items",
           "customer",
-          "paymentMethod",
-          "subtotal",
-          "total"
+          "paymentMethod"
         ]
       },
       "UpdateOrderStatusDto": {

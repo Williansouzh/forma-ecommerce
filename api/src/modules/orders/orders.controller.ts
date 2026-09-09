@@ -15,8 +15,8 @@ export class OrdersController {
   @Roles("superadmin")
   @Get()
   findAll(
-    @Query("status") status?: unknown,
-    @Query("limit") limit?: unknown,
+    @Query("status") status?: string,
+    @Query("limit") limit?: string,
   ) {
     // `queryText`: o parser do Express monta objeto a partir de
     // `?status[$ne]=x`, e esse valor ia direto para o filtro do Mongo.

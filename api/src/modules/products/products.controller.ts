@@ -19,24 +19,28 @@ import { queryLimit, queryText } from "../../common/query-text";
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  /**
-   * Pública, mas não igual para todo mundo.
+  /** Lista o catálogo. Sem sessão, devolve apenas as peças publicadas. */
+  /*
+   * O corte depende de QUEM pergunta, não da rota: o painel lê esta mesma
+   * listagem e precisa das despublicadas para poder republicá-las. Até aqui a
+   * promessa de que "peças despublicadas somem da loja" valia só na
+   * interface — a API entregava rascunho, preço e nome de lançamento a quem
+   * chamasse direto.
    *
-   * Sem sessão, a listagem devolve só o que está publicado — o painel diz
-   * "peças despublicadas somem da loja", e até aqui isso valia só na
-   * interface: a API entregava rascunho, preço e nome de lançamento futuro a
-   * quem chamasse a rota direto. Com token de superadmin, o painel continua
-   * recebendo tudo, que é o que ele precisa para poder republicar.
+   * Os parâmetros são declarados como `string` porque é isso que o contrato
+   * pede do cliente; `queryText` existe justamente por não dar para confiar
+   * nisso em tempo de execução (o `qs` do Express monta objeto a partir de
+   * `?q[$ne]=x`).
    */
   @Public()
   @Get()
   findAll(
     @CurrentUser() user: AuthenticatedUser | null,
-    @Query("category") category?: unknown,
-    @Query("q") q?: unknown,
-    @Query("featured") featured?: unknown,
-    @Query("sort") sort?: unknown,
-    @Query("limit") limit?: unknown,
+    @Query("category") category?: string,
+    @Query("q") q?: string,
+    @Query("featured") featured?: string,
+    @Query("sort") sort?: string,
+    @Query("limit") limit?: string,
   ) {
     return this.productsService.findAll({
       category: queryText(category),

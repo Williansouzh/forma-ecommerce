@@ -10,16 +10,14 @@ import type { AuthenticatedUser } from "../../common/roles";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /**
-   * Cinco tentativas por minuto, por IP.
-   *
-   * Antes eram infinitas. Duas consequências: força bruta contra a senha do
-   * admin sem nenhum custo, e um caminho de negação de serviço — `bcrypt` é
-   * caro POR DESENHO, então um laço de requisições prende a CPU da API
-   * inteira sem precisar acertar senha nenhuma.
+  /** Autentica no painel. Limitado a cinco tentativas por minuto, por IP. */
+  /*
+   * Antes eram infinitas: força bruta sem custo, e um caminho de negação de
+   * serviço — `bcrypt` é caro POR DESENHO, então um laço de requisições prende
+   * a CPU da API sem precisar acertar senha nenhuma.
    *
    * O limite vale só aqui, e não globalmente: as leituras de catálogo passam
-   * pelo servidor da loja, então chegam todas do mesmo IP, e um limite global
+   * pelo servidor da loja e chegam todas do mesmo IP, então um limite global
    * derrubaria a vitrine no primeiro pico de visitas.
    */
   @Public()

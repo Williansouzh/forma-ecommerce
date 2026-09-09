@@ -13,7 +13,7 @@ export class CustomRequestsController {
 
   @Roles("superadmin")
   @Get()
-  findAll(@Query("status") status?: unknown) {
+  findAll(@Query("status") status?: string) {
     return this.service.findAll(queryText(status));
   }
 
