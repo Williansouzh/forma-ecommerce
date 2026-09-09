@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { IntegrationsService } from "../integrations/integrations.service";
 import { R2Client, type R2Credentials } from "./r2.client";
 import { detectImage, rejectionReason } from "./image-type";
+import { VARIANT_WIDTHS, buildVariants, variantKey } from "./image-variants";
 
 /**
  * Diz por que uma URL não serve como base pública, ou `null` quando serve.
@@ -170,10 +171,53 @@ export class StorageService {
     ]);
 
     const today = new Date().toISOString().slice(0, 10);
-    const key = `produtos/${today}/${randomUUID()}.${detected.extension}`;
+    const id = randomUUID();
+
+    /*
+     * As variantes primeiro, e o caminho definido pelo resultado.
+     *
+     * `produtos/w/…` é o marcador que diz à loja "esta foto tem versões
+     * menores"; ele só é usado quando TODAS subiram. Se o redimensionamento
+     * ou qualquer envio falhar, a foto vai para o caminho antigo e a loja a
+     * serve inteira, como sempre serviu — nunca um `srcset` apontando para
+     * arquivo que não está no bucket.
+     */
+    const variants = await this.buildVariantsOrNone(body);
+    const prefix = variants.length > 0 ? `produtos/w/${today}` : `produtos/${today}`;
+    const key = `${prefix}/${id}.${detected.extension}`;
 
     await this.r2.putObject(credentials, key, body, detected.mime);
-    this.logger.log(`Imagem guardada em ${key} (${body.length} bytes, ${detected.mime}).`);
+
+    let stored = variants.length;
+    if (stored > 0) {
+      try {
+        await Promise.all(
+          variants.map((variant) =>
+            this.r2.putObject(
+              credentials,
+              variantKey(key, variant.width),
+              variant.body,
+              variant.contentType,
+            ),
+          ),
+        );
+      } catch (error) {
+        // O original já está no bucket sob `produtos/w/`, e agora sem todas as
+        // variantes. Regravar num caminho sem marcador seria o certo, mas
+        // custa outro PUT no caminho de resposta do upload; o `srcset` da loja
+        // tolera a ausência caindo no original, e a linha abaixo deixa o
+        // rastro para quem for investigar.
+        stored = 0;
+        this.logger.warn(
+          `Variantes de ${key} falharam: ${error instanceof Error ? error.message : "erro"}.`,
+        );
+      }
+    }
+
+    this.logger.log(
+      `Imagem guardada em ${key} (${body.length} bytes, ${detected.mime})` +
+        (stored > 0 ? ` com ${stored} variante(s).` : " sem variantes."),
+    );
 
     return {
       key,
@@ -184,15 +228,61 @@ export class StorageService {
   }
 
   /**
+   * As variantes, ou nenhuma.
+   *
+   * Falhar aqui não pode derrubar o upload: uma foto sem versões menores
+   * continua sendo uma foto boa, e o painel já mostrou o arquivo ao usuário.
+   */
+  private async buildVariantsOrNone(body: Buffer) {
+    try {
+      return await buildVariants(body);
+    } catch (error) {
+      this.logger.warn(
+        `Não deu para gerar variantes: ${error instanceof Error ? error.message : "erro"}.`,
+      );
+      return [];
+    }
+  }
+
+  /**
    * Apaga um objeto. Só aceita chave nossa (prefixo `produtos/`) — sem isso,
    * uma rota de exclusão viraria "apague qualquer coisa deste bucket".
    */
   async removeProductImage(key: string): Promise<void> {
     const clean = key.trim().replace(/^\/+/, "");
-    if (!/^produtos\/\d{4}-\d{2}-\d{2}\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/.test(clean)) {
+    // `w/` opcional: o padrão aceita tanto as fotos antigas quanto as que têm
+    // variantes, e nada além destas duas formas.
+    if (
+      !/^produtos\/(w\/)?\d{4}-\d{2}-\d{2}\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/.test(
+        clean,
+      )
+    ) {
       throw new BadRequestException("Chave fora do padrão das imagens de produto.");
     }
-    await this.r2.deleteObject(await this.credentials(), clean);
+
+    const credentials = await this.credentials();
+    await this.r2.deleteObject(credentials, clean);
+
+    /*
+     * As variantes vão junto, senão apagar uma foto deixaria três órfãs
+     * pagando armazenamento para sempre.
+     *
+     * Sem `Promise.all`: uma variante que já não exista não pode impedir as
+     * outras de sair, e o original — que é o que importa — já foi apagado
+     * acima. Falha aqui vira aviso, não erro para quem clicou.
+     */
+    if (clean.startsWith("produtos/w/")) {
+      for (const width of VARIANT_WIDTHS) {
+        try {
+          await this.r2.deleteObject(credentials, variantKey(clean, width));
+        } catch (error) {
+          this.logger.warn(
+            `Variante ${width} de ${clean} não saiu: ${error instanceof Error ? error.message : "erro"}.`,
+          );
+        }
+      }
+    }
+
     this.logger.log(`Imagem ${clean} removida do R2.`);
   }
 
