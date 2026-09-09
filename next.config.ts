@@ -19,6 +19,19 @@ const nextConfig: NextConfig = {
     remotePatterns: imageHost
       ? [{ protocol: imageHost.protocol, hostname: imageHost.hostname }]
       : [],
+    /*
+     * O redimensionamento saiu do tempo de resposta e foi para o upload.
+     *
+     * Em Cloudflare Workers o otimizador do Next é passthrough (`sharp` é
+     * binário nativo e não roda lá): as três larguras de um card devolviam o
+     * mesmo arquivo de 257 KB. Agora a API grava três versões no R2 quando a
+     * foto entra, e este loader escolhe entre elas — a `<img>` aponta direto
+     * para o bucket, sem passar pelo Worker.
+     *
+     * Ver `lib/image-loader.ts` e `api/src/modules/storage/image-variants.ts`.
+     */
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
   },
   /**
    * Cabeçalhos estáticos em vez de middleware: sem nonce por requisição, não
