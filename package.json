@@ -42,6 +42,7 @@
     "@types/react-dom": "^19.0.2",
     "@vitest/coverage-v8": "^5.0.0",
     "autoprefixer": "^10.4.20",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.23",
     "openapi-typescript": "^7.13.0",
