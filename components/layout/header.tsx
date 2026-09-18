@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
+import { Logotipo } from "@/components/brand/logo";
 import { useScroll } from "@/hooks/use-scroll";
 import { useCartStore, getCartTotals } from "@/stores/cart-store";
 import { useUIStore } from "@/stores/ui-store";
@@ -52,10 +53,10 @@ export function Header() {
         <Link
           href="/"
           onClick={closeMenu}
-          className="whitespace-nowrap font-display text-[clamp(19px,2.4vw,25px)] leading-none tracking-[-0.02em] text-primary"
+          className="text-[clamp(19px,2.4vw,25px)] text-primary"
           aria-label={`${SITE_NAME} — página inicial`}
         >
-          c3dcriativ<span className="text-clay">.</span>
+          <Logotipo />
         </Link>
 
         {/* Encostada no logotipo e ocupando a folga: a navegação é o assunto

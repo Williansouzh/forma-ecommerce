@@ -59,7 +59,7 @@ export class Settings {
   @Prop({ required: true, min: 1, default: 5 })
   defaultProductionDays: number;
 
-  @Prop({ required: true, trim: true, default: "c3dcriativ" })
+  @Prop({ required: true, trim: true, default: "camada" })
   atelierName: string;
 
   @Prop({ required: true, trim: true, default: "Campina Grande — PB" })

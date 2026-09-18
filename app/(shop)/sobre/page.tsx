@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AtelierNumbers } from "@/components/sections/atelier-numbers";
 
 export const metadata: Metadata = {
-  title: "Sobre — c3dcriativ",
+  title: "Sobre",
   description:
     "Começou com uma impressora na sala e uma lista de espera de amigos. Hoje são quatro máquinas rodando em Campina Grande.",
   alternates: { canonical: "/sobre" },

@@ -1,7 +1,7 @@
 {
   "name": "forma-api",
   "version": "0.1.0",
-  "description": "Backend NestJS + MongoDB para o e-commerce FORMA.",
+  "description": "Backend NestJS + MongoDB para o e-commerce camada.",
   "private": true,
   "scripts": {
     "build": "nest build",

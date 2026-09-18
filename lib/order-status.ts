@@ -48,6 +48,6 @@ export function isPending(status: OrderStatus): boolean {
 
 export function whatsappLink(phone: string, code: string): string {
   const digits = phone.replace(/\D/g, "");
-  const text = encodeURIComponent(`Oi! Sobre o seu pedido ${code} na c3dcriativ:`);
+  const text = encodeURIComponent(`Oi! Sobre o seu pedido ${code} no Estúdio Camada:`);
   return `https://wa.me/${digits}?text=${text}`;
 }

@@ -1,4 +1,8 @@
-# FORMA. — Direção de Arte & Motion (v2)
+# Direção de Arte & Motion (v2)
+
+> **`FORMA.` é codinome aposentado.** A marca é **camada.** desde 17/09/2026 —
+> ver [`MARCA.md`](MARCA.md). As regras `A-0xx` abaixo continuam valendo: o que
+> mudou foi o nome, não o sistema. Onde o texto diz "FORMA", leia "camada".
 
 Análise feita sobre a metodologia do projeto **Floralist / Flora & Lis**
 (`diprosoft/flora-lis-site/docs/floralist` + `docs/opensourcestack`), que

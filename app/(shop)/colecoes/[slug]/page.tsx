@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/constants";
 import { notFound } from "next/navigation";
 import {
   canonicalCategory,
@@ -40,7 +41,7 @@ export async function generateMetadata({
     alternates: { canonical: `/colecoes/${category.slug}` },
     robots: isEmpty ? { index: false, follow: true } : undefined,
     openGraph: {
-      title: `${category.name} | c3dcriativ`,
+      title: `${category.name} | ${SITE_NAME}`,
       description: category.description,
     },
   };

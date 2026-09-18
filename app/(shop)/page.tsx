@@ -16,7 +16,9 @@ import { resolveHomeMedia } from "@/lib/home-media";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "c3dcriativ — Objetos impressos em 3D, um por vez",
+  // `absolute` porque o template de `app/layout.tsx` anexa "| camada":
+  // sem isto a home vira "camada — ... | camada".
+  title: { absolute: "camada — Objetos impressos em 3D, um por vez" },
   description:
     "Vasos, articulados, chaveiros e presentes impressos em 3D em Campina Grande. Você escolhe a cor; a peça é impressa depois do pedido.",
   alternates: { canonical: "/" },

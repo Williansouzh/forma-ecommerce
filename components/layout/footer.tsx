@@ -8,6 +8,7 @@ import {
   SITE_NAME,
 } from "@/lib/constants";
 import { getStoreSettings, whatsappUrlFor } from "@/lib/settings";
+import { Logotipo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const LOJA_LINKS = [
@@ -33,9 +34,8 @@ export async function Footer() {
     <footer className="ink gutter pb-[30px] pt-[clamp(46px,9vh,100px)]">
       <div className="mx-auto flex w-full max-w-[1360px] flex-wrap gap-[clamp(26px,5vw,80px)]">
         <div className="flex-[1_1_min(100%,320px)]">
-          <p className="font-display text-[clamp(26px,3.2vw,36px)] font-semibold tracking-[-0.02em]">
-            {SITE_NAME}
-            <span className="text-clay">.</span>
+          <p>
+            <Logotipo className="text-[clamp(26px,3.2vw,36px)] font-semibold" />
           </p>
 
           <p className="mt-3.5 max-w-[320px] text-body-small text-secondary">

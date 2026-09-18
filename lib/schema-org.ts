@@ -12,7 +12,9 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: `${SITE_URL}/icon.svg`,
+    // PNG, e não o `icon.svg`: o Google não aceita SVG em `Organization.logo`
+    // — com SVG o logotipo simplesmente não aparece nos resultados.
+    logo: `${SITE_URL}/brand/logo-512.png`,
   };
 }
 

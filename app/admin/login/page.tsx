@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { login } from "@/lib/admin-api";
+import { Logotipo } from "@/components/brand/logo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -38,8 +39,8 @@ export default function AdminLoginPage() {
           Voltar à loja
         </Link>
 
-        <h1 className="mt-6 font-display text-heading-2 tracking-tight">
-          Painel <span className="text-accent">c3dcriativ</span>
+        <h1 className="mt-6 flex items-center gap-2 font-display text-heading-2 tracking-tight">
+          Painel <Logotipo comSimbolo />
         </h1>
         <p className="mt-2 text-body-small text-secondary">
           Acesso restrito à equipe do estúdio.

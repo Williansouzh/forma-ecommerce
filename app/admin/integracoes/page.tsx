@@ -7,6 +7,7 @@ import {
   testR2,
   updateIntegration,
 } from "@/lib/admin-api";
+import { INSTAGRAM_HANDLE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
 import type { Integration, IntegrationKey } from "@/types/integration";
@@ -93,7 +94,7 @@ const SMALL_CARDS: { key: IntegrationKey; name: string; text: string }[] = [
   {
     key: "instagram",
     name: "Instagram Shopping",
-    text: "Marca as peças nos posts do @c3dcriativ e leva o clique direto para o produto.",
+    text: `Marca as peças nos posts do ${INSTAGRAM_HANDLE} e leva o clique direto para o produto.`,
   },
   {
     key: "nfe",

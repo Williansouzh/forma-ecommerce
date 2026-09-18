@@ -1,5 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#EFE9DE"/>
-  <path d="M22 46V18h20v5H28v6h12v5H28v12h-6z" fill="#26241E"/>
-  <circle cx="45" cy="43" r="3" fill="#AE5E3D"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Camada">
+  <!--
+    Ladrilho cheio, e não o símbolo solto: numa aba de tema escuro as barras
+    tinta desapareceriam sobre o fundo do navegador. O ladrilho carrega o
+    próprio contraste, em qualquer tema.
+  -->
+  <rect width="32" height="32" fill="#101012"/>
+  <rect x="11" y="6"  width="10" height="4" fill="#FF5A1F"/>
+  <rect x="5"  y="12" width="22" height="4" fill="#FBFBF9"/>
+  <rect x="7"  y="18" width="18" height="4" fill="#FBFBF9"/>
+  <rect x="9"  y="24" width="14" height="4" fill="#FBFBF9"/>
 </svg>

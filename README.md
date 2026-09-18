@@ -1,6 +1,7 @@
-# FORMA. — E-commerce de Impressão 3D Premium
+# camada. — E-commerce de impressão 3D
 
-E-commerce premium da marca **FORMA.** — estúdio de design + loja de colecionáveis + showroom digital. Construído seguindo a documentação de produto (design system, arquitetura, fluxos e roadmap Fase 1/MVP).
+E-commerce da marca **camada.** (Estúdio Camada) — estúdio de design + loja de
+colecionáveis + showroom digital. Identidade em [`docs/MARCA.md`](docs/MARCA.md). Construído seguindo a documentação de produto (design system, arquitetura, fluxos e roadmap Fase 1/MVP).
 
 ## Stack
 

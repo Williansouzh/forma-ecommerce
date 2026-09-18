@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Camada">
+  <!--
+    Quatro camadas empilhadas, larguras traçando o perfil de um vaso.
+    A de cima é a camada que está sendo impressa agora: é a única com cor.
+    Raio 0 em todas — é objeto, não interface (regra A-012 da direção de arte).
+  -->
+  <rect x="11" y="5"  width="10" height="5" fill="#C43C08"/>
+  <rect x="5"  y="11" width="22" height="5" fill="#101012"/>
+  <rect x="7"  y="17" width="18" height="5" fill="#101012"/>
+  <rect x="9"  y="23" width="14" height="5" fill="#101012"/>
+</svg>

@@ -9,6 +9,7 @@ import { logout as endSession } from "@/lib/admin-api";
 import { isPending } from "@/lib/order-status";
 import { cn } from "@/lib/utils";
 import { useAdminData } from "./admin-data";
+import { Logotipo } from "@/components/brand/logo";
 
 /**
  * A sidebar é sempre escura, independente do tema da loja — por isso os
@@ -147,9 +148,9 @@ export function AdminNav() {
     <Link
       href="/"
       style={{ color: SAND }}
-      className="whitespace-nowrap font-display text-[21px] tracking-[-0.02em]"
+      className="text-[21px]"
     >
-      c3dcriativ<span style={{ color: CLAY_LIGHT }}>.</span>
+      <Logotipo classeDoPonto="!text-[#D68A63]" />
     </Link>
   );
 

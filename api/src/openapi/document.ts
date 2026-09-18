@@ -38,7 +38,7 @@ function renameIdToWireFormat(document: OpenAPIObject): void {
 
 export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
-    .setTitle("c3dcriativ — API v1")
+    .setTitle("camada — API v1")
     .setDescription(
       "Contrato da API da loja. Preços em CENTAVOS (inteiros) em todos os campos monetários.",
     )

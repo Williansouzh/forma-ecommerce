@@ -3,7 +3,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Painel de gestão | c3dcriativ",
+  title: "Painel de gestão",
   robots: { index: false, follow: false },
 };
 

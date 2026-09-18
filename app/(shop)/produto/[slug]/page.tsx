@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/constants";
 import { notFound } from "next/navigation";
 import { fetchProductBySlug, fetchRelatedProducts } from "@/lib/api";
 import { getCategory } from "@/data/categories";
@@ -28,13 +29,13 @@ export async function generateMetadata({
     description: `${product.shortDescription} — Produção em impressão 3D com material, textura e prazo informados antes do envio.`,
     alternates: { canonical: `/produto/${product.slug}` },
     openGraph: {
-      title: `${product.name} | c3dcriativ`,
+      title: `${product.name} | ${SITE_NAME}`,
       description: product.shortDescription,
       images: product.images.map((image) => ({ url: image.url })),
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | c3dcriativ`,
+      title: `${product.name} | ${SITE_NAME}`,
       description: product.shortDescription,
     },
   };

@@ -3,7 +3,7 @@ import { SearchPageClient } from "./search-client";
 
 export const metadata: Metadata = {
   title: "Busca",
-  description: "Encontre peças por nome, categoria ou tag no catálogo da c3dcriativ.",
+  description: "Encontre peças por nome, categoria ou tag no catálogo do estúdio.",
   robots: { index: false },
 };
 

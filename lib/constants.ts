@@ -1,4 +1,18 @@
-export const SITE_NAME = "c3dcriativ";
+export const SITE_NAME = "camada";
+
+/**
+ * Razão social e uso formal (nota fiscal, contrato, rodapé de e-mail).
+ * O logotipo é sempre "camada." em caixa baixa; "Estúdio Camada" é para
+ * quando o nome precisa se apresentar por extenso.
+ */
+export const SITE_LEGAL_NAME = "Estúdio Camada";
+
+/*
+ * Os três valores abaixo ainda apontam para as contas antigas de propósito:
+ * o domínio, o @ do Instagram e o e-mail só trocam depois de registrados.
+ * Trocar aqui antes disso quebraria canonical, Open Graph e os links do
+ * rodapé em produção. Checklist da migração em `docs/MARCA.md`.
+ */
 export const SITE_URL = "https://c3dcriativ.com.br";
 export const SITE_DESCRIPTION =
   "Objetos de decoração, chaveiros e presentes feitos em pequena escala, camada por camada, com textura aparente e acabamento manual.";

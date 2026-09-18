@@ -10,7 +10,7 @@ import { AtelierNumbers } from "@/components/sections/atelier-numbers";
 import { MATERIALS, PROCESS_STAGES } from "@/lib/atelier-facts";
 
 export const metadata: Metadata = {
-  title: "Ateliê — c3dcriativ",
+  title: "Ateliê",
   description:
     "Quatro máquinas e uma bancada em Campina Grande. As etapas, os materiais e o tempo real de cada peça.",
   alternates: { canonical: "/atelier" },
