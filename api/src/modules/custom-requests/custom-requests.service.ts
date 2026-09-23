@@ -7,6 +7,7 @@ import {
   RequestStatus,
 } from "./schemas/custom-request.schema";
 import { CreateCustomRequestDto } from "./dto/custom-request.dto";
+import { SequenceService, highestCodeNumber } from "../sequences/sequence.service";
 
 type RawRequest = Omit<CustomRequest, "id"> & {
   _id?: Types.ObjectId | string;
@@ -20,6 +21,7 @@ export class CustomRequestsService {
   constructor(
     @InjectModel(CustomRequest.name)
     private readonly requestModel: Model<CustomRequestDocument>,
+    private readonly sequences: SequenceService,
   ) {}
 
   async findAll(status?: string): Promise<CustomRequest[]> {
@@ -57,16 +59,15 @@ export class CustomRequestsService {
     return mapId(updated);
   }
 
-  /** Mesma ressalva da numeração de pedidos: sequência simples, sem contador. */
+  /** O próximo `ORC-…`, de um contador atômico — ver `SequenceService`. */
   private async nextCode(): Promise<string> {
-    const last = await this.requestModel
-      .findOne({ code: new RegExp(`^${CODE_PREFIX}\\d+$`) })
-      .sort({ code: -1 })
-      .lean<{ code?: string } | null>();
-    const current = last?.code
-      ? Number(last.code.slice(CODE_PREFIX.length))
-      : FIRST_CODE - 1;
-    return `${CODE_PREFIX}${current + 1}`;
+    const next = await this.sequences.next(`request:${CODE_PREFIX}`, async () =>
+      Math.max(
+        FIRST_CODE - 1,
+        await highestCodeNumber(this.requestModel as unknown as Model<never>, CODE_PREFIX),
+      ),
+    );
+    return `${CODE_PREFIX}${next}`;
   }
 }
 

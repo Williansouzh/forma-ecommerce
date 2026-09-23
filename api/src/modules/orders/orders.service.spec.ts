@@ -214,6 +214,48 @@ describe("OrdersService e o estoque", () => {
     });
   });
 
+  /**
+   * Leitura do maior código e gravação eram passos separados: dois checkouts
+   * no mesmo instante pegavam o mesmo número, e um deles virava 500 no
+   * índice único. Com o contador ainda inexistente, isto também exercita a
+   * corrida da semente.
+   */
+  it("checkouts simultâneos recebem códigos distintos e consecutivos", async () => {
+    const productId = await makeProduct(50);
+
+    const created = await Promise.all(
+      Array.from({ length: 12 }, () => orders.create(orderPayload(productId, 1))),
+    );
+
+    const numbers = created.map((o) => Number(o.code.slice("C3D-".length))).sort((a, b) => a - b);
+    expect(new Set(numbers).size).toBe(12);
+    expect(numbers[11] - numbers[0]).toBe(11);
+  });
+
+  /**
+   * `sort({ code: -1 })` comparava texto: "C3D-9999" > "C3D-10000". Depois do
+   * pedido 10000, o próximo seria 10000 de novo — para sempre.
+   */
+  it("a numeração atravessa C3D-9999 → C3D-10000 e segue", async () => {
+    const productId = await makeProduct(10);
+    for (const code of ["C3D-9999", "C3D-10000"]) {
+      await orderModel.create({
+        code,
+        items: [],
+        customer: { email: "a@b.com", firstName: "A", lastName: "B", phone: "83988887777" },
+        paymentMethod: "pix",
+        subtotal: 0,
+        total: 0,
+      });
+    }
+
+    const first = await orders.create(orderPayload(productId, 1));
+    const second = await orders.create(orderPayload(productId, 1));
+
+    expect(first.code).toBe("C3D-10001");
+    expect(second.code).toBe("C3D-10002");
+  });
+
   /** Notificação repetida do Mercado Pago não pode baixar duas vezes. */
   it("webhook de pagamento repetido baixa uma vez só", async () => {
     const productId = await makeProduct(5);

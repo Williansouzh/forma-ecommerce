@@ -19,6 +19,7 @@ import {
   ShopeeProductLink,
   ShopeeProductLinkSchema,
 } from "./schemas/shopee-product-link.schema";
+import { SequencesModule } from "../sequences/sequences.module";
 
 /**
  * A Shopee como CANAL DE VENDA, não como dona do estoque.
@@ -42,6 +43,7 @@ import {
     IntegrationsModule,
     InventoryModule,
     OutboxModule,
+    SequencesModule,
   ],
   controllers: [ShopeeController, ShopeeWebhookController],
   providers: [

@@ -8,6 +8,7 @@ import { InventoryModule } from "../inventory/inventory.module";
 import { ShopeeModule } from "../shopee/shopee.module";
 import { ProductsModule } from "../products/products.module";
 import { SettingsModule } from "../settings/settings.module";
+import { SequencesModule } from "../sequences/sequences.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SettingsModule } from "../settings/settings.module";
     // do corpo da requisição — ver `pricing.ts`.
     ProductsModule,
     SettingsModule,
+    SequencesModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

@@ -9,6 +9,7 @@ import { ShopeeInventoryService } from "../shopee/shopee-inventory.service";
 import { ProductsService } from "../products/products.service";
 import { SettingsService } from "../settings/settings.service";
 import { priceOrder, type CatalogEntry } from "./pricing";
+import { SequenceService, highestCodeNumber } from "../sequences/sequence.service";
 
 export interface OrderQuery {
   status?: string;
@@ -59,6 +60,7 @@ export class OrdersService {
     private readonly shopeeStock: ShopeeInventoryService,
     private readonly products: ProductsService,
     private readonly settings: SettingsService,
+    private readonly sequences: SequenceService,
   ) {}
 
   async findAll(query: OrderQuery): Promise<Order[]> {
@@ -364,20 +366,15 @@ export class OrdersService {
     }
   }
 
-  /**
-   * Sequência legível a partir do maior código já gravado. Um ateliê tem um
-   * pedido por vez; se o volume crescer, trocar por uma coleção de contadores
-   * com $inc, que é atômica.
-   */
+  /** O próximo `C3D-…`, de um contador atômico — ver `SequenceService`. */
   private async nextCode(): Promise<string> {
-    const last = await this.orderModel
-      .findOne({ code: new RegExp(`^${CODE_PREFIX}\\d+$`) })
-      .sort({ code: -1 })
-      .lean<{ code?: string } | null>();
-    const current = last?.code
-      ? Number(last.code.slice(CODE_PREFIX.length))
-      : FIRST_CODE - 1;
-    return `${CODE_PREFIX}${current + 1}`;
+    const next = await this.sequences.next(`order:${CODE_PREFIX}`, async () =>
+      Math.max(
+        FIRST_CODE - 1,
+        await highestCodeNumber(this.orderModel as unknown as Model<never>, CODE_PREFIX),
+      ),
+    );
+    return `${CODE_PREFIX}${next}`;
   }
 }
 

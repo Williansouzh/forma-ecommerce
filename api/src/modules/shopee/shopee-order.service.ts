@@ -8,6 +8,7 @@ import {
 } from "../orders/schemas/order.schema";
 import { InventoryService } from "../inventory/inventory.service";
 import { OutboxService } from "../outbox/outbox.service";
+import { SequenceService, highestCodeNumber } from "../sequences/sequence.service";
 import { ShopeeApiClient, isAuthError } from "./shopee-api.client";
 import { ShopeeAuthService } from "./shopee-auth.service";
 import { ShopeeLinkService } from "./shopee-link.service";
@@ -89,6 +90,7 @@ export class ShopeeOrderService {
     private readonly api: ShopeeApiClient,
     private readonly stock: ShopeeInventoryService,
     private readonly outbox: OutboxService,
+    private readonly sequences: SequenceService,
   ) {}
 
   /**
@@ -551,12 +553,10 @@ export class ShopeeOrderService {
 
   /** Sequência própria: `SHP-…` distingue na hora o que veio do marketplace. */
   private async nextCode(): Promise<string> {
-    const last = await this.orderModel
-      .findOne({ code: new RegExp(`^${CODE_PREFIX}\\d+$`) })
-      .sort({ code: -1 })
-      .lean<{ code?: string } | null>();
-    const current = last?.code ? Number(last.code.slice(CODE_PREFIX.length)) : 1000;
-    return `${CODE_PREFIX}${current + 1}`;
+    const next = await this.sequences.next(`order:${CODE_PREFIX}`, async () =>
+      Math.max(1000, await highestCodeNumber(this.orderModel as unknown as Model<never>, CODE_PREFIX)),
+    );
+    return `${CODE_PREFIX}${next}`;
   }
 }
 

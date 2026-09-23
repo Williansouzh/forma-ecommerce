@@ -6,12 +6,14 @@ import {
   CustomRequest,
   CustomRequestSchema,
 } from "./schemas/custom-request.schema";
+import { SequencesModule } from "../sequences/sequences.module";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: CustomRequest.name, schema: CustomRequestSchema },
     ]),
+    SequencesModule,
   ],
   controllers: [CustomRequestsController],
   providers: [CustomRequestsService],
