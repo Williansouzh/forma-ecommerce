@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { PaymentsService } from "./payments.service";
+import { PaymentsService, buildPreference } from "./payments.service";
 import type { IntegrationsService } from "../integrations/integrations.service";
 import type { OrdersService } from "../orders/orders.service";
 import type { WhatsappService } from "../notifications/whatsapp.service";
@@ -138,5 +138,124 @@ describe("PaymentsService.verifySignature", () => {
     await expect(
       service.verifySignature(DATA_ID, { signature }),
     ).resolves.toBe(true);
+  });
+});
+
+/** O que o Mercado Pago cobraria por uma preferência: itens mais frete. */
+function charged(preference: ReturnType<typeof buildPreference>): number {
+  const items = preference.items.reduce(
+    (acc, item) => acc + Math.round(item.unit_price * 100) * item.quantity,
+    0,
+  );
+  const shipping = "shipments" in preference ? Math.round(preference.shipments!.cost * 100) : 0;
+  return items + shipping;
+}
+
+const URLS = { apiUrl: "https://api.loja", siteUrl: "https://loja" };
+
+/** Pedido Pix de duas peças: 2×12.990 + 5.990, 5% de desconto, frete 2.990. */
+const PEDIDO_PIX = {
+  code: "C3D-4900",
+  items: [
+    { name: "Vaso Onda", quantity: 2, price: 12990 },
+    { name: "Luminária", quantity: 1, price: 5990 },
+  ],
+  customer: { firstName: "Ana", lastName: "Lima", email: "ana@exemplo.com" },
+  paymentMethod: "pix",
+  shipping: 2990,
+  discount: 1599,
+  total: 31970 + 2990 - 1599,
+};
+
+describe("buildPreference", () => {
+  /**
+   * O defeito que isto fecha: os itens iam a preço cheio, o desconto do Pix
+   * ficava de fora, o cliente pagava a mais e o webhook recusava o valor.
+   */
+  it("com desconto do Pix, cobra exatamente o total do pedido", () => {
+    expect(charged(buildPreference(PEDIDO_PIX, URLS))).toBe(PEDIDO_PIX.total);
+  });
+
+  it("com desconto do Pix, aceita só Pix", () => {
+    const preference = buildPreference(PEDIDO_PIX, URLS);
+    const excluded = preference.payment_methods?.excluded_payment_types.map((t) => t.id);
+    expect(excluded).toEqual(expect.arrayContaining(["credit_card", "debit_card", "ticket"]));
+    expect(excluded).not.toContain("bank_transfer");
+  });
+
+  it("sem desconto, mantém as linhas e todos os meios de pagamento", () => {
+    const cartao = { ...PEDIDO_PIX, paymentMethod: "credit_card", discount: 0, total: 31970 + 2990 };
+    const preference = buildPreference(cartao, URLS);
+
+    expect(preference.items).toHaveLength(2);
+    expect(preference.payment_methods).toBeUndefined();
+    expect(charged(preference)).toBe(cartao.total);
+  });
+
+  it("frete grátis não manda `shipments`", () => {
+    const semFrete = { ...PEDIDO_PIX, shipping: 0, total: 31970 - 1599 };
+    const preference = buildPreference(semFrete, URLS);
+
+    expect("shipments" in preference).toBe(false);
+    expect(charged(preference)).toBe(semFrete.total);
+  });
+});
+
+/**
+ * O ciclo que nunca tinha sido exercitado: preferência criada, pagamento
+ * aprovado pelo valor que ELA cobra, webhook dando o pedido como pago.
+ */
+describe("PaymentsService — Mercado Pago de ponta a ponta", () => {
+  const realFetch = global.fetch;
+  afterEach(() => {
+    global.fetch = realFetch;
+  });
+
+  it("um Pix com desconto pago pelo valor da preferência marca o pedido como pago", async () => {
+    const pedido = { ...PEDIDO_PIX, status: "pending" };
+    let sentPreference: ReturnType<typeof buildPreference> | null = null;
+
+    global.fetch = jest.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const href = String(url);
+      if (href.endsWith("/checkout/preferences")) {
+        sentPreference = JSON.parse(String(init?.body));
+        return new Response(JSON.stringify({ id: "pref-1", init_point: "https://mp/pay" }));
+      }
+      // A consulta do pagamento: aprovado pelo que a preferência cobrou.
+      return new Response(
+        JSON.stringify({
+          status: "approved",
+          external_reference: pedido.code,
+          transaction_amount: charged(sentPreference!) / 100,
+        }),
+      );
+    }) as typeof fetch;
+
+    const markPaidByCode = jest.fn().mockResolvedValue({ ...pedido, status: "paid", customer: { phone: "" } });
+    const service = new PaymentsService(
+      {
+        isEnabled: jest.fn().mockResolvedValue(true),
+        secretsFor: jest.fn().mockResolvedValue({ accessToken: "tok" }),
+      } as unknown as IntegrationsService,
+      {
+        findByCode: jest.fn().mockResolvedValue(pedido),
+        attachPayment: jest.fn().mockResolvedValue(pedido),
+        markPaidByCode,
+      } as unknown as OrdersService,
+      {
+        notifyOrderStage: jest.fn().mockResolvedValue({ sent: false, reason: "desligado" }),
+      } as unknown as WhatsappService,
+      { get: jest.fn().mockReturnValue("https://x") } as unknown as ConfigService<ApiConfig>,
+      {} as SettingsService,
+      new PixService(),
+    );
+
+    const instruction = await service.createPreferenceForOrder(pedido.code);
+    expect(instruction.paymentUrl).toBe("https://mp/pay");
+
+    const result = await service.handlePaymentNotification("pay-1");
+
+    expect(result.handled).toBe(true);
+    expect(markPaidByCode).toHaveBeenCalledWith(pedido.code);
   });
 });

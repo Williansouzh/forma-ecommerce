@@ -42,6 +42,81 @@ interface MercadoPagoPayment {
   transaction_amount?: number;
 }
 
+/** O que a preferência precisa saber do pedido. Valores em CENTAVOS. */
+export interface PreferenceOrder {
+  code: string;
+  items: { name: string; quantity: number; price: number }[];
+  customer: { firstName: string; lastName: string; email: string };
+  paymentMethod: string;
+  shipping: number;
+  discount: number;
+  total: number;
+}
+
+/**
+ * Tipos de pagamento que NÃO são Pix, na nomenclatura do Mercado Pago (o Pix
+ * é `bank_transfer`). Excluídos quando o pedido foi fechado no Pix.
+ */
+const NAO_PIX = ["credit_card", "debit_card", "ticket", "atm", "prepaid_card"];
+
+/**
+ * O corpo da preferência do Checkout Pro.
+ *
+ * A soma do que ela cobra TEM de ser `order.total`, porque é contra ele que o
+ * webhook confere o valor aprovado. Antes os itens iam a preço cheio e o
+ * desconto do Pix ficava de fora: o cliente pagava mais do que viu na tela, o
+ * webhook via a diferença e o pedido nunca saía de "aguardando pagamento".
+ *
+ * Com desconto, o pedido vai como UM item com o valor já descontado: o
+ * Mercado Pago não aceita item de preço negativo, e ratear o desconto entre
+ * as linhas arredondaria centavo por centavo até não fechar a conta. E como
+ * o desconto é do Pix, a preferência aceita só Pix — do contrário bastaria
+ * escolher Pix na loja e pagar com cartão lá.
+ */
+export function buildPreference(
+  order: PreferenceOrder,
+  urls: { apiUrl: string; siteUrl: string },
+) {
+  const back = `${urls.siteUrl}/checkout?pedido=${order.code}`;
+  const pecas = order.items.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Preços do domínio são centavos; o Mercado Pago fala em reais.
+  const items =
+    order.discount > 0
+      ? [
+          {
+            title: `Pedido ${order.code} · ${pecas} ${pecas === 1 ? "peça" : "peças"} (desconto Pix)`,
+            quantity: 1,
+            currency_id: "BRL",
+            unit_price: (order.total - order.shipping) / 100,
+          },
+        ]
+      : order.items.map((item) => ({
+          title: item.name,
+          quantity: item.quantity,
+          currency_id: "BRL",
+          unit_price: item.price / 100,
+        }));
+
+  return {
+    external_reference: order.code,
+    notification_url: `${urls.apiUrl}/api/v1/payments/mercadopago/webhook`,
+    back_urls: { success: back, pending: back, failure: back },
+    payer: {
+      name: order.customer.firstName,
+      surname: order.customer.lastName,
+      email: order.customer.email,
+    },
+    items,
+    ...(order.shipping > 0
+      ? { shipments: { cost: order.shipping / 100, mode: "not_specified" } }
+      : {}),
+    ...(order.paymentMethod === "pix" && order.discount > 0
+      ? { payment_methods: { excluded_payment_types: NAO_PIX.map((id) => ({ id })) } }
+      : {}),
+  };
+}
+
 /** A instrução vazia; cada retorno sobrescreve só o que preenche. */
 const VAZIO: PaymentInstruction = {
   preferenceId: null,
@@ -117,9 +192,6 @@ export class PaymentsService {
       );
     }
 
-    const apiUrl = this.config.get<string>("publicApiUrl");
-    const siteUrl = this.config.get<string>("publicSiteUrl");
-
     const response = await fetch(
       "https://api.mercadopago.com/checkout/preferences",
       {
@@ -128,30 +200,12 @@ export class PaymentsService {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          external_reference: order.code,
-          notification_url: `${apiUrl}/api/v1/payments/mercadopago/webhook`,
-          back_urls: {
-            success: `${siteUrl}/checkout?pedido=${order.code}`,
-            pending: `${siteUrl}/checkout?pedido=${order.code}`,
-            failure: `${siteUrl}/checkout?pedido=${order.code}`,
-          },
-          payer: {
-            name: order.customer.firstName,
-            surname: order.customer.lastName,
-            email: order.customer.email,
-          },
-          // Preços do domínio são centavos; o Mercado Pago fala em reais.
-          items: order.items.map((item) => ({
-            title: item.name,
-            quantity: item.quantity,
-            currency_id: "BRL",
-            unit_price: item.price / 100,
-          })),
-          ...(order.shipping > 0
-            ? { shipments: { cost: order.shipping / 100, mode: "not_specified" } }
-            : {}),
-        }),
+        body: JSON.stringify(
+          buildPreference(order, {
+            apiUrl: this.config.get<string>("publicApiUrl") ?? "",
+            siteUrl: this.config.get<string>("publicSiteUrl") ?? "",
+          }),
+        ),
       },
     ).catch(() => null);
 
