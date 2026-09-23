@@ -140,7 +140,7 @@ export async function fetchProducts(
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   try {
-    const raw = await request<ApiProduct | null>(`/products/${slug}`);
+    const raw = await request<ApiProduct | null>(`/products/${encodeURIComponent(slug)}`);
     return raw ? mapProduct(raw) : null;
   } catch {
     return getProduct(slug) ?? null;

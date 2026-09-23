@@ -52,10 +52,16 @@ export class ProductsController {
     });
   }
 
+  /** Peça despublicada não sai para o público — mesmo corte da listagem. */
   @Public()
   @Get(":slug")
-  async findBySlug(@Param("slug") slug: string) {
-    const product = await this.productsService.findBySlug(slug);
+  async findBySlug(
+    @Param("slug") slug: string,
+    @CurrentUser() user: AuthenticatedUser | null,
+  ) {
+    const product = await this.productsService.findBySlug(slug, {
+      includeUnpublished: user?.role === "superadmin",
+    });
     if (!product) return null;
     return product;
   }

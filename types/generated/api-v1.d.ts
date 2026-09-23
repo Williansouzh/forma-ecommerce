@@ -374,6 +374,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Peça despublicada não sai para o público — mesmo corte da listagem. */
         get: operations["Products_findBySlug"];
         put?: never;
         post?: never;

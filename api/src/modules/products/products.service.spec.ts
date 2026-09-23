@@ -54,6 +54,15 @@ describe("ProductsService e o ledger", () => {
     return String(created._id);
   }
 
+  it("peça despublicada não sai pelo slug para o público; para o painel, sai", async () => {
+    const productId = await makeProduct(3);
+    await productModel.updateOne({ _id: productId }, { $set: { isAvailable: false } });
+    const { slug } = (await productModel.findById(productId).lean())!;
+
+    expect(await products.findBySlug(slug)).toBeNull();
+    expect((await products.findBySlug(slug, { includeUnpublished: true }))?.slug).toBe(slug);
+  });
+
   /** Uma venda do site acontecendo enquanto o formulário está aberto. */
   async function sellOne(productId: string, variantId = "") {
     const key = `SITE:teste:${productId}:${variantId}:${Math.random()}`;

@@ -102,9 +102,19 @@ export class ProductsService {
     return rows.map(mapId);
   }
 
-  async findBySlug(slug: string): Promise<Product | null> {
+  /**
+   * A listagem já escondia peça despublicada; a leitura por slug não, e a
+   * página da peça abria para quem tivesse o link — com preço e nome de
+   * lançamento, e o botão de comprar ativo até o checkout recusar.
+   */
+  async findBySlug(
+    slug: string,
+    options: { includeUnpublished?: boolean } = {},
+  ): Promise<Product | null> {
     const row = await this.productModel
-      .findOne({ slug })
+      .findOne(
+        options.includeUnpublished ? { slug } : { slug, isAvailable: { $ne: false } },
+      )
       .lean<RawProduct | null>();
     return row ? mapId(row) : null;
   }
