@@ -1416,7 +1416,7 @@
     }
   },
   "info": {
-    "title": "c3dcriativ — API v1",
+    "title": "camada — API v1",
     "description": "Contrato da API da loja. Preços em CENTAVOS (inteiros) em todos os campos monetários.",
     "version": "1.0.0",
     "contact": {}
@@ -2306,7 +2306,7 @@
           },
           "lastName": {
             "type": "string",
-            "minLength": 1
+            "description": "Pode vir vazio: a loja tem um campo só de nome e o divide no primeiro\nespaço, então quem digita \"Maria\" chega sem sobrenome — e não pode ficar\nsem conseguir comprar por isso."
           },
           "phone": {
             "type": "string",

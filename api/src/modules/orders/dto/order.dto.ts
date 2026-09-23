@@ -50,7 +50,12 @@ export class CustomerDto {
   @IsString() @MinLength(1)
   firstName!: string;
 
-  @IsString() @MinLength(1)
+  /**
+   * Pode vir vazio: a loja tem um campo só de nome e o divide no primeiro
+   * espaço, então quem digita "Maria" chega sem sobrenome — e não pode ficar
+   * sem conseguir comprar por isso.
+   */
+  @IsString()
   lastName!: string;
 
   @IsString() @MinLength(8) @MaxLength(20)

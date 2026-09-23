@@ -856,6 +856,11 @@ export interface components {
             /** Format: email */
             email: string;
             firstName: string;
+            /**
+             * @description Pode vir vazio: a loja tem um campo só de nome e o divide no primeiro
+             *     espaço, então quem digita "Maria" chega sem sobrenome — e não pode ficar
+             *     sem conseguir comprar por isso.
+             */
             lastName: string;
             phone: string;
         };

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { customerFacingMessage } from "@/lib/api-error";
 import { getCartTotals } from "@/lib/cart";
 import { getStoreSettings } from "@/lib/settings";
 import type { CartItem } from "@/types/cart";
@@ -86,11 +87,8 @@ export async function POST(request: NextRequest) {
           message?: string | string[];
         } | null)
       : null;
-    const message = Array.isArray(detail?.message)
-      ? detail.message.join(", ")
-      : detail?.message;
     return NextResponse.json(
-      { error: message ?? "Não foi possível registrar o pedido" },
+      { error: customerFacingMessage(detail, "Não foi possível registrar o pedido") },
       { status: response?.status ?? 502 }
     );
   }

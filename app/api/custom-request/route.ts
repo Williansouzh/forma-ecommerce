@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { customerFacingMessage } from "@/lib/api-error";
 import type { CustomType } from "@/types/custom-request";
 
 const API_URL =
@@ -70,11 +71,8 @@ export async function POST(request: NextRequest) {
           message?: string | string[];
         } | null)
       : null;
-    const message = Array.isArray(detail?.message)
-      ? detail.message.join(", ")
-      : detail?.message;
     return NextResponse.json(
-      { error: message ?? "Não foi possível registrar a solicitação" },
+      { error: customerFacingMessage(detail, "Não foi possível registrar a solicitação") },
       { status: response?.status ?? 502 }
     );
   }
