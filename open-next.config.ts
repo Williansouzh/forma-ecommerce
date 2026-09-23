@@ -19,5 +19,14 @@ import { defineCloudflareConfig } from "@opennextjs/cloudflare";
  * `force-dynamic` (catálogo e produto leem a API a cada visita) e as do painel
  * não podem ser cacheadas mesmo. Ligar R2 ou KV aqui só faria sentido no dia
  * em que houver ISR de verdade para guardar.
+ *
+ * `buildCommand` é `next build` direto, e não o padrão `npm run build`: no
+ * Workers Builds o `npm run build` É quem chama este adaptador
+ * (`scripts/build.mjs`), e o padrão entraria em laço.
  */
-export default defineCloudflareConfig();
+const config = {
+  ...defineCloudflareConfig(),
+  buildCommand: "npx next build",
+};
+
+export default config;
