@@ -39,6 +39,14 @@ export class ProductVariantDto {
 
   @IsInt() @Min(0)
   stock: number = 0;
+
+  /**
+   * O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:
+   * campo intocado, nada muda. Diferente do saldo atual: houve venda no meio
+   * tempo, e a API responde 409 em vez de sobrescrevê-la.
+   */
+  @IsOptional() @IsInt() @Min(0)
+  stockBefore?: number;
 }
 
 export class DimensionsDto {
@@ -151,6 +159,14 @@ export class UpdateProductDto {
 
   @IsOptional() @IsInt() @Min(0)
   stock?: number;
+
+  /**
+   * O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:
+   * campo intocado, nada muda. Diferente do saldo atual: houve venda no meio
+   * tempo, e a API responde 409 em vez de sobrescrevê-la.
+   */
+  @IsOptional() @IsInt() @Min(0)
+  stockBefore?: number;
 
   @IsOptional() @ValidateNested()
   @Type(() => DimensionsDto)

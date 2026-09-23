@@ -1663,6 +1663,11 @@
             "type": "number",
             "default": 0,
             "minimum": 0
+          },
+          "stockBefore": {
+            "type": "number",
+            "description": "O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:\ncampo intocado, nada muda. Diferente do saldo atual: houve venda no meio\ntempo, e a API responde 409 em vez de sobrescrevê-la.",
+            "minimum": 0
           }
         },
         "required": [
@@ -1855,6 +1860,11 @@
           },
           "stock": {
             "type": "number",
+            "minimum": 0
+          },
+          "stockBefore": {
+            "type": "number",
+            "description": "O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:\ncampo intocado, nada muda. Diferente do saldo atual: houve venda no meio\ntempo, e a API responde 409 em vez de sobrescrevê-la.",
             "minimum": 0
           },
           "dimensions": {

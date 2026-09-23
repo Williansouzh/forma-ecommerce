@@ -1,7 +1,7 @@
 "use client";
 
 import type { Order, OrderStatus } from "@/types/order";
-import type { Product } from "@/types/product";
+import type { Product, ProductVariant } from "@/types/product";
 import type {
   Integration,
   IntegrationKey,
@@ -113,9 +113,16 @@ export interface ProductImageInput {
 }
 
 export type ProductInput = Partial<
-  Omit<Product, "id" | "createdAt" | "updatedAt" | "images">
+  Omit<Product, "id" | "createdAt" | "updatedAt" | "images" | "variants">
 > & {
   images?: ProductImageInput[];
+  variants?: (ProductVariant & { stockBefore?: number })[];
+  /**
+   * O saldo que a tela mostrava ao editar. Com ele a API não confunde "campo
+   * intocado" com "a pessoa digitou este número", e recusa (409) em vez de
+   * desfazer uma venda feita com o formulário aberto.
+   */
+  stockBefore?: number;
 };
 
 /**

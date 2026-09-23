@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { randomUUID } from "crypto";
@@ -185,9 +185,9 @@ export class ProductsService {
       throw new NotFoundException("Produto não encontrado");
     }
 
-    const { stock, variants, ...rest } = dto as UpdateProductDto & {
+    const { stock, stockBefore, variants, ...rest } = dto as UpdateProductDto & {
       stock?: number;
-      variants?: { id: string; stock?: number }[];
+      variants?: { id: string; stock?: number; stockBefore?: number }[];
     };
 
     const before = await this.productModel.findById(id).lean<RawProduct | null>();
@@ -215,7 +215,7 @@ export class ProductsService {
       const projected = new Map(
         (before.variants ?? []).map((variant) => [variant.id, variant.stock]),
       );
-      set.variants = variants.map((variant) => ({
+      set.variants = variants.map(({ stockBefore: _lido, ...variant }) => ({
         ...variant,
         stock: projected.get(variant.id) ?? 0,
       }));
@@ -229,11 +229,18 @@ export class ProductsService {
     const correlationId = randomUUID();
 
     if (typeof stock === "number") {
-      await this.applyStockEdit(id, "", stock, actor, correlationId);
+      await this.applyStockEdit(id, "", stock, stockBefore, actor, correlationId);
     }
     for (const variant of variants ?? []) {
       if (typeof variant.stock === "number") {
-        await this.applyStockEdit(id, variant.id, variant.stock, actor, correlationId);
+        await this.applyStockEdit(
+          id,
+          variant.id,
+          variant.stock,
+          variant.stockBefore,
+          actor,
+          correlationId,
+        );
       }
     }
 
@@ -248,16 +255,31 @@ export class ProductsService {
    * Ajustar para MENOS do que existe em lote é recusado pelo domínio, e a
    * recusa sobe para o painel — melhor um erro claro que um saldo que o ledger
    * não sustenta.
+   *
+   * `before` é o saldo que o painel mostrava. O formulário reenvia `stock` em
+   * todo salvamento, e sem essa referência "o campo agora vale 5" não tinha
+   * como distinguir "a pessoa digitou 5" de "a tela ainda mostrava 5": uma
+   * venda feita com o formulário aberto era desfeita ao salvar o nome. Agora
+   * campo intocado não ajusta nada, e saldo que mudou por baixo é recusado.
    */
   private async applyStockEdit(
     productId: string,
     variantId: string,
     target: number,
+    before: number | undefined,
     actor: string | undefined,
     correlationId: string,
   ): Promise<void> {
+    if (before !== undefined && Math.trunc(target) === before) return;
+
     const sku = { productId, variantId };
     const current = await this.inventory.getStock(sku);
+    if (before !== undefined && current.available !== before) {
+      throw new ConflictException(
+        `O estoque mudou enquanto você editava: eram ${before} disponíveis, agora são ` +
+          `${current.available}. Recarregue a peça e ajuste de novo.`,
+      );
+    }
     const delta = Math.trunc(target) - current.available;
     if (delta === 0) return;
 

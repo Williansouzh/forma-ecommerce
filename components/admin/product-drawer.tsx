@@ -156,7 +156,11 @@ export function ProductDrawer({
       price: parsePriceToCents(draft.price),
       category: draft.category,
       images,
-      variants: draft.variants,
+      // Cada variação vai com o saldo que o formulário leu: o campo não é
+      // editável aqui, então para a API é sempre "intocado".
+      variants: product
+        ? draft.variants.map((variant) => ({ ...variant, stockBefore: variant.stock }))
+        : draft.variants,
       isAvailable: draft.isAvailable,
       isFeatured: draft.isFeatured,
       isCustom: draft.isCustom,
@@ -164,6 +168,9 @@ export function ProductDrawer({
         ? { originalPrice: parsePriceToCents(draft.originalPrice) }
         : {}),
       ...(draft.stock.trim() ? { stock: Number(draft.stock) } : {}),
+      ...(draft.stock.trim() && product?.stock != null
+        ? { stockBefore: product.stock }
+        : {}),
       ...(draft.productionTime.trim()
         ? { productionTime: Number(draft.productionTime) }
         : {}),

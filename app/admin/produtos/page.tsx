@@ -50,7 +50,14 @@ export default function AdminProductsPage() {
     setBusy(product.id);
     patchProduct(product.id, fields);
     try {
-      await updateProduct(product.id, fields);
+      // Estoque vai com o saldo que a linha mostrava: se uma venda mexeu nele
+      // desde que a lista carregou, a API recusa em vez de desfazê-la.
+      await updateProduct(product.id, {
+        ...fields,
+        ...("stock" in fields && product.stock != null
+          ? { stockBefore: product.stock }
+          : {}),
+      });
       pushToast(message);
     } catch (err) {
       patchProduct(product.id, product);

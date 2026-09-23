@@ -54,6 +54,62 @@ describe("ProductsService e o ledger", () => {
     return String(created._id);
   }
 
+  /** Uma venda do site acontecendo enquanto o formulário está aberto. */
+  async function sellOne(productId: string, variantId = "") {
+    const key = `SITE:teste:${productId}:${variantId}:${Math.random()}`;
+    await inventory.reserve({ productId, variantId, quantity: 1, key }, { channel: "SITE" });
+    await inventory.confirmSale(key, { channel: "SITE" });
+  }
+
+  /**
+   * O formulário do painel reenvia `stock` em todo salvamento. Com o campo
+   * intocado e uma venda no meio tempo, o "ajuste" de volta ao número que a
+   * tela mostrava devolvia ao estoque a peça que acabara de ser vendida.
+   */
+  it("salvar sem mexer no estoque não desfaz uma venda feita no meio tempo", async () => {
+    const productId = await makeProduct(5);
+    await sellOne(productId);
+
+    await products.update(productId, { name: "Cactos Novos", stock: 5, stockBefore: 5 }, "admin");
+
+    expect((await inventory.getStock({ productId, variantId: "" })).available).toBe(4);
+    const ledger = await inventory.listLedger({ productId, variantId: "" }, 20);
+    expect(ledger.filter((e) => e.channel === "ADMIN")).toHaveLength(0);
+  });
+
+  it("mudar o estoque a partir de um saldo desatualizado é recusado", async () => {
+    const productId = await makeProduct(5);
+    await sellOne(productId);
+
+    await expect(
+      products.update(productId, { stock: 10, stockBefore: 5 }, "admin"),
+    ).rejects.toMatchObject({ status: 409 });
+    expect((await inventory.getStock({ productId, variantId: "" })).available).toBe(4);
+  });
+
+  it("com o saldo em dia, a mudança vale normalmente", async () => {
+    const productId = await makeProduct(5);
+
+    await products.update(productId, { stock: 8, stockBefore: 5 }, "admin");
+
+    expect((await inventory.getStock({ productId, variantId: "" })).available).toBe(8);
+  });
+
+  /** As variações iam no mesmo corpo, com o saldo lido na abertura. */
+  it("salvar não desfaz a venda de uma variação", async () => {
+    const productId = await makeProduct(undefined, [{ id: "verde", stock: 3 }]);
+    await inventory.getStock({ productId, variantId: "verde" });
+    await sellOne(productId, "verde");
+
+    await products.update(
+      productId,
+      { variants: [{ id: "verde", name: "verde", priceAdjustment: 0, stock: 3, stockBefore: 3 }] },
+      "admin",
+    );
+
+    expect((await inventory.getStock({ productId, variantId: "verde" })).available).toBe(2);
+  });
+
   it("subir o estoque pelo painel vira entrada no ledger", async () => {
     const productId = await makeProduct(4);
 

@@ -1039,6 +1039,12 @@ export interface components {
             priceAdjustment: number;
             /** @default 0 */
             stock: number;
+            /**
+             * @description O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:
+             *     campo intocado, nada muda. Diferente do saldo atual: houve venda no meio
+             *     tempo, e a API responde 409 em vez de sobrescrevê-la.
+             */
+            stockBefore?: number;
         };
         ProductVariantEmbed: {
             colorHex?: string;
@@ -1217,6 +1223,12 @@ export interface components {
             productionTime?: number;
             shortDescription?: string;
             stock?: number;
+            /**
+             * @description O saldo que o painel MOSTRAVA quando a pessoa editou. Igual a `stock`:
+             *     campo intocado, nada muda. Diferente do saldo atual: houve venda no meio
+             *     tempo, e a API responde 409 em vez de sobrescrevê-la.
+             */
+            stockBefore?: number;
             tags?: string[];
             variants?: components["schemas"]["ProductVariantDto"][];
             weight?: number;
