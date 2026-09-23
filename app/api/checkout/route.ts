@@ -36,7 +36,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "E-mail inválido" }, { status: 400 });
   }
 
-  // Frete grátis e desconto no Pix saem das configurações do ateliê.
+  // Os totais daqui são só o que a pessoa VIU, calculados com os preços do
+  // carrinho dela. A API recalcula tudo pelo catálogo e registra no log quando
+  // os dois divergem; o que volta para a tela é o que ela gravou.
   const settings = await getStoreSettings();
   const totals = getCartTotals(items, settings.freeShippingThreshold);
   const discount =
@@ -93,7 +95,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const created = (await response.json()) as { id: string; code: string };
+  const created = (await response.json()) as {
+    id: string;
+    code: string;
+    subtotal: number;
+    shipping: number;
+    discount: number;
+    total: number;
+  };
 
   /*
    * Como pagar. Com o Mercado Pago ligado, sai um link; sem ele, a API emite
@@ -141,7 +150,16 @@ export async function POST(request: NextRequest) {
       // cliente: sem isto ela precisaria de uma segunda ida ao servidor só
       // para saber para onde mandar o comprovante.
       whatsappNumber: settings.whatsappNumber ?? "",
-      totals: { ...totals, discount, total: totals.total - discount },
+      // Do pedido GRAVADO, não do carrinho: com um preço alterado desde que a
+      // peça entrou na sacola, o carrinho diria um número e o Pix — montado
+      // pela API a partir do pedido — cobraria outro.
+      totals: {
+        count: totals.count,
+        subtotal: created.subtotal,
+        shipping: created.shipping,
+        discount: created.discount,
+        total: created.total,
+      },
     },
     { status: 201 }
   );
