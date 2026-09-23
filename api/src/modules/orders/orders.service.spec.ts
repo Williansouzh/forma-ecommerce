@@ -151,6 +151,69 @@ describe("OrdersService e o estoque", () => {
     expect(ledger.find((e) => e.type === "sale")?.orderCode).toBe(order.code);
   });
 
+  /** Faz a reserva do pedido vencer e a varredura periódica devolvê-la. */
+  async function expireReservationsOf(code: string) {
+    await connection
+      .collection("stock_reservations")
+      .updateMany({ orderCode: code }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
+    await inventory.releaseExpiredReservations();
+  }
+
+  /**
+   * O caso comum do Pix direto e do boleto: o pagamento chega depois de a
+   * reserva de 60 minutos vencer. Antes, a confirmação via a reserva já
+   * liberada, respondia `already` e o estoque NUNCA baixava — a peça paga
+   * seguia à venda no site e na Shopee.
+   */
+  it("pagamento depois de a reserva vencer ainda baixa o estoque", async () => {
+    const productId = await makeProduct(5);
+    const order = await orders.create(orderPayload(productId, 2));
+    await expireReservationsOf(order.code);
+    expect((await inventory.getStock({ productId, variantId: "" })).reserved).toBe(0);
+
+    await orders.markPaidByCode(order.code);
+
+    expect(await inventory.getStock({ productId, variantId: "" })).toMatchObject({
+      onHand: 3,
+      reserved: 0,
+      available: 3,
+    });
+    const ledger = await inventory.listLedger({ productId, variantId: "" }, 20);
+    expect(ledger.filter((e) => e.type === "sale")).toHaveLength(1);
+  });
+
+  it("confirmação manual depois de a reserva vencer também baixa", async () => {
+    const productId = await makeProduct(5);
+    const order = await orders.create(orderPayload(productId, 1));
+    await expireReservationsOf(order.code);
+
+    await orders.updateStatus(await idOf(order.code), "paid");
+
+    expect((await inventory.getStock({ productId, variantId: "" })).onHand).toBe(4);
+  });
+
+  /**
+   * Reserva vencida e a peça vendida para outra pessoa no meio tempo: não há
+   * o que baixar. O saldo não pode ficar negativo nem roubar a reserva de
+   * quem chegou depois — o pedido segue pago e o conflito vai para o log de
+   * erro, que é o que o ateliê precisa ver.
+   */
+  it("reserva vencida sem saldo para retomar não tira a peça de outro pedido", async () => {
+    const productId = await makeProduct(2);
+    const first = await orders.create(orderPayload(productId, 2));
+    await expireReservationsOf(first.code);
+    await orders.create(orderPayload(productId, 2));
+
+    const paid = await orders.markPaidByCode(first.code);
+
+    expect(paid?.status).toBe("paid");
+    expect(await inventory.getStock({ productId, variantId: "" })).toMatchObject({
+      onHand: 2,
+      reserved: 2,
+      available: 0,
+    });
+  });
+
   /** Notificação repetida do Mercado Pago não pode baixar duas vezes. */
   it("webhook de pagamento repetido baixa uma vez só", async () => {
     const productId = await makeProduct(5);

@@ -287,11 +287,30 @@ export class OrdersService {
         },
         { channel: "SITE", orderCode: order.code, correlationId },
       );
-      const result = await this.inventory.confirmSale(key, {
-        channel: "SITE",
-        orderCode: order.code,
-        correlationId,
-      });
+      const context = { channel: "SITE" as const, orderCode: order.code, correlationId };
+      let result = await this.inventory.confirmSale(key, context);
+
+      // A reserva venceu antes do pagamento — o caso normal do Pix confirmado
+      // à mão e do boleto. Só daqui (pedido saindo de `pending`) uma reserva
+      // devolvida significa "venceu"; o cancelamento nunca passa por aqui.
+      if (result.reason === "released") {
+        const reclaimed = await this.inventory.reclaim(key, context);
+        if (reclaimed.ok) {
+          result = await this.inventory.confirmSale(key, context);
+        } else {
+          // Pago e sem peça: a reserva venceu e o saldo foi para outro pedido.
+          // O pedido segue pago — o dinheiro entrou —, mas o ateliê precisa
+          // saber que vai ter de produzir ou devolver.
+          this.logger.error(
+            `[${correlationId}] ${order.code} está PAGO, mas a reserva de ` +
+              `${sku.productId}${sku.variantId ? `/${sku.variantId}` : ""} venceu e não há ` +
+              `saldo para retomá-la (disponível ${reclaimed.available}). Baixa não feita.`,
+          );
+          await this.notifyChannels(sku, correlationId);
+          continue;
+        }
+      }
+
       if (!result.ok && result.reason !== "already") {
         this.logger.warn(
           `[${correlationId}] ${order.code}: não foi possível baixar ${sku.productId} (${result.reason}).`,

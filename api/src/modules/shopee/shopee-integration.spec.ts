@@ -139,6 +139,29 @@ describe("Integração Shopee (Mongo real, só a API da Shopee é dublê)", () =
     expect(order?.code).toMatch(/^SHP-\d+$/);
   });
 
+  /**
+   * Quem encerra a reserva de marketplace é o cancelamento da Shopee. Antes o
+   * `expiresAt: undefined` virava o prazo padrão de 60 minutos, e a varredura
+   * devolvia ao estoque a peça de um pedido UNPAID ainda vivo.
+   */
+  it("a reserva de um pedido da Shopee não vence com a varredura", async () => {
+    h.api.on("/product/update_stock", () => updateStockOk());
+    const { productId } = await h.seedLinkedProduct({ stock: 8, itemId: "610" });
+    h.api.on("/order/get_order_detail", () =>
+      orderDetail({ orderSn: "250101AAB", status: "UNPAID", itemId: "610", quantity: 2 }),
+    );
+    await h.orders.process({ shopId: SHOP_ID, orderSn: "250101AAB", correlationId: "c1" });
+
+    // A varredura roda "daqui a um dia": tudo o que tivesse prazo já teria vencido.
+    jest.useFakeTimers({ now: Date.now() + 86_400_000, doNotFake: ["nextTick", "setImmediate"] });
+    try {
+      expect(await h.inventory.releaseExpiredReservations()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+    expect((await h.inventory.getStock({ productId, variantId: "" })).reserved).toBe(2);
+  });
+
   it("READY_TO_SHIP confirma a venda e consome o lote FEFO", async () => {
     h.api.on("/product/update_stock", () => updateStockOk());
     const { productId } = await h.seedLinkedProduct({ stock: 0, itemId: "601" });

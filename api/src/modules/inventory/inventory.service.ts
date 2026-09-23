@@ -61,7 +61,15 @@ export interface ReserveRequest extends Sku {
   quantity: number;
   /** Idempotência: a mesma chave nunca reserva duas vezes. */
   key: string;
-  expiresAt?: Date;
+  /**
+   * Ausente: vale o prazo padrão. `null`: não vence — quem encerra é o canal
+   * (o cancelamento na Shopee), não a varredura.
+   *
+   * Os dois casos eram o mesmo até aqui: a Shopee passava `undefined`
+   * achando que desligava o prazo, o `??` o trocava pelo padrão de 60 minutos
+   * e a varredura devolvia ao estoque a peça de um pedido ainda vivo.
+   */
+  expiresAt?: Date | null;
 }
 
 export interface ReserveResult {
@@ -73,7 +81,13 @@ export interface ReserveResult {
 
 export interface ConfirmResult {
   ok: boolean;
-  reason: "confirmed" | "already" | "missing" | "insufficient" | "untracked";
+  /**
+   * `already`: a venda já tinha sido baixada. `released`: a reserva existe mas
+   * foi devolvida (venceu ou foi cancelada) — não há o que baixar sem antes
+   * retomá-la com `reclaim`, e tratar isso como `already` escondia uma venda
+   * que nunca saiu do estoque.
+   */
+  reason: "confirmed" | "already" | "released" | "missing" | "insufficient" | "untracked";
   /** COGS congelado da baixa, em CENTAVOS. */
   cogs: number;
   batches: { batchId: string; quantity: number; unitCost: number }[];
@@ -255,7 +269,7 @@ export class InventoryService {
         orderCode: context.orderCode,
         externalOrderSn: context.externalOrderSn,
         correlationId: context.correlationId,
-        expiresAt: request.expiresAt ?? this.defaultHoldUntil(),
+        expiresAt: this.holdUntil(request.expiresAt),
       });
       return { ok: true, reason: "untracked", available: 0 };
     }
@@ -293,7 +307,7 @@ export class InventoryService {
         orderCode: context.orderCode,
         externalOrderSn: context.externalOrderSn,
         correlationId: context.correlationId,
-        expiresAt: request.expiresAt ?? this.defaultHoldUntil(),
+        expiresAt: this.holdUntil(request.expiresAt),
       });
     } catch (error) {
       // Corrida na chave única: outra requisição gravou a mesma reserva entre
@@ -363,6 +377,86 @@ export class InventoryService {
     return true;
   }
 
+  /**
+   * Retoma uma reserva devolvida, se ainda houver saldo para ela.
+   *
+   * É o caminho do pagamento que chega depois de a reserva vencer — Pix
+   * confirmado à mão, boleto compensado no dia seguinte. A chave é a mesma
+   * (é por ela que pagamento e cancelamento acham a reserva), então não dá
+   * para simplesmente reservar de novo: `reserve` veria a chave e responderia
+   * `already` sem comprometer nada.
+   *
+   * A guarda é a mesma do `reserve`: o saldo só sobe no `reserved` se
+   * `onHand - reserved` comportar a quantidade. Sem saldo, a reserva continua
+   * devolvida e a peça que outra pessoa já reservou não é tomada dela.
+   */
+  async reclaim(
+    key: string,
+    context: StockContext,
+  ): Promise<{ ok: boolean; reason: "reclaimed" | "untracked" | "insufficient" | "missing"; available: number }> {
+    const reservation = await this.reservationModel
+      .findOne({ key, status: "released" })
+      .lean<StockReservation | null>();
+    if (!reservation) return { ok: false, reason: "missing", available: 0 };
+
+    const sku: Sku = { productId: reservation.productId, variantId: reservation.variantId };
+    const rehold = { $set: { status: "held", expiresAt: this.defaultHoldUntil() } };
+
+    if (!(await this.isTracked(sku))) {
+      const flipped = await this.reservationModel
+        .findOneAndUpdate({ key, status: "released" }, rehold)
+        .lean();
+      return flipped
+        ? { ok: true, reason: "untracked", available: 0 }
+        : { ok: false, reason: "missing", available: 0 };
+    }
+
+    await this.expireBatches(sku, context.correlationId);
+
+    const level = await this.levelModel
+      .findOneAndUpdate(
+        {
+          ...sku,
+          $expr: {
+            $gte: [{ $subtract: ["$onHand", "$reserved"] }, reservation.quantity],
+          },
+        },
+        { $inc: { reserved: reservation.quantity, version: 1 } },
+        { new: true },
+      )
+      .lean<StockLevel | null>();
+    if (!level) {
+      const view = await this.getStock(sku);
+      return { ok: false, reason: "insufficient", available: view.available };
+    }
+
+    const flipped = await this.reservationModel
+      .findOneAndUpdate({ key, status: "released" }, rehold)
+      .lean();
+    if (!flipped) {
+      // Outra chamada retomou a mesma reserva entre a leitura e aqui; o `$inc`
+      // acima é nosso e precisa voltar.
+      await this.levelModel
+        .updateOne(sku, { $inc: { reserved: -reservation.quantity, version: 1 } })
+        .exec();
+      return { ok: false, reason: "missing", available: 0 };
+    }
+
+    await this.writeLedger(sku, "reserve", -reservation.quantity, level, {
+      ...context,
+      orderCode: context.orderCode ?? reservation.orderCode,
+      externalOrderSn: context.externalOrderSn ?? reservation.externalOrderSn,
+    }, { reservationKey: key });
+    await this.projectToProduct(sku);
+
+    const expired = expiredRemaining(await this.loadBatches(sku));
+    return {
+      ok: true,
+      reason: "reclaimed",
+      available: availableStock({ onHand: level.onHand, reserved: level.reserved, expired }),
+    };
+  }
+
   // ── Venda ──────────────────────────────────────────────────────────────
 
   /**
@@ -387,7 +481,7 @@ export class InventoryService {
       const known = await this.reservationModel.findOne({ key }).lean<StockReservation | null>();
       return {
         ok: known?.status === "consumed",
-        reason: known ? "already" : "missing",
+        reason: !known ? "missing" : known.status === "released" ? "released" : "already",
         cogs: 0,
         batches: [],
       };
@@ -908,6 +1002,11 @@ export class InventoryService {
 
   private defaultHoldUntil(): Date {
     return new Date(Date.now() + DEFAULT_HOLD_MINUTES * 60_000);
+  }
+
+  /** `undefined` vira o prazo padrão; `null` fica `null` — ver `ReserveRequest`. */
+  private holdUntil(requested: Date | null | undefined): Date | null {
+    return requested === undefined ? this.defaultHoldUntil() : requested;
   }
 
   private defaultBatchCode(): string {

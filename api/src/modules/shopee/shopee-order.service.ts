@@ -280,8 +280,9 @@ export class ShopeeOrderService {
               key,
               // Reserva de marketplace não expira sozinha: quem encerra é o
               // cancelamento da Shopee. Uma varredura devolvendo estoque de
-              // um pedido ainda vivo é pior que segurá-lo.
-              expiresAt: undefined,
+              // um pedido ainda vivo é pior que segurá-lo. `null`, e não
+              // `undefined`: ausente vale o prazo padrão de 60 minutos.
+              expiresAt: null,
             },
             context,
           );
