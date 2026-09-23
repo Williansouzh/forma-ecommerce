@@ -3,7 +3,7 @@
 Falha em vulnerabilidade high/critical de produção que não esteja na lista de
 exceções documentadas abaixo.
 
-Por que não `npm audit --audit-level=high` puro: hoje as três descobertas vêm
+Por que não `npm audit --audit-level=high` puro: hoje as duas descobertas vêm
 de cópias que o próprio Next carrega, e a única correção é subir de major.
 Um passo que fica vermelho por meses e ninguém pode consertar deixa de ser
 lido — e aí a vulnerabilidade NOVA passa junto. Com allowlist, o que já foi
@@ -30,12 +30,6 @@ ALLOWED = {
         "Vem de node_modules/next/node_modules/postcss. Os vetores são leitura "
         "de sourceMappingURL e stringify de CSS — ambos em build, sobre CSS "
         "que é nosso. Nada de terceiro entra no pipeline de estilo.",
-        "Sai junto com o upgrade para o Next 16.",
-    ),
-    "sharp": (
-        "Vem de node_modules/next/node_modules/sharp@0.34.5. A dependência "
-        "direta do projeto já é 0.35.3, acima da faixa afetada; a cópia "
-        "aninhada só processa as imagens do próprio repositório.",
         "Sai junto com o upgrade para o Next 16.",
     ),
 }
