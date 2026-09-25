@@ -180,13 +180,15 @@ isso que a API não publica porta.
 
 ## 3 · Publicar a imagem da API
 
-O CI faz isso a cada push em `main` que toque em `api/`
-(`.github/workflows/publish-api.yml`). A instância **nunca constrói** — `nest
+O GitHub Actions faz isso depois de cada push em `main` **cujo CI passou**
+(`.github/workflows/publish-api.yml`, disparado pelo fim do workflow `CI`).
+Push com o CI vermelho não gera imagem. A instância **nunca constrói** — `nest
 build` numa t3.micro trava ou leva dez minutos, e um deploy que depende disso
 falha justamente quando há pressa.
 
 A imagem sai em `ghcr.io/<seu-usuario>/forma-api`, com duas tags: `main` (a
-mais recente) e o SHA do commit (para voltar a uma versão específica).
+mais recente) e `sha-<SHA completo do commit>` (para voltar a uma versão
+específica — por exemplo `forma-api:sha-e5a0b70…`).
 
 **Se o pacote estiver privado**, autentique a instância uma vez:
 

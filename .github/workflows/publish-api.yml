@@ -6,17 +6,22 @@
 # instância só baixa.
 #
 # Roda depois do CI e só quando ele passa: publicar imagem de um commit que
-# não compila é encher o registry de armadilha.
+# não compila é encher o registry de armadilha. Até aqui o comentário dizia
+# isso mas o gatilho era `push` — os dois workflows corriam em paralelo, e a
+# tag `main` podia apontar para um commit com o CI vermelho.
+#
+# Sem filtro de caminho: `workflow_run` não tem `paths`. Um push que não
+# toca em `api/` reconstrói a mesma imagem a partir do cache, em segundos.
 
 name: Publica a imagem da API
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
-    paths:
-      - "api/**"
-      - ".github/workflows/publish-api.yml"
   # Para republicar sem um commit novo — trocar de instância, por exemplo.
+  # É manual e deliberado, por isso não passa pela trava do CI.
   workflow_dispatch:
 
 concurrency:
@@ -26,13 +31,26 @@ concurrency:
 jobs:
   publish:
     name: Constrói e publica
+    # Só CI verde de um push — `workflow_run` também dispara com o CI vermelho
+    # ou vindo de pull request, e nenhum dos dois pode virar imagem.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    env:
+      # O commit que o CI APROVOU. Em `workflow_run`, `github.sha` é a ponta
+      # da main no momento em que este job roda — outro commit, se alguém
+      # empurrou no meio tempo.
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     permissions:
       contents: read
       packages: write
 
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
 
       - name: Autentica no registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
@@ -50,7 +68,7 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/forma-api
           tags: |
             type=raw,value=main
-            type=sha,format=long
+            type=raw,value=sha-${{ env.SOURCE_SHA }}
 
       - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
