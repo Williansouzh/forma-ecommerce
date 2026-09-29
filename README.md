@@ -34,7 +34,7 @@ canal — recebe o saldo, não o define.
 - Rotas da API da Shopee: [`docs/SHOPEE_API.md`](docs/SHOPEE_API.md)
 - Imagens de produto no Cloudflare R2: [`docs/IMAGENS.md`](docs/IMAGENS.md)
 - Operação (backup, restauração, contrato): [`docs/RUNBOOK.md`](docs/RUNBOOK.md)
-- Hospedar o backend numa EC2: [`docs/DEPLOY_EC2.md`](docs/DEPLOY_EC2.md)
+- Deploy (loja na Cloudflare, API na EC2): [`docs/DEPLOY.md`](docs/DEPLOY.md)
 
 > Ajuste de estoque agora passa por `POST /api/v1/inventory/adjust` (com motivo)
 > ou `/inventory/receive`. O campo `product.stock` virou **projeção** do ledger:

@@ -20,7 +20,7 @@
 # Sem `--profile`, sobem só a API e o banco — que ficam inalcançáveis de fora.
 # É de propósito: escolher o porteiro é decisão consciente.
 #
-# As variáveis vêm de um `.env` ao lado deste arquivo — ver docs/DEPLOY_EC2.md.
+# As variáveis vêm de um `.env` ao lado deste arquivo — ver docs/DEPLOY.md.
 
 services:
   mongo:
@@ -68,7 +68,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:?defina CORS_ORIGIN no .env}
       # O segredo que a loja apresenta — o MESMO valor configurado como Secret
       # na Cloudflare. Opcional só para que a loja e a API possam subir em
-      # qualquer ordem; ausente, a API avisa no log. Ver docs/DEPLOY_EC2.md.
+      # qualquer ordem; ausente, a API avisa no log. Ver docs/DEPLOY.md.
       STORE_API_KEY: ${STORE_API_KEY:-}
     depends_on:
       mongo:
