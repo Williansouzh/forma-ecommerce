@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
   IsEmail,
@@ -6,6 +7,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -23,19 +25,20 @@ import { ORDER_STATUSES, PAYMENT_METHODS } from "../schemas/order.schema";
  * gravado. Não apague sem tirar também do corpo que a loja monta.
  */
 export class OrderItemDto {
-  @IsString() @MinLength(1)
+  @IsString() @MinLength(1) @MaxLength(64)
   productId!: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(200)
   name?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(64)
   variantId?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(120)
   variantName?: string;
 
-  @IsInt() @Min(1)
+  /** O mesmo teto do carrinho da loja. */
+  @IsInt() @Min(1) @Max(99)
   quantity!: number;
 
   /** Ignorado. O preço vem do catálogo — ver `pricing.ts`. */
@@ -44,10 +47,10 @@ export class OrderItemDto {
 }
 
 export class CustomerDto {
-  @IsEmail()
+  @IsEmail() @MaxLength(254)
   email!: string;
 
-  @IsString() @MinLength(1)
+  @IsString() @MinLength(1) @MaxLength(80)
   firstName!: string;
 
   /**
@@ -55,29 +58,33 @@ export class CustomerDto {
    * espaço, então quem digita "Maria" chega sem sobrenome — e não pode ficar
    * sem conseguir comprar por isso.
    */
-  @IsString()
+  @IsString() @MaxLength(120)
   lastName!: string;
 
   @IsString() @MinLength(8) @MaxLength(20)
   phone!: string;
 
-  @IsOptional() @IsString()
+  @IsOptional() @IsString() @MaxLength(14)
   cpf?: string;
 }
 
 export class AddressDto {
-  @IsString() street!: string;
-  @IsString() number!: string;
-  @IsOptional() @IsString() complement?: string;
-  @IsString() neighborhood!: string;
-  @IsString() city!: string;
-  @IsString() state!: string;
-  @IsString() zipCode!: string;
-  @IsString() country!: string;
+  @IsString() @MaxLength(160) street!: string;
+  @IsString() @MaxLength(20) number!: string;
+  @IsOptional() @IsString() @MaxLength(120) complement?: string;
+  @IsString() @MaxLength(120) neighborhood!: string;
+  @IsString() @MaxLength(120) city!: string;
+  @IsString() @MaxLength(2) state!: string;
+  @IsString() @MaxLength(9) zipCode!: string;
+  @IsString() @MaxLength(2) country!: string;
 }
 
 export class CreateOrderDto {
-  @IsArray() @ArrayNotEmpty()
+  /*
+   * Teto de linhas: a rota é pública, e sem ele um corpo de 100 kB virava
+   * milhares de itens — cada um com consulta ao catálogo e reserva de estoque.
+   */
+  @IsArray() @ArrayNotEmpty() @ArrayMaxSize(30)
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items!: OrderItemDto[];

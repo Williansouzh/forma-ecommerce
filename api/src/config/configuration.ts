@@ -22,6 +22,11 @@ export interface ApiConfig {
   publicApiUrl: string;
   /** Base pública da loja, para as back_urls do checkout. */
   publicSiteUrl: string;
+  /**
+   * Segredo compartilhado com o servidor da loja (`STORE_API_KEY` nos dois
+   * lados). Vazio desliga a exigência — ver `common/store-client.ts`.
+   */
+  storeApiKey: string;
 }
 
 /**
@@ -81,6 +86,7 @@ export function configuration(): ApiConfig {
       process.env.PUBLIC_API_URL ?? "http://localhost:4000",
     publicSiteUrl:
       process.env.PUBLIC_SITE_URL ?? "http://localhost:3000",
+    storeApiKey: process.env.STORE_API_KEY?.trim() ?? "",
   };
 
   exigeSegredoProprio(config);

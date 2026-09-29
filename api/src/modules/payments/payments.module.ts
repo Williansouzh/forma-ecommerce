@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { StoreClientModule } from "../../common/store-client.module";
 import { PaymentsController } from "./payments.controller";
 import { PaymentsService } from "./payments.service";
 import { PixService } from "./pix.service";
@@ -15,6 +16,7 @@ import { SettingsModule } from "../settings/settings.module";
     OrdersModule,
     NotificationsModule,
     SettingsModule,
+    StoreClientModule,
   ],
   controllers: [PaymentsController],
   providers: [PaymentsService, PixService],

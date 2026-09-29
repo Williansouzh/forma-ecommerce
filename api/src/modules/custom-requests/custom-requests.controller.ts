@@ -5,6 +5,7 @@ import {
   UpdateCustomRequestStatusDto,
 } from "./dto/custom-request.dto";
 import { Public, Roles } from "../../common/decorators/auth.decorators";
+import { StoreOnly } from "../../common/decorators/store.decorators";
 import { queryText } from "../../common/query-text";
 
 @Controller("custom-requests")
@@ -17,8 +18,9 @@ export class CustomRequestsController {
     return this.service.findAll(queryText(status));
   }
 
-  /** O formulário da loja envia sem sessão. */
+  /** O formulário da loja envia sem sessão. Cinco por cliente a cada dez minutos. */
   @Public()
+  @StoreOnly(5, 10 * 60_000)
   @Post()
   create(@Body() dto: CreateCustomRequestDto) {
     return this.service.create(dto);

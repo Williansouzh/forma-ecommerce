@@ -9,6 +9,7 @@ import {
 import { PaymentsService } from "./payments.service";
 import { CreatePreferenceDto } from "./dto/payment.dto";
 import { Public } from "../../common/decorators/auth.decorators";
+import { StoreOnly } from "../../common/decorators/store.decorators";
 
 interface MercadoPagoNotification {
   type?: string;
@@ -24,8 +25,14 @@ export class PaymentsController {
    * Chamado pelo servidor da loja logo depois de criar o pedido. Público
    * porque o checkout não tem sessão de admin; só age sobre pedido existente
    * e ainda pendente, e repetir devolve a mesma preferência.
+   *
+   * Só a loja chama: o código do pedido é sequencial, e aberta a rota
+   * devolvia o Pix ou o link de pagamento de qualquer pedido a quem
+   * chutasse `C3D-4801`, `C3D-4802`… — e criava preferências no Mercado
+   * Pago em nome deles.
    */
   @Public()
+  @StoreOnly(20, 10 * 60_000)
   @Post("mercadopago/preference")
   createPreference(@Body() body: CreatePreferenceDto) {
     return this.payments.createPreferenceForOrder(body.code);

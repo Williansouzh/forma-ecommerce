@@ -3,6 +3,7 @@ import { OrdersService } from "./orders.service";
 import { CreateOrderDto, UpdateOrderStatusDto } from "./dto/order.dto";
 import { WhatsappService } from "../notifications/whatsapp.service";
 import { Public, Roles } from "../../common/decorators/auth.decorators";
+import { StoreOnly } from "../../common/decorators/store.decorators";
 import { queryLimit, queryText } from "../../common/query-text";
 
 @Controller("orders")
@@ -26,8 +27,13 @@ export class OrdersController {
     });
   }
 
-  /** O checkout da loja cria o pedido sem sessão de admin. */
+  /**
+   * O checkout da loja cria o pedido sem sessão de admin. Dez por cliente a
+   * cada dez minutos: quem compra de verdade fecha um; quem cria em laço
+   * prendia o estoque inteiro (cada pedido reserva por uma hora).
+   */
   @Public()
+  @StoreOnly(10, 10 * 60_000)
   @Post()
   create(@Body() dto: CreateOrderDto) {
     return this.ordersService.create(dto);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { customerFacingMessage } from "@/lib/api-error";
+import { storeHeaders } from "@/lib/store-api";
 import { getCartTotals } from "@/lib/cart";
 import { getStoreSettings } from "@/lib/settings";
 import type { CartItem } from "@/types/cart";
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
   // O pedido vive na API; esta rota é só a ponte do formulário da loja.
   const response = await fetch(`${API_URL}/api/v1/orders`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...storeHeaders(request) },
     body: JSON.stringify(order),
     cache: "no-store",
   }).catch(() => null);
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
     `${API_URL}/api/v1/payments/mercadopago/preference`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...storeHeaders(request) },
       body: JSON.stringify({ code: created.code }),
       cache: "no-store",
     }

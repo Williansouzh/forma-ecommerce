@@ -54,6 +54,18 @@ async function bootstrap() {
     }),
   );
 
+  // Sem a chave, checkout, orçamento, cobrança e login seguem abertos a quem
+  // chamar a API direto, e o limite de tentativas não enxerga o cliente. Não
+  // derruba o boot para que loja e API possam ser implantadas em qualquer
+  // ordem — mas não pode passar em silêncio. Ver `common/store-client.ts`.
+  if (process.env.NODE_ENV === "production" && !config.get<string>("storeApiKey")) {
+    Logger.warn(
+      "STORE_API_KEY não configurada: rotas da loja abertas a chamadas diretas e " +
+        "sem limite por cliente. Defina a mesma chave aqui e na loja.",
+      "Bootstrap",
+    );
+  }
+
   const port = config.get<number>("port") ?? 4000;
   await app.listen(port);
   Logger.log(`API camada no ar em http://localhost:${port}/api/v1`, "Bootstrap");

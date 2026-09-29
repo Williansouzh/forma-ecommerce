@@ -17,7 +17,7 @@ function checkoutRequest() {
 
 /** Responde como a API: configurações, pedido gravado e preferência. */
 function fakeApi(order: Record<string, unknown>) {
-  return vi.fn(async (url: string | URL | Request) => {
+  return vi.fn(async (url: string | URL | Request, _init?: RequestInit) => {
     const href = String(url);
     if (href.endsWith("/settings")) {
       return Response.json({ freeShippingThreshold: 40000, pixDiscountPercent: 5, whatsappNumber: "" });
@@ -30,6 +30,7 @@ function fakeApi(order: Record<string, unknown>) {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("POST /api/checkout", () => {
@@ -49,6 +50,29 @@ describe("POST /api/checkout", () => {
 
     expect(response.status).toBe(201);
     expect(body.totals).toMatchObject({ subtotal: 12000, shipping: 2990, discount: 600, total: 14390 });
+  });
+
+  /**
+   * O pedido e a cobrança só são aceitos pela API com a chave da loja; sem
+   * ela nos dois, o checkout inteiro responderia 403.
+   */
+  it("apresenta-se à API com a chave e o IP do cliente nas duas chamadas", async () => {
+    vi.stubEnv("STORE_API_KEY", "segredo");
+    const api = fakeApi({ id: "o1", code: "C3D-4901", subtotal: 100, shipping: 0, discount: 0, total: 100 });
+    vi.stubGlobal("fetch", api);
+    const request = checkoutRequest();
+    request.headers.set("cf-connecting-ip", "203.0.113.9");
+
+    await POST(request);
+
+    const toApi = api.mock.calls.filter(([url]) => /\/(orders|preference)$/.test(String(url)));
+    expect(toApi).toHaveLength(2);
+    for (const [, init] of toApi) {
+      expect((init as RequestInit).headers).toMatchObject({
+        "x-store-key": "segredo",
+        "x-client-ip": "203.0.113.9",
+      });
+    }
   });
 
   it("recusa do domínio chega ao cliente; a lista do ValidationPipe, não", async () => {

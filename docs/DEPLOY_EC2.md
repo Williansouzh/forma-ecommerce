@@ -230,6 +230,9 @@ PUBLIC_API_URL=https://forma-api.duckdns.org
 
 PUBLIC_SITE_URL=https://sua-loja.workers.dev
 CORS_ORIGIN=https://sua-loja.workers.dev
+
+# O MESMO valor vai na Cloudflare — ver o passo 5.
+STORE_API_KEY=<gere com: openssl rand -hex 32>
 ENV
 
 chmod 600 .env
@@ -282,6 +285,22 @@ API_URL             = https://api.seudominio.com
 
 E **refaça o deploy**: `NEXT_PUBLIC_*` é embutida no bundle durante o build —
 salvar sem reconstruir não muda nada.
+
+Ainda nessa tela, agora como **Secret** (de runtime, não de build):
+
+```
+STORE_API_KEY = <o mesmo valor do .env da EC2>
+```
+
+É com ela que o servidor da loja se apresenta à API. Com a chave configurada
+nos dois lados, checkout, orçamento, cobrança e login do painel **só aceitam
+chamadas vindas da loja**, e o limite de tentativas passa a contar por
+cliente, e não pelo IP do Worker. Sem ela, essas rotas continuam abertas a
+quem chamar a API direto — a API avisa no log ao subir.
+
+A ordem não importa: a exigência liga sozinha no lado que tiver a chave, e a
+loja só manda o cabeçalho quando tem a sua. Mas os valores precisam ser
+**idênticos** — diferentes, o checkout inteiro responde 403.
 
 Sem isso, o painel em produção continua chamando `http://localhost:4000` e a
 CSP bloqueia, que é o erro que aparece como *"Refused to connect"*.
@@ -337,6 +356,7 @@ commit que funcionava e repita.
 | Mongo não sobe | volume corrompido, ou disco cheio | `df -h`; restaure pelo RUNBOOK |
 | Login do painel falha com erro de CORS | `CORS_ORIGIN` sem a origem da loja | corrija o `.env` e `up -d` |
 | Webhook da Shopee recusado | `PUBLIC_API_URL` ≠ a URL cadastrada lá | acerte os dois |
+| Checkout ou login com 403 "Esta rota atende só a loja" | `STORE_API_KEY` diferente (ou ausente) na Cloudflare | o mesmo valor nos dois lados, e refaça o deploy da loja |
 | `docker compose` reclama de variável | o `:?` do compose fez o trabalho dele | a mensagem nomeia a que falta |
 
 Para ver o que está consumindo memória:

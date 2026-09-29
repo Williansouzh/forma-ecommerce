@@ -3,18 +3,17 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { PassportModule } from "@nestjs/passport";
-import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { StoreClientModule } from "../../common/store-client.module";
 import { User, UserSchema } from "./schemas/user.schema";
 
 @Module({
   imports: [
     PassportModule,
-    // O limite real é declarado por rota, com `@Throttle`; isto só instala o
-    // armazenamento de contagem.
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 5 }]),
+    // O limitador e a chave da loja — ver `common/store-client.ts`.
+    StoreClientModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

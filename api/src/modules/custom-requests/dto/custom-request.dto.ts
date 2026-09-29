@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsEmail,
   IsEnum,
@@ -15,7 +16,7 @@ export class CreateCustomRequestDto {
   @IsString() @MinLength(2) @MaxLength(120)
   customerName!: string;
 
-  @IsEmail()
+  @IsEmail() @MaxLength(254)
   customerEmail!: string;
 
   @IsOptional() @IsString() @MaxLength(20)
@@ -24,7 +25,8 @@ export class CreateCustomRequestDto {
   @IsString() @MinLength(10) @MaxLength(2000)
   description!: string;
 
-  @IsOptional() @IsArray() @IsString({ each: true })
+  @IsOptional() @IsArray() @ArrayMaxSize(10)
+  @IsString({ each: true }) @MaxLength(500, { each: true })
   referenceImages?: string[];
 
   @IsOptional() @IsEnum(CUSTOM_TYPES)

@@ -34,7 +34,7 @@
             "description": ""
           }
         },
-        "summary": "Autentica no painel. Limitado a cinco tentativas por minuto, por IP.",
+        "summary": "Autentica no painel. Limitado a cinco tentativas por minuto, por cliente.",
         "tags": [
           "Auth"
         ]
@@ -438,7 +438,7 @@
             }
           }
         },
-        "summary": "O checkout da loja cria o pedido sem sessão de admin.",
+        "summary": "O checkout da loja cria o pedido sem sessão de admin. Dez por cliente a\ncada dez minutos: quem compra de verdade fecha um; quem cria em laço\nprendia o estoque inteiro (cada pedido reserva por uma hora).",
         "tags": [
           "Orders"
         ]
@@ -1305,7 +1305,7 @@
             }
           }
         },
-        "summary": "O formulário da loja envia sem sessão.",
+        "summary": "O formulário da loja envia sem sessão. Cinco por cliente a cada dez minutos.",
         "tags": [
           "CustomRequests"
         ]
@@ -1377,7 +1377,7 @@
             }
           }
         },
-        "summary": "Chamado pelo servidor da loja logo depois de criar o pedido. Público\nporque o checkout não tem sessão de admin; só age sobre pedido existente\ne ainda pendente, e repetir devolve a mesma preferência.",
+        "summary": "Chamado pelo servidor da loja logo depois de criar o pedido. Público\nporque o checkout não tem sessão de admin; só age sobre pedido existente\ne ainda pendente, e repetir devolve a mesma preferência.\n\nSó a loja chama: o código do pedido é sequencial, e aberta a rota\ndevolvia o Pix ou o link de pagamento de qualquer pedido a quem\nchutasse `C3D-4801`, `C3D-4802`… — e criava preferências no Mercado\nPago em nome deles.",
         "tags": [
           "Payments"
         ]
@@ -2278,20 +2278,26 @@
         "properties": {
           "productId": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 64
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 200
           },
           "variantId": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 64
           },
           "variantName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 120
           },
           "quantity": {
             "type": "number",
-            "minimum": 1
+            "description": "O mesmo teto do carrinho da loja.",
+            "minimum": 1,
+            "maximum": 99
           },
           "price": {
             "type": "number",
@@ -2309,15 +2315,18 @@
         "properties": {
           "email": {
             "type": "string",
+            "maxLength": 254,
             "format": "email"
           },
           "firstName": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 80
           },
           "lastName": {
             "type": "string",
-            "description": "Pode vir vazio: a loja tem um campo só de nome e o divide no primeiro\nespaço, então quem digita \"Maria\" chega sem sobrenome — e não pode ficar\nsem conseguir comprar por isso."
+            "description": "Pode vir vazio: a loja tem um campo só de nome e o divide no primeiro\nespaço, então quem digita \"Maria\" chega sem sobrenome — e não pode ficar\nsem conseguir comprar por isso.",
+            "maxLength": 120
           },
           "phone": {
             "type": "string",
@@ -2325,7 +2334,8 @@
             "maxLength": 20
           },
           "cpf": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 14
           }
         },
         "required": [
@@ -2339,28 +2349,36 @@
         "type": "object",
         "properties": {
           "street": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 160
           },
           "number": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 20
           },
           "complement": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 120
           },
           "neighborhood": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 120
           },
           "city": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 120
           },
           "state": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2
           },
           "zipCode": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 9
           },
           "country": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2
           }
         },
         "required": [
@@ -2378,6 +2396,7 @@
         "properties": {
           "items": {
             "minItems": 1,
+            "maxItems": 30,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/OrderItemDto"
@@ -2972,6 +2991,7 @@
           },
           "customerEmail": {
             "type": "string",
+            "maxLength": 254,
             "format": "email"
           },
           "customerPhone": {
@@ -2984,9 +3004,11 @@
             "maxLength": 2000
           },
           "referenceImages": {
+            "maxItems": 10,
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 500
             }
           },
           "type": {

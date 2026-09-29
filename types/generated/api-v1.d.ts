@@ -13,7 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Autentica no painel. Limitado a cinco tentativas por minuto, por IP. */
+        /** Autentica no painel. Limitado a cinco tentativas por minuto, por cliente. */
         post: operations["Auth_login"];
         delete?: never;
         options?: never;
@@ -46,7 +46,7 @@ export interface paths {
         };
         get: operations["CustomRequests_findAll"];
         put?: never;
-        /** O formulário da loja envia sem sessão. */
+        /** O formulário da loja envia sem sessão. Cinco por cliente a cada dez minutos. */
         post: operations["CustomRequests_create"];
         delete?: never;
         options?: never;
@@ -260,7 +260,11 @@ export interface paths {
         };
         get: operations["Orders_findAll"];
         put?: never;
-        /** O checkout da loja cria o pedido sem sessão de admin. */
+        /**
+         * O checkout da loja cria o pedido sem sessão de admin. Dez por cliente a
+         *     cada dez minutos: quem compra de verdade fecha um; quem cria em laço
+         *     prendia o estoque inteiro (cada pedido reserva por uma hora).
+         */
         post: operations["Orders_create"];
         delete?: never;
         options?: never;
@@ -301,6 +305,11 @@ export interface paths {
          * Chamado pelo servidor da loja logo depois de criar o pedido. Público
          *     porque o checkout não tem sessão de admin; só age sobre pedido existente
          *     e ainda pendente, e repetir devolve a mesma preferência.
+         *
+         *     Só a loja chama: o código do pedido é sequencial, e aberta a rota
+         *     devolvia o Pix ou o link de pagamento de qualquer pedido a quem
+         *     chutasse `C3D-4801`, `C3D-4802`… — e criava preferências no Mercado
+         *     Pago em nome deles.
          */
         post: operations["Payments_createPreference"];
         delete?: never;
@@ -978,6 +987,7 @@ export interface components {
             /** @description Ignorado. O preço vem do catálogo — ver `pricing.ts`. */
             price?: number;
             productId: string;
+            /** @description O mesmo teto do carrinho da loja. */
             quantity: number;
             variantId?: string;
             variantName?: string;

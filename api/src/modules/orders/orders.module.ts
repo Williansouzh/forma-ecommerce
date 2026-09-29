@@ -9,6 +9,7 @@ import { ShopeeModule } from "../shopee/shopee.module";
 import { ProductsModule } from "../products/products.module";
 import { SettingsModule } from "../settings/settings.module";
 import { SequencesModule } from "../sequences/sequences.module";
+import { StoreClientModule } from "../../common/store-client.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SequencesModule } from "../sequences/sequences.module";
     ProductsModule,
     SettingsModule,
     SequencesModule,
+    StoreClientModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

@@ -5,6 +5,7 @@ import {
   adminApiUrl,
   sessionCookieOptions,
 } from "@/lib/admin-session";
+import { storeHeaders } from "@/lib/store-api";
 
 /**
  * A sessão do painel — criada e destruída aqui, nunca visível ao JavaScript.
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
 
   const response = await fetch(`${adminApiUrl()}/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...storeHeaders(request) },
     body: JSON.stringify({ email: body.email, password: body.password }),
     cache: "no-store",
   }).catch(() => null);

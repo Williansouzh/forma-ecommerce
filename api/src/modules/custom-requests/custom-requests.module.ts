@@ -7,6 +7,7 @@ import {
   CustomRequestSchema,
 } from "./schemas/custom-request.schema";
 import { SequencesModule } from "../sequences/sequences.module";
+import { StoreClientModule } from "../../common/store-client.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SequencesModule } from "../sequences/sequences.module";
       { name: CustomRequest.name, schema: CustomRequestSchema },
     ]),
     SequencesModule,
+    StoreClientModule,
   ],
   controllers: [CustomRequestsController],
   providers: [CustomRequestsService],

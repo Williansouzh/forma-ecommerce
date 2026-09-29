@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { customerFacingMessage } from "@/lib/api-error";
+import { storeHeaders } from "@/lib/store-api";
 import type { CustomType } from "@/types/custom-request";
 
 const API_URL =
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
   // O orçamento vive na API — o painel precisa vê-lo em "Precisa de você".
   const response = await fetch(`${API_URL}/api/v1/custom-requests`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...storeHeaders(request) },
     body: JSON.stringify({
       customerName: payload.customerName.trim(),
       customerEmail: payload.customerEmail.trim(),

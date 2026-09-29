@@ -66,6 +66,10 @@ services:
       # O painel fala com a API direto do navegador; sem a origem da loja aqui,
       # o login falha no CORS.
       CORS_ORIGIN: ${CORS_ORIGIN:?defina CORS_ORIGIN no .env}
+      # O segredo que a loja apresenta — o MESMO valor configurado como Secret
+      # na Cloudflare. Opcional só para que a loja e a API possam subir em
+      # qualquer ordem; ausente, a API avisa no log. Ver docs/DEPLOY_EC2.md.
+      STORE_API_KEY: ${STORE_API_KEY:-}
     depends_on:
       mongo:
         condition: service_healthy
