@@ -7,13 +7,7 @@ export const SITE_NAME = "camada";
  */
 export const SITE_LEGAL_NAME = "Estúdio Camada";
 
-/*
- * Os três valores abaixo ainda apontam para as contas antigas de propósito:
- * o domínio, o @ do Instagram e o e-mail só trocam depois de registrados.
- * Trocar aqui antes disso quebraria canonical, Open Graph e os links do
- * rodapé em produção. Checklist da migração em `docs/MARCA.md`.
- */
-export const SITE_URL = "https://c3dcriativ.com.br";
+export const SITE_URL = "https://studiocamada.com";
 export const SITE_DESCRIPTION =
   "Objetos de decoração, chaveiros e presentes feitos em pequena escala, camada por camada, com textura aparente e acabamento manual.";
 
@@ -26,6 +20,12 @@ export const ATELIER_PRINTERS = 4;
 
 export const ATELIER_CITY = "Campina Grande — PB";
 export const ATELIER_HOURS = "Seg a sáb · 8h às 18h";
+/*
+ * Os três valores abaixo ainda apontam para as contas antigas de propósito:
+ * o e-mail e o @ do Instagram só trocam depois de criados. Trocar aqui antes
+ * disso quebraria os links do rodapé em produção. Checklist da migração em
+ * `docs/MARCA.md`.
+ */
 export const CONTACT_EMAIL = "ola@c3dcriativ.com.br";
 export const INSTAGRAM_HANDLE = "@c3dcriativ";
 export const INSTAGRAM_URL = "https://www.instagram.com/c3dcriativ/";

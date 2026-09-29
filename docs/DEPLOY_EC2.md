@@ -32,8 +32,8 @@ forma-api           │  :80 :443  caddy → api → mongo          │
                     └─────────────────────────────────────────┘
 
                     ┌─ perfil tunnel ─────────────────────────┐
-api.seudominio.com  │  cloudflared → api → mongo              │
-              ─────▶│  Security Group: NADA entra             │
+api.studiocamada    │  cloudflared → api → mongo              │
+  .com          ───▶│  Security Group: NADA entra             │
                     └─────────────────────────────────────────┘
 ```
 
@@ -167,7 +167,7 @@ No painel da Cloudflare em **Networking → Tunnels** (o caminho antigo,
 | Campo | Valor |
 |---|---|
 | Subdomain | `api` |
-| Domain | `seudominio.com` |
+| Domain | `studiocamada.com` |
 | Service | `HTTP` → `api:4000` |
 
 `api:4000` é o **nome do serviço na rede do compose**, não um IP. O
@@ -226,10 +226,10 @@ PUBLIC_API_URL=https://forma-api.duckdns.org
 
 # Com domínio na Cloudflare (perfil tunnel), troque as duas de cima por:
 #   CLOUDFLARE_TUNNEL_TOKEN=<o token do passo 2B>
-#   PUBLIC_API_URL=https://api.seudominio.com
+#   PUBLIC_API_URL=https://api.studiocamada.com
 
-PUBLIC_SITE_URL=https://sua-loja.workers.dev
-CORS_ORIGIN=https://sua-loja.workers.dev
+PUBLIC_SITE_URL=https://studiocamada.com
+CORS_ORIGIN=https://studiocamada.com
 
 # O MESMO valor vai na Cloudflare — ver o passo 5.
 STORE_API_KEY=<gere com: openssl rand -hex 32>
@@ -279,8 +279,8 @@ Na Cloudflare, em **Workers & Pages → o projeto → Settings → Variables**, 
 variáveis de **build**:
 
 ```
-NEXT_PUBLIC_API_URL = https://api.seudominio.com
-API_URL             = https://api.seudominio.com
+NEXT_PUBLIC_API_URL = https://api.studiocamada.com
+API_URL             = https://api.studiocamada.com
 ```
 
 E **refaça o deploy**: `NEXT_PUBLIC_*` é embutida no bundle durante o build —

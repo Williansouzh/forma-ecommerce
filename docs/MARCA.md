@@ -136,11 +136,12 @@ A marca já está aplicada no código. O que falta depende de registro em
 serviços externos, e por isso **não** foi trocado — trocar antes de registrar
 quebraria canonical, Open Graph e os links do rodapé em produção.
 
-- [ ] Registrar `estudiocamada.com.br` no registro.br
+- [x] Registrar o domínio — `studiocamada.com`, na Cloudflare
+- [x] Trocar `SITE_URL` em `lib/constants.ts`
 - [ ] Criar o @ no Instagram e migrar o perfil atual (`@c3dcriativ`)
-- [ ] Criar `ola@estudiocamada.com.br`
-- [ ] Trocar `SITE_URL`, `INSTAGRAM_HANDLE`, `INSTAGRAM_URL` e `CONTACT_EMAIL`
-      em `lib/constants.ts`
+- [ ] Criar `ola@studiocamada.com` (Cloudflare → Email Routing)
+- [ ] Trocar `INSTAGRAM_HANDLE`, `INSTAGRAM_URL` e `CONTACT_EMAIL` em
+      `lib/constants.ts`
 - [ ] Redirecionar 301 de `c3dcriativ.com.br` para o domínio novo, e mantê-lo
       pago por pelo menos dois anos
 - [ ] Atualizar o nome da loja na Shopee e a arte de perfil dos canais

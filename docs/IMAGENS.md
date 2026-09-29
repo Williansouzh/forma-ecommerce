@@ -13,7 +13,7 @@ painel ──(bytes crus)──▶ API ──(SigV4 PUT)──▶ bucket R2
                           │
                           └─ valida magic bytes, gera a chave, define o Content-Type
 
-loja ◀──(GET)── img.seudominio.com ◀── domínio personalizado no bucket
+loja ◀──(GET)── img.studiocamada.com ◀── domínio personalizado no bucket
 ```
 
 | Peça | Arquivo |
@@ -33,7 +33,7 @@ loja ◀──(GET)── img.seudominio.com ◀── domínio personalizado no
 ### 1. Domínio personalizado no bucket
 
 No painel da Cloudflare: **R2 → forma-data → Settings → Custom Domains →
-Connect Domain**, e aponte um subdomínio da sua zona (ex.: `img.seudominio.com`).
+Connect Domain**, e aponte um subdomínio da sua zona (ex.: `img.studiocamada.com`).
 
 Isso é o que torna o bucket legível. Um bucket recém-criado tem
 **Public Development URL desativada e nenhum domínio** — nada nele é acessível
@@ -56,7 +56,7 @@ ID** e o **Secret Access Key** — o segredo só aparece uma vez.
 |---|---|
 | Account ID | o da sua conta Cloudflare (aparece na URL do painel e em **R2 → Overview**) |
 | Bucket | `forma-data` |
-| Domínio público de leitura | `https://img.seudominio.com` |
+| Domínio público de leitura | `https://img.studiocamada.com` |
 | Access Key ID / Secret Access Key | do passo 2 |
 
 Ligue a integração e use **Testar conexão** — ele faz um `HEAD` numa chave
@@ -65,7 +65,7 @@ inexistente: 404 significa credencial boa, 403 significa recusada.
 ### 4. Build da loja
 
 ```bash
-NEXT_PUBLIC_IMAGE_BASE_URL=https://img.seudominio.com docker compose build web
+NEXT_PUBLIC_IMAGE_BASE_URL=https://img.studiocamada.com docker compose build web
 docker compose up -d web
 ```
 
