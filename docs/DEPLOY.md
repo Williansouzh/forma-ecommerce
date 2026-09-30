@@ -37,7 +37,7 @@ isso eles precisam de uma máquina de verdade.
 | [7](#7--domínio-da-loja) | Cloudflare | `https://studiocamada.com` abrindo a loja |
 | [8](#8--imagens-no-r2) | Cloudflare + painel | fotos servidas por `img.studiocamada.com` |
 | [9](#9--primeiro-acesso-e-integrações) | painel | login, Mercado Pago, Shopee |
-| [10](#10--backup) | EC2 | backup diário |
+| [10](#10--backup) | EC2 e R2 | backup de hora em hora, cifrado, fora do servidor |
 
 ---
 
@@ -232,12 +232,14 @@ De volta à EC2, como `ubuntu`.
 mkdir -p ~/forma && cd ~/forma
 BASE=https://raw.githubusercontent.com/SEU_USUARIO/forma-ecommerce/main
 curl -fsSLO "$BASE/docker-compose.prod.yml"
-curl -fsSLO "$BASE/scripts/backup-mongo.sh" && chmod +x backup-mongo.sh
+curl -fsSLO "$BASE/scripts/backup-mongo.sh"
+curl -fsSLO "$BASE/scripts/restore-mongo.sh"
+chmod +x backup-mongo.sh restore-mongo.sh
 ```
 
 Se o repositório for privado, o `raw.githubusercontent.com` responde 404.
-Nesse caso, copie o conteúdo dos dois arquivos do GitHub e cole com
-`nano docker-compose.prod.yml` (e o mesmo para o script).
+Nesse caso, copie o conteúdo dos três arquivos do GitHub e cole com
+`nano docker-compose.prod.yml` (e o mesmo para os scripts).
 
 ### Autenticar no registry
 
@@ -468,22 +470,89 @@ Siga [`CONECTAR_SHOPEE.md`](CONECTAR_SHOPEE.md). A Push URL a cadastrar é
 
 ## 10 · Backup
 
-Na EC2, como `ubuntu`. O `backup-mongo.sh` foi baixado no passo 5 e usa
-`docker exec` no contêiner `forma-mongo`.
+O banco roda na EC2, e sem cópia fora dela os pedidos morrem junto com o
+disco, com um `docker compose down -v` errado ou com uma invasão. Aqui o
+backup sai **de hora em hora**, **cifrado**, para um bucket R2 **privado** que
+**não aceita apagar** as cópias por 30 dias.
+
+A peça central é a cifra por chave pública (`age`): o servidor guarda só a
+chave PÚBLICA — cifra, mas não decifra. A chave privada fica com você. Quem
+invadir a EC2 ou roubar o token do R2 leva arquivos ilegíveis.
+
+### 1. A chave de cifra — no SEU computador, não na EC2
+
+```bash
+# macOS: brew install age · Ubuntu: sudo apt install age · Windows: winget install FiloSottile.age
+age-keygen -o chave-backup-camada.txt
+# Public key: age1....   ← esta vai para a EC2
+```
+
+Guarde `chave-backup-camada.txt` em **dois** lugares seguros (o gerenciador
+de senhas e um pendrive, por exemplo). **Sem ela, nenhum backup pode ser
+restaurado** — nem por você.
+
+### 2. O bucket de backup — no painel da Cloudflare
+
+1. **R2 → Create bucket** → `camada-backups`. **Não** conecte domínio nem
+   ative acesso público: é um bucket privado, diferente do `forma-data`, que
+   serve as fotos para qualquer um.
+2. **`camada-backups` → Settings → Bucket lock rules → Add rule**: prefixo
+   `mongo/`, retenção de **30 dias**. Durante esse prazo nenhum arquivo pode
+   ser apagado ou sobrescrito — nem com o token da EC2, que não tem permissão
+   de mexer na configuração do bucket.
+3. **Settings → Object lifecycle rules → Add rule**: prefixo `mongo/`, apagar
+   objetos depois de **35 dias**. Sem isso o bucket só cresce.
+4. **R2 → Manage API tokens → Create API token**: permissão **Object Read &
+   Write**, **aplicada só ao bucket `camada-backups`**. Anote o Access Key ID e
+   o Secret Access Key — o segredo só aparece uma vez.
+
+### 3. A configuração — na EC2
+
+```bash
+cd ~/forma
+sudo apt install -y age
+cat > backup.env <<'ENV'
+R2_ACCOUNT_ID=<o Account ID da Cloudflare>
+R2_BUCKET=camada-backups
+R2_ACCESS_KEY_ID=<do token do passo 2.4>
+R2_SECRET_ACCESS_KEY=<do token do passo 2.4>
+BACKUP_AGE_RECIPIENT=<a linha age1... do passo 1>
+# Opcional, e recomendado — ver "Ser avisado quando parar", abaixo.
+BACKUP_PING_URL=
+ENV
+chmod 600 backup.env
+./backup-mongo.sh
+```
+
+A última linha precisa terminar com `Conferido no R2: camada-backups/mongo/...`.
+
+### 4. Automatizar
 
 ```bash
 crontab -e
 ```
 
 ```cron
-0 3 * * * cd /home/ubuntu/forma && ./backup-mongo.sh >> /home/ubuntu/forma/backup.log 2>&1
+0 * * * * cd /home/ubuntu/forma && ./backup-mongo.sh >> /home/ubuntu/forma/backup.log 2>&1
 ```
 
-**Tire o backup da instância.** `./backups` vive no mesmo disco do banco e não
-protege contra a perda do volume. O jeito mais barato é mandar para o R2 que
-você já tem, com `rclone` ou `aws s3 cp` (o R2 fala S3).
+De hora em hora: no pior caso, perde-se uma hora de pedidos. O servidor
+guarda as últimas 48 cópias; o R2, 30 a 35 dias.
 
-Procedimento de restauração e o ensaio trimestral: [`RUNBOOK.md`](RUNBOOK.md).
+### Ser avisado quando parar
+
+Backup que falha em silêncio é descoberto no dia em que mais se precisa dele.
+Crie um check gratuito em [healthchecks.io](https://healthchecks.io) com
+período de **1 hora** e tolerância de **1 hora**, e ponha a URL dele em
+`BACKUP_PING_URL`. O script avisa a cada sucesso e a cada falha; se o aviso
+parar de chegar — cron quebrado, disco cheio, instância desligada —, o
+healthchecks manda e-mail.
+
+### Restaurar
+
+Procedimento completo, inclusive a partir de um servidor novo, e o ensaio
+trimestral: [`RUNBOOK.md`](RUNBOOK.md). **Faça o primeiro ensaio antes de
+lançar a loja.**
 
 ---
 

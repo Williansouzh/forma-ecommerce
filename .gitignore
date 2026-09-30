@@ -24,3 +24,7 @@ coverage/
 .open-next/
 .wrangler/
 .dev.vars
+
+# Configuração do backup fora do servidor (credenciais do R2) e backups cifrados.
+backup.env
+*.archive.gz.age

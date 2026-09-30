@@ -7,35 +7,29 @@ pressão. **Leia o de restauração antes de precisar dele.**
 
 ## 1. Backup do MongoDB
 
-O volume `forma-ecommerce_forma-mongo-data` guarda pedidos, produtos,
-configurações da loja e os segredos das integrações. Não há réplica: se ele
-corromper e não houver dump, os pedidos acabaram.
+O volume do Mongo guarda pedidos, produtos, configurações da loja e os
+segredos das integrações. Não há réplica: se ele corromper e não houver dump,
+os pedidos acabaram.
 
 ```bash
-cd /caminho/do/projeto
-./scripts/backup-mongo.sh
+cd ~/forma          # em produção; no repositório, ./scripts/backup-mongo.sh
+./backup-mongo.sh
 ```
 
-Grava em `./backups/forma_AAAAMMDD_HHMMSS.archive.gz` e mantém os 14 mais
-recentes. O script recusa dump vazio ou corrompido em vez de deixá-lo rodar a
-rotação e derrubar um backup bom.
+Cada execução:
 
-### Automatizar
+1. gera o dump em `./backups/forma_AAAAMMDD_HHMMSS.archive.gz` e recusa
+   arquivo vazio ou corrompido antes da rotação;
+2. com `backup.env` configurado, **cifra** com a chave pública do `age` e envia
+   para `camada-backups/mongo/` no R2, conferindo o tamanho do que ficou lá;
+3. mantém as últimas 48 cópias locais;
+4. avisa o `BACKUP_PING_URL` do sucesso ou da falha.
 
-```cron
-0 3 * * * cd /caminho/do/projeto && scripts/backup-mongo.sh >> /var/log/forma-backup.log 2>&1
-```
+Configuração passo a passo (bucket, bucket lock, token, chave, cron e
+monitoramento): [`DEPLOY.md` § 10](DEPLOY.md#10--backup).
 
-Ajuste com `BACKUP_DIR`, `KEEP`, `CONTAINER` e `DB`.
-
-### Tirar o backup da máquina
-
-`./backups` fica no mesmo disco do banco — não protege contra perda do disco.
-Copie para fora com o que você já usar (`rclone`, `aws s3 cp`, `scp`):
-
-```bash
-aws s3 cp ./backups/forma_20260905_202353.archive.gz s3://SEU-BUCKET/forma/
-```
+Sem `backup.env`, o script funciona como antes — só local — e avisa que o
+backup ficou no servidor.
 
 ### Limite conhecido
 
@@ -52,32 +46,57 @@ preciso converter o mongod para `--replSet`.
 **Destrutiva.** `--drop` apaga cada coleção antes de reinserir; tudo gravado
 depois do dump se perde.
 
+Na pasta da pilha (`~/forma` em produção):
+
 ```bash
-./scripts/restore-mongo.sh --list                              # o que existe
-./scripts/restore-mongo.sh --dry-run forma_20260905_202353.archive.gz
-./scripts/restore-mongo.sh forma_20260905_202353.archive.gz    # pra valer
+./restore-mongo.sh --list                  # cópias neste servidor
+./restore-mongo.sh --dry-run forma_20260905_202353.archive.gz
+./restore-mongo.sh forma_20260905_202353.archive.gz        # pra valer
 ```
 
 O script pede confirmação digitada, salva o estado atual em
-`backups/pre-restore_*.archive.gz` antes de sobrescrever, para `api` e `web`
-durante a operação e sobe os dois no fim.
+`backups/pre-restore_*.archive.gz` antes de sobrescrever, para a `api`
+durante a operação e a sobe no fim. Usa o `docker-compose.prod.yml` quando ele
+existe na pasta.
+
+### Do R2 — inclusive num servidor novo
+
+Quando o servidor inteiro se perdeu: suba a pilha vazia (DEPLOY.md § 5),
+recrie o `backup.env` e traga a **chave privada** do `age` só para esta
+operação.
+
+```bash
+./restore-mongo.sh --list-remote                     # o que há no R2
+./restore-mongo.sh --fetch forma_20260905_202353.archive.gz.age
+
+nano ~/chave-backup.txt && chmod 600 ~/chave-backup.txt   # cole a chave privada
+./restore-mongo.sh --dry-run --identity ~/chave-backup.txt forma_20260905_202353.archive.gz.age
+./restore-mongo.sh --identity ~/chave-backup.txt forma_20260905_202353.archive.gz.age
+shred -u ~/chave-backup.txt                               # a chave NÃO fica no servidor
+```
 
 Depois de restaurar, confira antes de liberar:
 
 ```bash
-curl -s localhost:4001/api/v1/health
-curl -s -o /dev/null -w '%{http_code}\n' localhost:3222/
+docker exec forma-api wget -qO- http://127.0.0.1:4000/api/v1/health
 docker exec forma-mongo mongosh forma --quiet --eval 'print(db.orders.countDocuments())'
+curl -s -o /dev/null -w '%{http_code}\n' https://studiocamada.com/
 ```
 
 ### Ensaie por trimestre
 
 Backup nunca restaurado não é backup, é arquivo. O ensaio abaixo não toca o
-banco real — restaura para um banco descartável e compara:
+banco real: baixa a cópia mais recente **do R2**, decifra, restaura para um
+banco descartável e compara. É o caminho inteiro de um desastre de verdade,
+não só o arquivo local.
 
 ```bash
-docker exec -i forma-mongo mongorestore --archive --gzip --quiet \
-  --nsFrom='forma.*' --nsTo='forma_restore_test.*' < backups/ARQUIVO.archive.gz
+ULTIMO=$(./restore-mongo.sh --list-remote | tail -1 | tr -d ' ')
+./restore-mongo.sh --fetch "$ULTIMO"
+age -d -i ~/chave-backup.txt "backups/$ULTIMO" \
+  | docker exec -i forma-mongo mongorestore --archive --gzip --quiet \
+      --nsFrom='forma.*' --nsTo='forma_restore_test.*'
+shred -u ~/chave-backup.txt
 
 docker exec forma-mongo mongosh --quiet --eval '
 const a = db.getSiblingDB("forma"), b = db.getSiblingDB("forma_restore_test");
