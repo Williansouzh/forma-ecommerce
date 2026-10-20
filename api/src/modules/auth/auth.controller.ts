@@ -1,8 +1,9 @@
 import { Body, Controller, Get, HttpCode, Post } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
+import { AppPairingExchangeDto } from "./dto/app-pairing.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
-import { Public } from "../../common/decorators/auth.decorators";
+import { Public, Roles } from "../../common/decorators/auth.decorators";
 import { StoreOnly, ThrottleWithoutStoreKey } from "../../common/decorators/store.decorators";
 import type { AuthenticatedUser } from "../../common/roles";
 
@@ -31,6 +32,26 @@ export class AuthController {
   @HttpCode(200)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  /** Gera o QR code de "App móvel" para quem está no painel. */
+  @Roles("superadmin")
+  @Post("app-pairing")
+  createAppPairing(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.createAppPairing(user.sub);
+  }
+
+  /**
+   * O app troca o código do QR pela sessão. Mesmas travas do login: só pelo
+   * servidor da loja e cinco tentativas por minuto, por cliente.
+   */
+  @Public()
+  @StoreOnly(5, 60_000)
+  @ThrottleWithoutStoreKey()
+  @Post("app-pairing/exchange")
+  @HttpCode(200)
+  exchangeAppPairing(@Body() dto: AppPairingExchangeDto) {
+    return this.authService.exchangeAppPairing(dto.code);
   }
 
   @Get("me")

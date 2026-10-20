@@ -69,6 +69,7 @@ export function AdminNav() {
     { href: "/admin/integracoes", name: "Integrações" },
     { href: "/admin/shopee", name: "Shopee" },
     { href: "/admin/configuracoes", name: "Configurações" },
+    { href: "/admin/app", name: "App móvel" },
   ];
 
   const logout = async () => {

@@ -195,6 +195,13 @@ export async function login(
   return user;
 }
 
+/** Código do QR code de "App móvel" — vale 2 minutos e uma única entrada. */
+export async function createAppPairing(): Promise<{ code: string; expiresAt: string }> {
+  return authFetch<{ code: string; expiresAt: string }>("/auth/app-pairing", {
+    method: "POST",
+  });
+}
+
 export async function listProducts(): Promise<Product[]> {
   return authFetch<Product[]>("/products?limit=200");
 }

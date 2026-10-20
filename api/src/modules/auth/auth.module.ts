@@ -8,13 +8,17 @@ import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { StoreClientModule } from "../../common/store-client.module";
 import { User, UserSchema } from "./schemas/user.schema";
+import { AppPairing, AppPairingSchema } from "./schemas/app-pairing.schema";
 
 @Module({
   imports: [
     PassportModule,
     // O limitador e a chave da loja — ver `common/store-client.ts`.
     StoreClientModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: AppPairing.name, schema: AppPairingSchema },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

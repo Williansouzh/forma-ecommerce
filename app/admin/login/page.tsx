@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { login } from "@/lib/admin-api";
 import { Logotipo } from "@/components/brand/logo";
+import { APP_DOWNLOAD_URL } from "@/lib/app-download";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -90,6 +91,13 @@ export default function AdminLoginPage() {
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
+
+        <p className="mt-8 border-t border-border-subtle pt-5 text-center text-body-small text-tertiary">
+          Gerencie a loja pelo celular:{" "}
+          <a href={APP_DOWNLOAD_URL} className="text-secondary underline-offset-4 hover:text-accent hover:underline">
+            baixar o app
+          </a>
+        </p>
       </div>
     </div>
   );

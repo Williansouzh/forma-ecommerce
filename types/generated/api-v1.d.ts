@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/api/v1/auth/app-pairing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Gera o QR code de "App móvel" para quem está no painel. */
+        post: operations["Auth_createAppPairing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/app-pairing/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * O app troca o código do QR pela sessão. Mesmas travas do login: só pelo
+         *     servidor da loja e cinco tentativas por minuto, por cliente.
+         */
+        post: operations["Auth_exchangeAppPairing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -804,6 +841,9 @@ export interface components {
             reason: string;
             variantId?: string;
         };
+        AppPairingExchangeDto: {
+            code: string;
+        };
         AuthorizeUrlDto: {
             redirectUri: string;
         };
@@ -1281,6 +1321,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    Auth_createAppPairing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    Auth_exchangeAppPairing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppPairingExchangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     Auth_login: {
         parameters: {
             query?: never;
