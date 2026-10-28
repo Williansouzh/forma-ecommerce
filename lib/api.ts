@@ -22,6 +22,19 @@ const API_URL =
 const BASE = `${API_URL}/api/v1`;
 
 /**
+ * O catálogo de demonstração só serve a quem desenvolve sem a API de pé.
+ *
+ * Em produção ele é mentira com preço: a peça aparece, entra no carrinho e o
+ * checkout recusa, porque a API cobra pelo catálogo DELA. Foi o que a loja no
+ * ar mostrou quando o build saiu sem `NEXT_PUBLIC_API_URL` — nove peças de
+ * demonstração e nenhum erro em lugar nenhum. Em produção, API fora é loja
+ * vazia (e um erro no log), nunca vitrine falsa.
+ */
+function demoCatalogAllowed() {
+  return process.env.NODE_ENV !== "production";
+}
+
+/**
  * Traduz o produto da API para o tipo de domínio da loja.
  *
  * A tradução é explícita campo a campo de propósito: o `_id` do Mongo vira
@@ -102,11 +115,13 @@ export async function fetchProducts(
   try {
     rows = await request<ApiProduct[]>(`/products${query ? `?${query}` : ""}`);
     apiRespondeu = true;
-  } catch {
+  } catch (error) {
+    console.error(`[catalogo] API inalcançável em ${BASE}:`, error);
     rows = [];
   }
   const mapped = rows.map(mapProduct);
-  let result = apiRespondeu ? mapped : [...mapped, ...PRODUCTS];
+  let result =
+    apiRespondeu || !demoCatalogAllowed() ? mapped : [...mapped, ...PRODUCTS];
 
   if (filters.category) {
     result = result.filter((product) => product.category === filters.category);
@@ -140,9 +155,20 @@ export async function fetchProducts(
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   try {
-    const raw = await request<ApiProduct | null>(`/products/${encodeURIComponent(slug)}`);
+    const response = await fetch(`${BASE}/products/${encodeURIComponent(slug)}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    // Peça inexistente (ou despublicada) chega como 200 de corpo VAZIO, e
+    // `response.json()` lança nisso — o que, em produção, viraria 500 em vez
+    // de 404.
+    const body = await response.text();
+    const raw = body ? (JSON.parse(body) as ApiProduct | null) : null;
     return raw ? mapProduct(raw) : null;
-  } catch {
+  } catch (error) {
+    // Em produção, relança: a página responde 500 e o Google tenta de novo.
+    // Devolver `null` viraria 404, e um 404 tira a peça do índice.
+    if (!demoCatalogAllowed()) throw error;
     return getProduct(slug) ?? null;
   }
 }

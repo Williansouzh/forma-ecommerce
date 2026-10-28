@@ -1,4 +1,3 @@
-import { getFeaturedProducts } from "@/data/products";
 import { inCatalogOrder } from "@/lib/catalog-order";
 import { fetchProducts } from "@/lib/api";
 import { ProductCard } from "@/components/product/product-card";
@@ -26,8 +25,12 @@ const SLOTS = [
 
 export async function FeaturedProducts() {
   const all = await fetchProducts();
-  let featured = inCatalogOrder(all.filter((product) => product.isFeatured)).slice(0, 4);
-  if (featured.length === 0) featured = getFeaturedProducts().slice(0, 4);
+  // Sem peça marcada como destaque no painel, a vitrine mostra as primeiras
+  // do catálogo real — não as de demonstração, que o checkout recusaria.
+  const ordered = inCatalogOrder(all);
+  const marked = ordered.filter((product) => product.isFeatured);
+  const featured = (marked.length > 0 ? marked : ordered).slice(0, 4);
+  if (featured.length === 0) return null;
 
   return (
     <section aria-labelledby="destaques-titulo" className="section-rhythm shell">

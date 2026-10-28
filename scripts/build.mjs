@@ -16,6 +16,24 @@ import { execSync } from "node:child_process";
  * Não há recursão: o adaptador chama `next build` direto (ver `buildCommand`
  * em `open-next.config.ts`), não este script.
  */
+/*
+ * Na Cloudflare, sem `NEXT_PUBLIC_API_URL` o build passava verde e publicava
+ * uma loja falando com `localhost:4000` — isto é, com ninguém. Ela ficou no
+ * ar assim, sem erro em lugar nenhum. A variável é embutida no build, então é
+ * aqui que a falta dela tem de parar tudo.
+ */
+if (process.env.WORKERS_CI) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+  if (!/^https:\/\//.test(apiUrl) || /localhost|127\.0\.0\.1/.test(apiUrl)) {
+    console.error(
+      `\nNEXT_PUBLIC_API_URL inválida para produção: "${apiUrl}".\n` +
+        "Defina em Workers & Pages → forma-ecommerce → Settings → Build → " +
+        "Variables and secrets (ex.: https://api.studiocamada.com). Ver docs/DEPLOY.md § 6.\n",
+    );
+    process.exit(1);
+  }
+}
+
 const command = process.env.WORKERS_CI
   ? "npx opennextjs-cloudflare build"
   : "npx next build";

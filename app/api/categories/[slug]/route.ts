@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCategory } from "@/data/categories";
-import { getProductsByCategory } from "@/data/products";
+import { fetchProducts } from "@/lib/api";
 
 export async function GET(
   _request: Request,
@@ -13,6 +13,6 @@ export async function GET(
   }
   return NextResponse.json({
     ...category,
-    products: getProductsByCategory(category.slug),
+    products: await fetchProducts({ category: category.slug }),
   });
 }

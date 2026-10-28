@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { fetchProducts } from "@/lib/api";
-import { getFeaturedProducts } from "@/data/products";
 import { ProductCard } from "@/components/product/product-card";
 import { getWhatsappUrl } from "@/lib/settings";
 
@@ -25,28 +24,31 @@ function newestFirst(a: { createdAt: string | Date }, b: { createdAt: string | D
 export async function CTASection() {
   const all = await fetchProducts();
   const whatsappUrl = await getWhatsappUrl();
-  const source = all.length > 0 ? all : getFeaturedProducts();
-  const latest = [...source].sort(newestFirst).slice(0, 4);
+  const latest = [...all].sort(newestFirst).slice(0, 4);
 
   return (
-    <section aria-labelledby="fecho-titulo" className="section-rhythm shell pb-[clamp(48px,7vw,80px)]">
-      <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-strong pb-5">
-        <h2 id="fecho-titulo" className="font-display text-display-2">
-          Últimas que saíram da impressora
-        </h2>
-        <Link
-          href="/colecoes"
-          className="nav-link text-body-small font-medium text-primary"
-        >
-          Ver a coleção completa
-        </Link>
-      </div>
+    <section aria-labelledby={latest.length > 0 ? "fecho-titulo" : undefined} className="section-rhythm shell pb-[clamp(48px,7vw,80px)]">
+      {latest.length > 0 && (
+        <>
+          <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-border-strong pb-5">
+            <h2 id="fecho-titulo" className="font-display text-display-2">
+              Últimas que saíram da impressora
+            </h2>
+            <Link
+              href="/colecoes"
+              className="nav-link text-body-small font-medium text-primary"
+            >
+              Ver a coleção completa
+            </Link>
+          </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4">
-        {latest.map((product) => (
-          <ProductCard key={product.id} product={product} variant="grid" />
-        ))}
-      </div>
+          <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4">
+            {latest.map((product) => (
+              <ProductCard key={product.id} product={product} variant="grid" />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Para quem chegou até aqui e não achou: o caminho da encomenda, agora
           como alternativa e não como tese da página. */}

@@ -126,4 +126,53 @@ describe("fetchProducts — quando o catálogo local entra", () => {
     const { PRODUCTS } = await import("@/data/products");
     expect(await fetchProducts()).toHaveLength(PRODUCTS.length);
   });
+
+  /*
+   * O caso que estava no ar: build sem `NEXT_PUBLIC_API_URL`, o Worker
+   * tentando `localhost:4000`, e a loja vendendo as nove peças de
+   * demonstração — que o checkout depois recusava.
+   */
+  it("em produção, API fora do ar: loja vazia, nunca demonstração", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    global.fetch = vi.fn().mockRejectedValue(new Error("network")) as unknown as typeof fetch;
+
+    const { fetchProducts } = await import("./api");
+    expect(await fetchProducts()).toEqual([]);
+  });
+});
+
+describe("fetchProductBySlug", () => {
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.unstubAllEnvs();
+  });
+
+  it("peça inexistente (200 de corpo vazio) devolve null, também em produção", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => "",
+    }) as unknown as typeof fetch;
+
+    const { fetchProductBySlug } = await import("./api");
+    expect(await fetchProductBySlug("vaso-canelado")).toBeNull();
+  });
+
+  it("em produção, API fora do ar lança em vez de servir a peça de demonstração", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    global.fetch = vi.fn().mockRejectedValue(new Error("network")) as unknown as typeof fetch;
+
+    const { fetchProductBySlug } = await import("./api");
+    await expect(fetchProductBySlug("vaso-canelado")).rejects.toThrow("network");
+  });
+
+  it("fora de produção, API fora do ar serve a peça de demonstração", async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error("network")) as unknown as typeof fetch;
+
+    const { fetchProductBySlug } = await import("./api");
+    expect((await fetchProductBySlug("vaso-canelado"))?.slug).toBe("vaso-canelado");
+  });
 });
