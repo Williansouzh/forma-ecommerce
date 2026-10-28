@@ -5,6 +5,9 @@ import {
   ATELIER_HOURS,
   INSTAGRAM_HANDLE,
   INSTAGRAM_URL,
+  LEGAL_ADDRESS,
+  LEGAL_DOCUMENT,
+  SITE_LEGAL_NAME,
   SITE_NAME,
 } from "@/lib/constants";
 import { getStoreSettings, whatsappUrlFor } from "@/lib/settings";
@@ -16,7 +19,8 @@ const LOJA_LINKS = [
   { href: "/personalizados", label: "Sob medida" },
   { href: "/atelier", label: "Ateliê" },
   { href: "/sobre", label: "Sobre nós" },
-  { href: "/politicas", label: "Prazos e cuidados" },
+  { href: "/politicas", label: "Trocas, prazos e cuidados" },
+  { href: "/privacidade", label: "Privacidade" },
 ];
 
 /**
@@ -93,6 +97,13 @@ export async function Footer() {
       <div className="mx-auto mt-[clamp(34px,6vh,70px)] flex w-full max-w-[1360px] flex-wrap items-center justify-between gap-x-5 gap-y-3 border-t border-border-subtle pt-[18px] text-[13px] text-tertiary">
         <span>
           © {year} {SITE_NAME}
+          {/* Decreto 7.962/2013: razão social, documento e endereço visíveis. */}
+          {LEGAL_DOCUMENT && (
+            <>
+              {" "}· {SITE_LEGAL_NAME} · {LEGAL_DOCUMENT}
+            </>
+          )}
+          {LEGAL_ADDRESS && <> · {LEGAL_ADDRESS}</>}
         </span>
         {/* O frete grátis subiu para a barra de utilidade, no topo: aqui ele
             tinha o mesmo tamanho e a mesma cor do aviso de copyright. */}

@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/shared/breadcrumb";
 export const metadata: Metadata = {
   title: "Políticas",
   description:
-    "Prazos, trocas, personalização e cuidados para peças do estúdio produzidas por impressão 3D.",
+    "Prazos, trocas, desistência, personalização e cuidados para peças do estúdio produzidas por impressão 3D.",
   alternates: { canonical: "/politicas" },
 };
 
@@ -17,6 +17,10 @@ const policies = [
   {
     title: "Trocas e defeitos",
     text: "Trocamos peças com defeito de fabricação comunicado em até 7 dias após o recebimento. Pequenas variações de textura, linhas de camada e tonalidade fazem parte do processo de impressão 3D.",
+  },
+  {
+    title: "Desistência da compra",
+    text: "Comprou pelo site e mudou de ideia? Pelo Código de Defesa do Consumidor (art. 49), você pode desistir em até 7 dias corridos a partir do recebimento, sem precisar explicar o motivo. Avise pelo WhatsApp ou por e-mail, devolva a peça sem uso e nós reembolsamos o valor integral, frete incluído, pelo mesmo meio de pagamento.",
   },
   {
     title: "Personalizados",
@@ -62,6 +66,13 @@ export default function PoliciesPage() {
 
       <div className="mt-12 rounded-lg bg-surface-muted p-6">
         <p className="text-body-small text-secondary">
+          Como tratamos seus dados:{" "}
+          <Link href="/privacidade" className="font-medium text-accent">
+            política de privacidade
+          </Link>
+          .
+        </p>
+        <p className="mt-3 text-body-small text-secondary">
           Ficou em dúvida sobre material, escala ou prazo?{" "}
           <Link href="/personalizados" className="font-medium text-accent">
             Solicite uma análise personalizada

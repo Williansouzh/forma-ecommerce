@@ -19,6 +19,14 @@ export const PIX_DISCOUNT = 0.05;
 export const ATELIER_PRINTERS = 4;
 
 export const ATELIER_CITY = "Campina Grande — PB";
+
+/*
+ * Identificação exigida de toda loja online pelo Decreto 7.962/2013 (art. 2º):
+ * CNPJ — ou CPF, para quem vende como pessoa física — e endereço físico.
+ * Vazios, o rodapé simplesmente não mostra a linha; preencha antes de vender.
+ */
+export const LEGAL_DOCUMENT = "";
+export const LEGAL_ADDRESS = "";
 export const ATELIER_HOURS = "Seg a sáb · 8h às 18h";
 /*
  * Os três valores abaixo ainda apontam para as contas antigas de propósito:
