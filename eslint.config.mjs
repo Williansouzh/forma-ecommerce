@@ -1,22 +1,18 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-/**
- * Config ESLint (flat) do frontend.
- *
- * O `eslint-config-next` 15 ainda só exporta o formato legado, então passa
- * pelo `FlatCompat`. Quando o projeto subir para o 16, dá para trocar por
- * `...next` direto e apagar a dependência `@eslint/eslintrc`.
- */
-const compat = new FlatCompat({
-  baseDirectory: dirname(fileURLToPath(import.meta.url)),
-});
-
+/** Config ESLint (flat) do frontend. */
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextVitals,
+  ...nextTypescript,
   {
     rules: {
+      // Chegou com o eslint-config-next 16 e reprova nove `setState` em
+      // efeito (busca, tema, painel) que já rodavam assim no 15. É custo de
+      // uma renderização a mais, não defeito; refatorar oito componentes sem
+      // teste dentro da migração do framework seria trocar de risco. Religar
+      // ao reescrever esses efeitos.
+      "react-hooks/set-state-in-effect": "off",
       // Variável de descarte é intencional em destructuring de props e em
       // catch sem uso — o padrão `_` sinaliza isso melhor que um comentário.
       "@typescript-eslint/no-unused-vars": [
